@@ -1,0 +1,123 @@
+.header_area {
+    width: 100%;
+    z-index: 10;
+}
+
+.main_menu {
+    transition: background-color 0.3s ease-in-out;
+    height: 80px;
+    border-bottom: 1px solid transparent;
+}
+
+.main_menu.scrolled {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand.logo_h img {
+    max-height: 60px;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.navbar-nav .nav-link {
+    color: #000;
+    font-weight: bold;
+    font-size: 18px;
+    padding: 10px 15px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: #ff5a5f;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.navbar-nav .nav-link.scrolled {
+    color: #fff !important;
+}
+
+.navbar-nav .submenu .dropdown-menu {
+    border-radius: 0;
+    box-shadow: none;
+    margin-top: 0;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.navbar-nav .submenu:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+}
+
+.navbar-nav .submenu .dropdown-menu .nav-link {
+    color: #000;
+    padding: 10px 20px;
+}
+
+.navbar-nav .submenu .dropdown-menu .nav-link:hover {
+    background-color: #f7f7f7;
+    color: #ff5a5f;
+}
+
+.navbar-nav .submenu .dropdown-menu .nav-link.scrolled {
+    color: #fff !important;
+}
+
+.navbar-nav .icons {
+    font-size: 18px;
+    padding: 10px 15px;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+.navbar-nav .icons:hover {
+    color: #ff5a5f;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.navbar-nav .icons.scrolled {
+    color: #fff !important;
+}
+
+.banner_inner {
+    /* height: 100vh; */
+    /* background: url('assets/images/banner/banner-bg.jpg') no-repeat center center; */
+    background-size: cover;
+}
+
+.banner_content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: #fff;
+    text-align: center;
+}
+
+.banner_content .sub {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.banner_content h3 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-top: 20px;
+}
+
+.banner_content h4 {
+    font-size: 32px;
+    font-weight: 400;
+    margin-top: 20px;
+}
+
+.banner_content .main_btn {
+    background: #ff5a5f;
+    color: #fff;
+    padding: 10px 30px;
+    border-radius: 5px;
+    margin-top: 40px;
+    display: inline-block;
+    text-transform: uppercase;
+}

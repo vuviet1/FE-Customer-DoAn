@@ -1,6 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Navbar, Nav, NavDropdown, Container } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./header.css"; // Tạo file CSS riêng để thêm các style tùy chỉnh
 
 function Header() {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -17,233 +20,179 @@ function Header() {
         };
     }, []);
 
+    const handleLogout = () => {
+        // Xóa token khỏi localStorage
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token_type");
+
+        // Điều hướng đến trang đăng nhập
+        window.location.href = 'http://localhost:3002/login'
+    };
+
     return (
         <>
-            <header className={`header_area ${isScrolled ? 'scrolled' : ''}`}>
-                <div className={`top_menu ${isScrolled ? 'top_menu_scrolled' : ''}`}>
-                    <div className="container">
-                        <div className="row">
-                            <div className="col-lg-7">
-                                <div className="float-left">
-                                    <p>Phone: +01 256 25 235</p>
-                                    <p>email: info@eiser.com</p>
-                                </div>
-                            </div>
-                            <div className="col-lg-5">
-                                <div className="float-right">
-                                    <ul className="right_side">
-                                        <li>
-                                            <Link to="/cart">gift card</Link>
-                                        </li>
-                                        <li>
-                                            <Link to="/tracking">
-                                                track order
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link to="/contact">
-                                                Contact Us
-                                            </Link>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="main_menu">
-                    <div className="container">
-                        <nav className="navbar navbar-expand-lg navbar-light w-100">
-                            <Link className="navbar-brand logo_h" to="/">
-                                <img src="/assets/images/logo.png" alt="Logo" />
-                            </Link>
-                            <button
-                                className="navbar-toggler"
-                                type="button"
-                                data-toggle="collapse"
-                                data-target="#navbarSupportedContent"
-                                aria-controls="navbarSupportedContent"
-                                aria-expanded="false"
-                                aria-label="Toggle navigation"
-                            >
-                                <span className="icon-bar"></span>
-                                <span className="icon-bar"></span>
-                                <span className="icon-bar"></span>
-                            </button>
-                            <div
-                                className="collapse navbar-collapse offset w-100"
-                                id="navbarSupportedContent"
-                            >
-                                <div className="row w-100 mr-0">
-                                    <div className="col-lg-7 pr-0">
-                                        <ul className="nav navbar-nav center_nav pull-right">
-                                            <li className="nav-item active">
-                                                <Link
-                                                    className="nav-link"
-                                                    to="/"
-                                                >
-                                                    Home
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item submenu dropdown">
-                                                <a
-                                                    href="#"
-                                                    className="nav-link dropdown-toggle"
-                                                    data-toggle="dropdown"
-                                                    role="button"
-                                                    aria-haspopup="true"
-                                                    aria-expanded="false"
-                                                >
-                                                    Shop
-                                                </a>
-                                                <ul className="dropdown-menu">
-                                                    <li className="nav-item">
-                                                        <Link
-                                                            className="nav-link"
-                                                            to="/category"
-                                                        >
-                                                            Shop Category
-                                                        </Link>
-                                                    </li>
-                                                    <li className="nav-item">
-                                                        <Link
-                                                            className="nav-link"
-                                                            to="/product-detail"
-                                                        >
-                                                            Product Detail
-                                                        </Link>
-                                                    </li>
-                                                    <li className="nav-item">
-                                                        <Link
-                                                            className="nav-link"
-                                                            to="/cart"
-                                                        >
-                                                            Shopping Cart
-                                                        </Link>
-                                                    </li>
-                                                    <li className="nav-item">
-                                                        <Link
-                                                            className="nav-link"
-                                                            to="/checkout"
-                                                        >
-                                                            Product Checkout
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li className="nav-item submenu dropdown">
-                                                <a
-                                                    href="#"
-                                                    className="nav-link dropdown-toggle"
-                                                    data-toggle="dropdown"
-                                                    role="button"
-                                                    aria-haspopup="true"
-                                                    aria-expanded="false"
-                                                >
-                                                    Blog
-                                                </a>
-                                                <ul className="dropdown-menu">
-                                                    <li className="nav-item">
-                                                        <Link
-                                                            className="nav-link"
-                                                            to="/blog"
-                                                        >
-                                                            Blog
-                                                        </Link>
-                                                    </li>
-                                                    <li className="nav-item">
-                                                        <Link
-                                                            className="nav-link"
-                                                            to="/blog-detail"
-                                                        >
-                                                            Blog Detail
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li className="nav-item submenu dropdown">
-                                                <a
-                                                    href="#"
-                                                    className="nav-link dropdown-toggle"
-                                                    data-toggle="dropdown"
-                                                    role="button"
-                                                    aria-haspopup="true"
-                                                    aria-expanded="false"
-                                                >
-                                                    Pages
-                                                </a>
-                                                <ul className="dropdown-menu">
-                                                    <li className="nav-item">
-                                                        <Link
-                                                            className="nav-link"
-                                                            to="/tracking"
-                                                        >
-                                                            Tracking
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link
-                                                    className="nav-link"
-                                                    to="/contact"
-                                                >
-                                                    Contact
-                                                </Link>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div className="col-lg-5 pr-0">
-                                        <ul className="nav navbar-nav navbar-right right_nav pull-right">
-                                            <li className="nav-item">
-                                                <Link
-                                                    to="/search"
-                                                    className="icons"
-                                                >
-                                                    <i
-                                                        className="ti-search"
-                                                        aria-hidden="true"
-                                                    ></i>
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link
-                                                    to="/cart"
-                                                    className="icons"
-                                                >
-                                                    <i className="ti-shopping-cart"></i>
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link
-                                                    to="/profile"
-                                                    className="icons"
-                                                >
-                                                    <i
-                                                        className="ti-user"
-                                                        aria-hidden="true"
-                                                    ></i>
-                                                </Link>
-                                            </li>
-                                            <li className="nav-item">
-                                                <Link
-                                                    to="/wishlist"
-                                                    className="icons"
-                                                >
-                                                    <i
-                                                        className="ti-heart"
-                                                        aria-hidden="true"
-                                                    ></i>
-                                                </Link>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </nav>
-                    </div>
-                </div>
+            <header className={`header_area ${isScrolled ? "scrolled" : ""}`}>
+                <Navbar
+                    expand="lg"
+                    fixed="top"
+                    className={`main_menu ${isScrolled ? "scrolled" : ""}`}
+                    variant="dark"
+                    style={{
+                        height: "80px",
+                        transition: "background-color 0.3s ease-in-out",
+                        backgroundColor: isScrolled
+                            ? "rgba(0, 0, 0, 0.4)"
+                            : "transparent",
+                    }}
+                >
+                    <Container>
+                        <Navbar.Brand
+                            as={Link}
+                            to="/"
+                            className="navbar-brand logo_h"
+                        >
+                            <img src="/assets/images/logo.png" alt="Logo" />
+                        </Navbar.Brand>
+                        <Navbar.Toggle aria-controls="navbarResponsive" />
+                        <Navbar.Collapse id="navbarResponsive">
+                            <Nav className="mr-auto">
+                                <Nav.Link
+                                    as={Link}
+                                    to="/"
+                                    className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    Home
+                                </Nav.Link>
+                                <NavDropdown
+                                    title="Shop"
+                                    id="shopDropdown"
+                                    className={`nav-item submenu dropdown ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <NavDropdown.Item
+                                        as={Link}
+                                        to="/category"
+                                        className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                    >
+                                        Shop Category
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item
+                                        as={Link}
+                                        to="/product-detail"
+                                        className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                    >
+                                        Product Detail
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item
+                                        as={Link}
+                                        to="/cart"
+                                        className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                    >
+                                        Shopping Cart
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item
+                                        as={Link}
+                                        to="/checkout"
+                                        className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                    >
+                                        Product Checkout
+                                    </NavDropdown.Item>
+                                </NavDropdown>
+                                <NavDropdown
+                                    title="Blog"
+                                    id="blogDropdown"
+                                    className={`nav-item submenu dropdown ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <NavDropdown.Item
+                                        as={Link}
+                                        to="/blog"
+                                        className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                    >
+                                        Blog
+                                    </NavDropdown.Item>
+                                    <NavDropdown.Item
+                                        as={Link}
+                                        to="/blog-detail"
+                                        className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                    >
+                                        Blog Detail
+                                    </NavDropdown.Item>
+                                </NavDropdown>
+                                <NavDropdown
+                                    title="Pages"
+                                    id="pagesDropdown"
+                                    className={`nav-item submenu dropdown ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <NavDropdown.Item
+                                        as={Link}
+                                        to="/tracking"
+                                        className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                    >
+                                        Tracking
+                                    </NavDropdown.Item>
+                                </NavDropdown>
+                                <Nav.Link
+                                    as={Link}
+                                    to="/contact"
+                                    className={`nav-item nav-link ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    Contact
+                                </Nav.Link>
+                            </Nav>
+                            <Nav className="ml-auto">
+                                <Nav.Link
+                                    as={Link}
+                                    to="/search"
+                                    className={`nav-item icons ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <i
+                                        className="ti-search text-white"
+                                        aria-hidden="true"
+                                    ></i>
+                                </Nav.Link>
+                                <Nav.Link
+                                    as={Link}
+                                    to="/cart"
+                                    className={`nav-item icons ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <i className="ti-shopping-cart text-white"></i>
+                                </Nav.Link>
+                                <Nav.Link
+                                    as={Link}
+                                    to="/profile"
+                                    className={`nav-item icons ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <i
+                                        className="ti-user text-white"
+                                        aria-hidden="true"
+                                    ></i>
+                                </Nav.Link>
+                                <Nav.Link
+                                    as={Link}
+                                    to="/wishlist"
+                                    className={`nav-item icons ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <i
+                                        className="ti-heart text-white"
+                                        aria-hidden="true"
+                                    ></i>
+                                </Nav.Link>
+                                <Nav.Link
+                                    as={Link}
+                                    onClick={handleLogout}
+                                    // to="/login"
+                                    className={`nav-item icons ${isScrolled ? "scrolled" : ""}`}
+                                >
+                                    <i
+                                        className="fas fa-sign-out-alt text-white"
+                                        aria-hidden="true"
+                                    ></i>
+                                </Nav.Link>
+                            </Nav>
+                        </Navbar.Collapse>
+                    </Container>
+                </Navbar>
             </header>
+
             {/*================Home Banner Area =================*/}
             <section className="home_banner_area mb-40">
                 <div className="banner_inner d-flex align-items-center">

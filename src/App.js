@@ -10,6 +10,10 @@ import Cart from "./views/customer/cart";
 import Checkout from "./views/customer/checkout";
 import ProductDetail from "./views/customer/product-detail";
 
+import Login from "./views/login/login";
+import Register from "./views/login/register";
+import Forgot from "./views/login/forgot";
+
 function App() {
   return (
     <Router>
@@ -23,6 +27,10 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/product-detail" element={<ProductDetail />} />
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot" element={<Forgot />} />
       </Routes>
     </Router>
   );

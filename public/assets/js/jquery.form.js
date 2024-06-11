@@ -1,3 +1,10 @@
+/* eslint-disable no-script-url */
+/* eslint-disable no-eval */
+/* eslint-disable no-mixed-operators */
+/* eslint-disable no-throw-literal */
+/* eslint-disable eqeqeq */
+/* eslint-disable no-undef */
+/* eslint-disable strict */
 /*!
  * jQuery Form Plugin
  * version: 3.32.0-2013.04.09

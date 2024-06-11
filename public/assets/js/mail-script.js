@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
     // -------   Mail Send ajax
 
      $(document).ready(function() {
