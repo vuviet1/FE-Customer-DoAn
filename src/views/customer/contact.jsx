@@ -1,182 +1,124 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import { Fragment } from "react";
+/* eslint-disable no-script-url */
+import React, { Fragment } from "react";
 import Header from "./components/header";
+import Sidebar from "./components/sidebar";
+import Cart from "./components/cart";
 import Footer from "./components/footer";
 
 function Contact() {
     return (
         <Fragment>
             <Header />
+            <Sidebar />
+            <Cart />
+            {/* Content */}
             <>
-                {/* ================ contact section start ================= */}
-                <section className="section_gap">
+                {/* Title page */}
+                <section
+                    className="bg-img1 txt-center p-lr-15 p-tb-92"
+                    style={{ backgroundImage: 'url("assets/customer/images/bg-01.jpg")' }}
+                >
+                    <h2 className="ltext-105 cl0 txt-center">LIÊN HỆ</h2>
+                </section>
+                {/* Content page */}
+                <section className="bg0 p-t-104 p-b-116">
                     <div className="container">
-                        <div className="d-none d-sm-block mb-5 pb-4">
-                            <div id="map" style={{ height: 480 }} />
-                        </div>
-                        <div className="row">
-                            <div className="col-12">
-                                <h2 className="contact-title">Get in Touch</h2>
-                            </div>
-                            <div className="col-lg-8 mb-4 mb-lg-0">
-                                <form
-                                    className="form-contact contact_form"
-                                    action="contact_process.php"
-                                    method="post"
-                                    id="contactForm"
-                                    noValidate="novalidate"
-                                >
-                                    <div className="row">
-                                        <div className="col-12">
-                                            <div className="form-group">
-                                                <textarea
-                                                    className="form-control w-100"
-                                                    name="message"
-                                                    id="message"
-                                                    cols={30}
-                                                    rows={9}
-                                                    placeholder="Enter Message"
-                                                    defaultValue={""}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="col-sm-6">
-                                            <div className="form-group">
-                                                <input
-                                                    className="form-control"
-                                                    name="name"
-                                                    id="name"
-                                                    type="text"
-                                                    placeholder="Enter your name"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="col-sm-6">
-                                            <div className="form-group">
-                                                <input
-                                                    className="form-control"
-                                                    name="email"
-                                                    id="email"
-                                                    type="email"
-                                                    placeholder="Enter email address"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="col-12">
-                                            <div className="form-group">
-                                                <input
-                                                    className="form-control"
-                                                    name="subject"
-                                                    id="subject"
-                                                    type="text"
-                                                    placeholder="Enter Subject"
-                                                />
-                                            </div>
-                                        </div>
+                        <div className="flex-w flex-tr">
+                            <div className="size-210 bor10 p-lr-70 p-t-55 p-b-70 p-lr-15-lg w-full-md">
+                                <form>
+                                    <h4 className="mtext-105 cl2 txt-center p-b-30">
+                                        Send Us A Message
+                                    </h4>
+                                    <div className="bor8 m-b-20 how-pos4-parent">
+                                        <input
+                                            className="stext-111 cl2 plh3 size-116 p-l-62 p-r-30"
+                                            type="text"
+                                            name="email"
+                                            placeholder="Your Email Address"
+                                        />
+                                        <img
+                                            className="how-pos4 pointer-none"
+                                            src="assets/customer/images/icons/icon-email.png"
+                                            alt="ICON"
+                                        />
                                     </div>
-                                    <div className="form-group mt-lg-3">
-                                        <button
-                                            type="submit"
-                                            className="main_btn"
-                                        >
-                                            Send Message
-                                        </button>
+                                    <div className="bor8 m-b-30">
+                                        <textarea
+                                            className="stext-111 cl2 plh3 size-120 p-lr-28 p-tb-25"
+                                            name="msg"
+                                            placeholder="How Can We Help?"
+                                            defaultValue={""}
+                                        />
                                     </div>
+                                    <button className="flex-c-m stext-101 cl0 size-121 bg3 bor1 hov-btn3 p-lr-15 trans-04 pointer">
+                                        Submit
+                                    </button>
                                 </form>
                             </div>
-                            <div className="col-lg-4">
-                                <div className="media contact-info">
-                                    <span className="contact-info__icon">
-                                        <i className="ti-home" />
+                            <div className="size-210 bor10 flex-w flex-col-m p-lr-93 p-tb-30 p-lr-15-lg w-full-md">
+                                <div className="flex-w w-full p-b-42">
+                                    <span className="fs-18 cl5 txt-center size-211">
+                                        <span className="lnr lnr-map-marker" />
                                     </span>
-                                    <div className="media-body">
-                                        <h3>Buttonwood, California.</h3>
-                                        <p>Rosemead, CA 91770</p>
+                                    <div className="size-212 p-t-2">
+                                        <span className="mtext-110 cl2">
+                                            Address
+                                        </span>
+                                        <p className="stext-115 cl6 size-213 p-t-18">
+                                            Coza Store Center 8th floor, 379
+                                            Hudson St, New York, NY 10018 US
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="media contact-info">
-                                    <span className="contact-info__icon">
-                                        <i className="ti-tablet" />
+                                <div className="flex-w w-full p-b-42">
+                                    <span className="fs-18 cl5 txt-center size-211">
+                                        <span className="lnr lnr-phone-handset" />
                                     </span>
-                                    <div className="media-body">
-                                        <h3>
-                                            <a href="tel:454545654">
-                                                00 (440) 9865 562
-                                            </a>
-                                        </h3>
-                                        <p>Mon to Fri 9am to 6pm</p>
+                                    <div className="size-212 p-t-2">
+                                        <span className="mtext-110 cl2">
+                                            Lets Talk
+                                        </span>
+                                        <p className="stext-115 cl1 size-213 p-t-18">
+                                            +1 800 1236879
+                                        </p>
                                     </div>
                                 </div>
-                                <div className="media contact-info">
-                                    <span className="contact-info__icon">
-                                        <i className="ti-email" />
+                                <div className="flex-w w-full">
+                                    <span className="fs-18 cl5 txt-center size-211">
+                                        <span className="lnr lnr-envelope" />
                                     </span>
-                                    <div className="media-body">
-                                        <h3>
-                                            <a href="mailto:support@colorlib.com">
-                                                support@colorlib.com
-                                            </a>
-                                        </h3>
-                                        <p>Send us your query anytime!</p>
+                                    <div className="size-212 p-t-2">
+                                        <span className="mtext-110 cl2">
+                                            Sale Support
+                                        </span>
+                                        <p className="stext-115 cl1 size-213 p-t-18">
+                                            contact@example.com
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
-                {/* ================ contact section end ================= */}
-                {/*================Contact Success and Error message Area =================*/}
-                <div
-                    id="success"
-                    className="modal modal-message fade"
-                    role="dialog"
-                >
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <button
-                                    type="button"
-                                    className="close"
-                                    data-dismiss="modal"
-                                    aria-label="Close"
-                                >
-                                    <i className="fa fa-close" />
-                                </button>
-                                <h2>Thank you</h2>
-                                <p>Your message is successfully sent...</p>
-                            </div>
-                        </div>
-                    </div>
+                {/* Map */}
+                <div className="map">
+                    <div
+                        className="size-303"
+                        id="google_map"
+                        data-map-x="40.691446"
+                        data-map-y="-73.886787"
+                        data-pin="assets/customer/images/icons/pin.png"
+                        data-scrollwhell={0}
+                        data-draggable={1}
+                        data-zoom={11}
+                    />
                 </div>
-                {/* Modals error */}
-                <div
-                    id="error"
-                    className="modal modal-message fade"
-                    role="dialog"
-                >
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <button
-                                    type="button"
-                                    className="close"
-                                    data-dismiss="modal"
-                                    aria-label="Close"
-                                >
-                                    <i className="fa fa-close" />
-                                </button>
-                                <h2>Sorry !</h2>
-                                <p> Something went wrong </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/*================End Contact Success and Error message Area =================*/}
             </>
 
+            {/* End Content */}
             <Footer />
         </Fragment>
     );
 }
-
 export default Contact;

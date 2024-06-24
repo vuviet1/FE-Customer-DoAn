@@ -6,7 +6,7 @@ import request from "../../utils/request";
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [remember, setRemember] = useState(true);
+    // const [remember, setRemember] = useState(true);
     const [passwordVisible, setPasswordVisible] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -14,6 +14,7 @@ function Login() {
         const dataLogin = {
             email,
             password,
+            // remember,
         };
         try {
             const response = await request.post("auth/login", dataLogin);
@@ -36,9 +37,11 @@ function Login() {
             localStorage.setItem("user_data", JSON.stringify(userData));
 
             if (userData.role === 1) {
-                window.location.href = `http://localhost:3001`;
+                window.location.reload();
+                window.location.href = '/admin-home';
             } else if (userData.role === 0) {
-                window.location.href = "http://localhost:3002";
+                window.location.reload();
+                window.location.href = '/';
             }
         } catch (error) {
             console.error("Failed to check user:", error);
@@ -55,9 +58,9 @@ function Login() {
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
                 rel="stylesheet"
             ></link>
-            <link rel="stylesheet" href="assets/css/login.css"></link>
+            <link rel="stylesheet" href="assets/login/css/styles.css"></link>
             <Image
-                src="assets/images/login-bg.png"
+                src="assets/login/img/login-bg.png"
                 alt="login image"
                 className="login__img"
             />
@@ -117,7 +120,7 @@ function Login() {
                 </div>
                 <div className="login__check">
                     <div className="login__check-group">
-                        <input
+                        {/* <input
                             type="checkbox"
                             className="login__check-input"
                             id="login-check"
@@ -129,7 +132,7 @@ function Login() {
                             className="login__check-label"
                         >
                             Ghi nhớ tôi
-                        </label>
+                        </label> */}
                     </div>
 
                     <div className="login__check-group"></div>
@@ -143,6 +146,9 @@ function Login() {
                 <p className="login__register">
                     Bạn không có tài khoản?{" "}
                     <Link to={"/register"}>Đăng ký</Link>
+                </p>
+                <p className="login__register">
+                    <Link to={"/"}>Trở lại trang chủ</Link>
                 </p>
             </Form>
         </div>

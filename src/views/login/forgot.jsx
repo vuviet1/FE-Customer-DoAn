@@ -23,10 +23,9 @@ function Forgot() {
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
                 rel="stylesheet"
             ></link>
-            <link rel="stylesheet" href="assets/css/login.css"></link>
-            <script src="assets/js/login.js"></script>
+            <link rel="stylesheet" href="assets/login/css/styles.css"></link>
             <Image
-                src="assets/images/login-bg.png"
+                src="assets/login/img/login-bg.png"
                 alt="login image"
                 className="login__img"
             />

@@ -9,6 +9,7 @@ function Register() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -24,7 +25,7 @@ function Register() {
             const response = await request.post("auth/register", dataLogin);
             console.log(response.data);
             console.log("Check user successfully:", response.data);
-            window.location.href='http://localhost:3002'
+            window.location.href='http://localhost:3000'
         } catch (error) {
             console.error("Failed to check user:", error);
         }
@@ -34,6 +35,11 @@ function Register() {
         setPasswordVisible(!passwordVisible);
     };
 
+    const toggleConfirmPasswordVisibility = () => {
+        setConfirmPasswordVisible(!confirmPasswordVisible);
+    };
+
+
 
     return (
         <div className="login">
@@ -41,10 +47,9 @@ function Register() {
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
                 rel="stylesheet"
             ></link>
-            <link rel="stylesheet" href="assets/css/login.css"></link>
-            <script src="assets/js/login.js"></script>
+            <link rel="stylesheet" href="assets/login/css/styles.css"></link>
             <Image
-                src="assets/images/login-bg.png"
+                src="assets/login/img/login-bg.png"
                 alt="login image"
                 className="login__img"
             />
@@ -121,7 +126,7 @@ function Register() {
                         <i className="ri-lock-2-line login__icon" />
                         <div className="login__box-input">
                             <input
-                                type={passwordVisible ? "text" : "password"}
+                                type={confirmPasswordVisible ? "text" : "password"}
                                 required
                                 className="login__input"
                                 id="login-pass"
@@ -136,9 +141,9 @@ function Register() {
                                 Nhập lại mật khẩu
                             </label>
                             <i
-                                className={passwordVisible ? "ri-eye-line login__eye" : "ri-eye-off-line login__eye"}
+                                className={confirmPasswordVisible ? "ri-eye-line login__eye" : "ri-eye-off-line login__eye"}
                                 id="login-eye"
-                                onClick={togglePasswordVisibility}
+                                onClick={toggleConfirmPasswordVisibility}
                                 style={{ cursor: "pointer" }}
                             />
                         </div>
