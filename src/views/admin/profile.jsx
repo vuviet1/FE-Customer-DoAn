@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Form, Image, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import ReactQuill from "react-quill";
+// import ReactQuill from "react-quill";
+
 import Topbar from "./components/topbar";
 import Footer from "./components/footer";
 import ImageUploader from "./components/ImageUploader";
@@ -69,9 +70,9 @@ function ProfileAdmin() {
         setAdmin({ ...admin, [name]: value });
     };
 
-    const handleNoteChange = (value) => {
-        setAdmin({ ...admin, note: value });
-    };
+    // const handleNoteChange = (value) => {
+    //     setAdmin({ ...admin, note: value });
+    // };
 
     return (
         <div id="wrapper">
@@ -224,7 +225,7 @@ function ProfileAdmin() {
                                                         />
                                                     </Form.Group>
 
-                                                    <Form.Group
+                                                    {/* <Form.Group
                                                         controlId="profileNotes"
                                                         className="mt-3"
                                                     >
@@ -243,7 +244,7 @@ function ProfileAdmin() {
                                                                     "30px",
                                                             }}
                                                         />
-                                                    </Form.Group>
+                                                    </Form.Group> */}
 
                                                     <Button
                                                         type="submit"

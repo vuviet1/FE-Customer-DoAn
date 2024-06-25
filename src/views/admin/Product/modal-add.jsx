@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
-import request from "../../../utils/request";
-import ImageUploader from "../components/ImageUploader";
 import ReactQuill from "react-quill";
 import sanitizeHtml from 'sanitize-html';
+import { toast, ToastContainer } from "react-toastify";
+
+import request from "../../../utils/request";
+import ImageUploader from "../components/ImageUploader";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddProductModal({ show, handleClose, onAddProduct }) {
     const [brands, setBrands] = useState([]);
     const [categories, setCategories] = useState([]);
+
     const [productName, setProductName] = useState("");
     const [price, setPrice] = useState("");
     const [discount, setDiscount] = useState("");
@@ -24,7 +28,16 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
                 const response = await request.get("brand");
                 setBrands(response.data.data);
             } catch (error) {
-                console.error("Error fetching brands:", error);
+                let errorMessage = "Hiển thị danh sách thương hiệu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -33,7 +46,16 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
                 const response = await request.get("category");
                 setCategories(response.data.data);
             } catch (error) {
-                console.error("Error fetching categories:", error);
+                let errorMessage = "Hiển thị danh sách danh mục thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -71,19 +93,30 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
                 discount: discount,
                 image: images[0],
             };
-            console.log(productData);
 
-            const response = await request.post("product", productData, {
+            await request.post("product", productData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            console.log("Product added successfully:", response.data);
+            toast.success("Thêm sản phẩm thành công!", {
+                position: "top-right",
+            });
             onAddProduct();
             setImages([]);
             handleClose();
         } catch (error) {
-            console.error("Failed to add product:", error);
+            let errorMessage = "Thêm sản phẩm thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right"
+            });
+            console.error("Thêm sản phẩm thất bại:", error);
+            handleClose();
         }
     };
 
@@ -93,6 +126,7 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
 
     return (
         <>
+        <ToastContainer />
             <Modal show={show} onHide={handleClose} size="xl" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới sản phẩm</Modal.Title>

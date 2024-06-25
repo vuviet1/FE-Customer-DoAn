@@ -1,26 +1,26 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button, InputGroup } from "react-bootstrap";
+import { toast } from "react-toastify"
+
 import request from "../../../../utils/request";
-import ProductModal from "./modal-cart";
+import ProductModal from "./modal-product";
+import { getErrorMessage } from "../../../../utils/errorMessages"
 
 function ViewOrderModal({ show, handleClose, selectedOrderId }) {
     const [orders, setOrders] = useState({
-        order_id: 1,
         address: "",
         phone_number: "",
-        status: 0,
+        status: 1,
         total: "",
         payment_method_id: 0,
         shipping_method_id: 0,
-        user_id: "",
-        employee_id: 1,
         voucher_id: "",
     });
 
     const [showProductModal, setShowProductModal] = useState(false);
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
-    const user_data = JSON.parse(localStorage.getItem("user_data"));
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -28,7 +28,6 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                 request.defaults.headers.common[
                     "Authorization"
                 ] = `${token_type} ${access_token}`;
-                // Fetch the existing order data
                 if (selectedOrderId) {
                     const orderResponse = await request.get(
                         `order/${selectedOrderId}`
@@ -39,13 +38,23 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                             ...orderData,
                             status: orderData.status,
                             phoneNumber: orderData.phone_number,
-                            paymentMethodId: orderData.payment_method_id,
-                            shippingMethodId: orderData.shipping_method_id,
+                            paymentMethodName: orderData.payment.payment_method,
+                            shippingMethodName:
+                                orderData.shipping.shipping_method,
                         });
                     }
                 }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                let errorMessage = "Hiển thị hóa đơn thất bại: "
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status)
+                } else {
+                    errorMessage += error.message
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                })
+                console.error("Lấy dữ liệu thất bại:", error)
             }
         };
 
@@ -53,6 +62,23 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
     }, [selectedOrderId]);
 
     const handleShowProductModal = () => setShowProductModal(true);
+
+    const getStatusText = (status) => {
+        switch (status) {
+            case 0:
+                return "Đã hủy";
+            case 1:
+                return "Chờ duyệt";
+            case 2:
+                return "Chờ lấy hàng";
+            case 3:
+                return "Đang giao hàng";
+            case 4:
+                return "Hoàn thành";
+            default:
+                return "Không xác định";
+        }
+    };
 
     return (
         <>
@@ -66,11 +92,11 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                         <div className="row">
                             <div className="col-6">
                                 <Form.Group controlId="inputUser">
-                                    <Form.Label>Người tạo</Form.Label>
+                                    <Form.Label>Tên khách hàng</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Người tạo ..."
-                                        value={user_data.name}
+                                        placeholder="Tên khách hàng ..."
+                                        value={orders.name}
                                         readOnly
                                     />
                                 </Form.Group>
@@ -86,24 +112,22 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                                 <Form.Group controlId="inputStatus">
                                     <Form.Label>Trạng thái</Form.Label>
                                     <Form.Control
-                                        as="select"
-                                        value={orders.status}
+                                        type="text"
+                                        value={getStatusText(orders.status)}
+                                        placeholder="Trạng thái đơn hàng ..."
                                         readOnly
-                                    >
-                                        <option value="0">Chờ duyệt</option>
-                                        <option value="1">Đang giao hàng</option>
-                                        <option value="2">Hoàn thành</option>
-                                        <option value="3">Đã hủy</option>
-                                    </Form.Control>
+                                    ></Form.Control>
                                 </Form.Group>
                             </div>
                             <div className="col-6">
                                 <Form.Group controlId="inputPayment">
-                                    <Form.Label>Phương thức thanh toán</Form.Label>
+                                    <Form.Label>
+                                        Phương thức thanh toán
+                                    </Form.Label>
                                     <Form.Control
                                         type="text"
                                         placeholder="Phương thức thanh toán ..."
-                                        value={orders.paymentMethodId}
+                                        value={orders.paymentMethodName}
                                         readOnly
                                     />
                                 </Form.Group>
@@ -114,7 +138,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                                     <Form.Control
                                         type="text"
                                         placeholder="Phương thức vận chuyển ..."
-                                        value={orders.shippingMethodId}
+                                        value={orders.shippingMethodName}
                                         readOnly
                                     />
                                 </Form.Group>

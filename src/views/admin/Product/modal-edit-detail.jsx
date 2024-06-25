@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
+import { toast } from "react-toastify";
+
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditProductDetailModal({
     show,
@@ -11,6 +14,7 @@ function EditProductDetailModal({
 }) {
     const [colors, setColors] = useState([]);
     const [sizes, setSizes] = useState([]);
+
     const [colorId, setColorId] = useState("");
     const [sizeId, setSizeId] = useState("");
     const [quantity, setQuantity] = useState("");
@@ -22,7 +26,16 @@ function EditProductDetailModal({
                 const response = await request.get("color");
                 setColors(response.data.data);
             } catch (error) {
-                console.error("Error fetching colors:", error);
+                let errorMessage = "Hiển thị danh sách màu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -31,7 +44,16 @@ function EditProductDetailModal({
                 const response = await request.get("size");
                 setSizes(response.data.data);
             } catch (error) {
-                console.error("Error fetching sizes:", error);
+                let errorMessage = "Hiển thị danh sách kích cỡ thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -51,7 +73,9 @@ function EditProductDetailModal({
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!productDetail) {
-            console.error("No product detail provided");
+            toast.error("Không tồn tại phân loại sản phẩm này.", {
+                position: "top-right",
+            });
             return;
         }
         try {
@@ -63,16 +87,28 @@ function EditProductDetailModal({
                 status: parseInt(status),
             };
 
-            const response = await request.put(
-                `productdetail/${productDetail.product_detail_id}`,
+            await request.post(
+                `productdetail/${productDetail.product_detail_id}?_method=PUT`,
                 updatedProductDetail
             );
 
-            console.log("Product detail updated successfully:", response.data);
-            onEditProductDetail(); // Notify parent component to refresh details
+            onEditProductDetail();
             handleClose();
+            toast.success("Cập nhật phân loại sản phẩm thành công!", {
+                position: "top-right",
+            });
         } catch (error) {
-            console.error("Failed to update product detail:", error);
+            let errorMessage = "Cập nhật phân loại sản phẩm thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Cập nhật phân loại sản phẩm thất bại:", error);
+            handleClose();
         }
     };
 

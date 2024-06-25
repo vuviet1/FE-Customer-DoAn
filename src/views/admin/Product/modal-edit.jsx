@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Table, Image } from "react-bootstrap";
+import ReactQuill from "react-quill";
+import { toast } from "react-toastify";
+
 import request from "../../../utils/request";
 import EditProductDetailModal from "./modal-edit-detail";
 import ImageLibraryModal from "../ImageLibrary";
 import ImageUploader from "../components/ImageUploader";
-import ReactQuill from "react-quill";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduct }) {
     const [product, setProduct] = useState({
@@ -57,7 +60,16 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                console.error("Error while fetching product data:", error);
+                let errorMessage = "Hiển thị sản phẩm thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -66,7 +78,16 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
                 const response = await request.get("brand");
                 setBrands(response.data.data);
             } catch (error) {
-                console.error("Error fetching brands:", error);
+                let errorMessage = "Hiển thị danh sách thương hiệu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -75,7 +96,16 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
                 const response = await request.get("category");
                 setCategories(response.data.data);
             } catch (error) {
-                console.error("Error fetching categories:", error);
+                let errorMessage = "Hiển thị danh sách danh mục thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -90,10 +120,6 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
     const updateProduct = async (e) => {
         e.preventDefault();
         try {
-            // if (images.length !== 1) {
-            //     alert("Vui lòng chọn một ảnh duy nhất.");
-            //     return;
-            // }
 
             const formData = {
                 product_name: product.product_name,
@@ -113,13 +139,26 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
             });
             onUpdateProduct();
             handleClose();
+            toast.success("Cập nhật sản phẩm thành công!", {
+                position: "top-right",
+            });
         } catch (error) {
-            console.error("Error updating product:", error);
+            let errorMessage = "Cập nhật sản phẩm thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Cập nhật sản phẩm thất bại:", error);
+            handleClose();
         }
     };
 
     const deleteProductDetail = async (detailId) => {
-        if (window.confirm("Bạn có chắc muốn xóa sản phẩm chi tiết này không?")) {
+        if (window.confirm("Bạn có chắc muốn xóa phân loại sản phẩm này không?")) {
             try {
                 await request.delete(`productdetail/${detailId}`);
                 setProduct((prevProduct) => ({
@@ -128,8 +167,19 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
                         (detail) => detail.product_detail_id !== detailId
                     ),
                 }));
+                toast.success("Xóa phân loại sản phẩm thành công!", {
+                    position: "top-right",
+                });
             } catch (error) {
-                console.error("Error deleting product detail:", error);
+                let errorMessage = "Xóa phân loại sản phẩm thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
             }
         }
     };

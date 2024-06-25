@@ -1,111 +1,160 @@
-import React from "react";
-import { Form, Modal, Button } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Form, Modal, Button, Image } from "react-bootstrap";
+import { toast } from "react-toastify";
 
-function ViewCustomerModal({ show, handleClose, customerData }) {
+import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
+
+function ViewCustomerModal({ show, handleClose, selectedCustomerId }) {
+    const [customer, setCustomer] = useState({
+        name: "",
+        email: "",
+        password: "",
+        role: 0,
+        google_id: "",
+        avatar: "",
+        phone: "",
+        address: "",
+        status: 1,
+    });
+
+    useEffect(() => {
+        const fetchCustomer = async () => {
+            try {
+                const response = await request.get(`user/${selectedCustomerId}`);
+                if (response.data.data) {
+                    setCustomer(response.data.data);
+                } else {
+                    console.error("No data returned from the API");
+                }
+            } catch (error) {
+                let errorMessage = "Hiển thị khách hàng thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
+            }
+        };
+
+        if (selectedCustomerId) {
+            fetchCustomer();
+        }
+    }, [selectedCustomerId]);
+
     return (
-        <Modal show={show} onHide={handleClose} size="xl" centered>
-            <Modal.Header closeButton>
-                <Modal.Title>Thông tin chi tiết khách hàng</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <div className="row">
-                    <div className="col-6">
-                        <label htmlFor="viewImg" className="form-label">
-                            Ảnh đại diện
-                        </label>
-                        <img
-                            src={customerData.image}
-                            alt="Avatar"
-                            className="img-fluid"
-                        />
+        <>
+            <Modal show={show} onHide={handleClose} size="lg" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Xem thông tin khách hàng</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="row">
+                        <div className="col-6">
+                            <Form.Group
+                                controlId="customerAvatar"
+                                style={{
+                                    display: "grid",
+                                    textAlign: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Form.Label>Ảnh đại diện</Form.Label>
+                                <Image
+                                    src={
+                                        "http://127.0.0.1:8000/uploads/avatar/" +
+                                        customer.avatar
+                                    }
+                                    alt={customer.name}
+                                    style={{
+                                        width: "250px",
+                                        height: "250px",
+                                    }}
+                                    thumbnail
+                                />
+                            </Form.Group>
+                        </div>
+                        <div className="col-6">
+                            <Form.Group controlId="customerName">
+                                <Form.Label>Tên khách hàng</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Tên khách hàng"
+                                    value={customer.name}
+                                    readOnly
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="customerEmail">
+                                <Form.Label>Email</Form.Label>
+                                <Form.Control
+                                    type="email"
+                                    placeholder="Email"
+                                    value={customer.email}
+                                    readOnly
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="customerPhone">
+                                <Form.Label>Số điện thoại</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Số điện thoại"
+                                    value={customer.phone}
+                                    readOnly
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="customerAddress">
+                                <Form.Label>Địa chỉ</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Địa chỉ"
+                                    value={customer.address}
+                                    readOnly
+                                />
+                            </Form.Group>
+                        </div>
+
+                        <div className="col-12">
+                            <Form.Group controlId="customerRole">
+                                <Form.Label>Vai trò</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Vai trò"
+                                    value={customer.role === 1 ? "Quản trị viên" : "Khách hàng"}
+                                    readOnly
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="customerGoogleId">
+                                <Form.Label>Google ID</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Google ID"
+                                    value={customer.google_id}
+                                    readOnly
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="customerStatus">
+                                <Form.Label>Trạng thái</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    placeholder="Trạng thái"
+                                    value={customer.status === 1 ? "Sử dụng" : "Không sử dụng"}
+                                    readOnly
+                                />
+                            </Form.Group>
+                        </div>
                     </div>
-                    <div className="col-6">
-                        <Form.Group controlId="viewName">
-                            <Form.Label>Tên khách hàng</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Tên khách hàng ..."
-                                value={customerData.name}
-                                readOnly
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="viewEmail">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control
-                                type="email"
-                                placeholder="Email ..."
-                                value={customerData.email}
-                                readOnly
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="viewPhone">
-                            <Form.Label>Số điện thoại</Form.Label>
-                            <Form.Control
-                                type="tel"
-                                placeholder="Số điện thoại ..."
-                                value={customerData.phone}
-                                readOnly
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="viewPassword">
-                            <Form.Label>Mật khẩu</Form.Label>
-                            <Form.Control
-                                type="password"
-                                placeholder="Mật khẩu ..."
-                                value="******"
-                                readOnly
-                            />
-                        </Form.Group>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-6 mt-3">
-                        <Form.Group controlId="viewStatus">
-                            <Form.Label>Trạng thái</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Trạng thái ..."
-                                value={
-                                    customerData.status === "1"
-                                        ? "Sử dụng"
-                                        : "Không sử dụng"
-                                }
-                                readOnly
-                            />
-                        </Form.Group>
-                    </div>
-                    <div className="col-6 mt-3">
-                        <Form.Group controlId="viewRole">
-                            <Form.Label>Quyền</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Quyền ..."
-                                value={customerData.role}
-                                readOnly
-                            />
-                        </Form.Group>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-12 mt-3">
-                        <Form.Group controlId="viewAddress">
-                            <Form.Label>Địa chỉ</Form.Label>
-                            <Form.Control
-                                type="text"
-                                placeholder="Địa chỉ ..."
-                                value={customerData.address}
-                                readOnly
-                            />
-                        </Form.Group>
-                    </div>
-                </div>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>
-                    Đóng
-                </Button>
-            </Modal.Footer>
-        </Modal>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Đóng
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        </>
     );
 }
 

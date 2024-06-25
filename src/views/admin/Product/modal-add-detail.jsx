@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
-import request from "../../../utils/request"; // Make sure the request utility is correctly imported
+import { toast, ToastContainer } from "react-toastify";
+
+import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddProductDetailModal({
     show,
@@ -21,7 +24,16 @@ function AddProductDetailModal({
                 const response = await request.get("color");
                 setColors(response.data.data);
             } catch (error) {
-                console.error("Error fetching colors:", error);
+                let errorMessage = "Hiển thị danh sách màu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -30,7 +42,16 @@ function AddProductDetailModal({
                 const response = await request.get("size");
                 setSizes(response.data.data);
             } catch (error) {
-                console.error("Error fetching sizes:", error);
+                let errorMessage = "Hiển thị danh sách kích cỡ thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -48,21 +69,33 @@ function AddProductDetailModal({
                 quantity: parseInt(quantity),
                 status: parseInt(quantity),
             };
-            console.log(productDetailData);
-            const response = await request.post(
+            await request.post(
                 "productdetail",
                 productDetailData
             );
-            console.log("Product detail added successfully:", response.data);
+            toast.success("Thêm phân loại sản phẩm thành công!", {
+                position: "top-right"
+            });
             onAddProductDetail();
             handleClose();
         } catch (error) {
-            console.error("Failed to add product detail:", error);
+            let errorMessage = "Thêm phương thức thanh toán thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right"
+            });
+            console.error("Thêm phương thức thất bại:", error);
+            handleClose();
         }
     };
 
     return (
         <>
+            <ToastContainer />
             <Modal show={show} onHide={handleClose} size="xl" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>

@@ -10,7 +10,6 @@ import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Footer from "./components/footer";
 import ProductModal from "./components/modal";
-import "./product.css";
 import request from "../../utils/request";
 
 function Product() {
@@ -26,6 +25,13 @@ function Product() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showModal, setShowModal] = useState(false);
+
+    // Lọc
+    const [brands, setBrands] = useState([]);
+    const [category, setCategory] = useState([]);
+
+    const [selectedBrand, setSelectedBrand] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
 
     const handleProductClick = (productId) => {
         // Lưu productId vào session storage
@@ -62,6 +68,29 @@ function Product() {
         fetchProduct();
     }, []);
 
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const response = await request.get("brand");
+                setBrands(response.data.data);
+            } catch (error) {
+                console.error("Error fetching brands:", error);
+            }
+        };
+
+        const fetchColors = async () => {
+            try {
+                const response = await request.get("category");
+                setCategory(response.data.data);
+            } catch (error) {
+                console.error("Error fetching colors:", error);
+            }
+        };
+
+        fetchBrands();
+        fetchColors();
+    }, []);
+
     const indexOfLastProduct = currentPage * itemsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
     const currentProducts = filteredProducts.slice(
@@ -69,6 +98,7 @@ function Product() {
         indexOfLastProduct
     );
 
+    // Phân trang
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
     const handlePageChange = (page) => {
@@ -91,20 +121,50 @@ function Product() {
         setCurrentPage((prevPage) => Math.min(prevPage + 1, totalPages));
     };
 
+    // TÌm kiếm
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
-        if (e.target.value === "") {
-            setFilteredProducts(products);
-        } else {
-            setFilteredProducts(
-                products.filter((product) =>
-                    product.product_name
-                        .toLowerCase()
-                        .includes(e.target.value.toLowerCase())
-                )
+    };
+
+    // Lọc
+    useEffect(() => {
+        let updatedProducts = products;
+
+        if (selectedBrand) {
+            updatedProducts = updatedProducts.filter(
+                (product) => product.brand.brand_id === selectedBrand
             );
         }
+
+        if (selectedCategory) {
+            updatedProducts = updatedProducts.filter(
+                (product) => product.category.category_id === selectedCategory
+            );
+        }
+
+        if (searchTerm) {
+            updatedProducts = updatedProducts.filter((product) =>
+                product.product_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+            );
+        }
+
+        setFilteredProducts(updatedProducts);
+        setCurrentPage(1); // Reset to first page when filters change
+    }, [products, selectedBrand, selectedCategory, searchTerm]);
+
+    // Filter
+    const splitArray = (array, size) => {
+        const result = [];
+        for (let i = 0; i < array.length; i += size) {
+            result.push(array.slice(i, i + size));
+        }
+        return result;
     };
+
+    const brandChunks = splitArray(brands, Math.ceil(brands.length / 2));
+    const categoryChunks = splitArray(category, Math.ceil(category.length / 2));
 
     return (
         <Fragment>
@@ -189,206 +249,116 @@ function Product() {
                             unmountOnExit
                         >
                             <div className="w-full p-t-10">
-                                <div className="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm">
-                                    <div className="filter-col1 p-r-15 p-b-27">
+                                <div
+                                    className="wrap-filter flex-w bg6 w-full p-lr-40 p-t-27 p-lr-15-sm"
+                                    style={{ justifyContent: "space-between" }}
+                                >
+                                    <div className="filter-col p-r-15 p-b-27">
                                         <div className="mtext-102 cl2 p-b-15">
-                                            Sort By
+                                            Thương hiệu
                                         </div>
                                         <ul>
                                             <li className="p-b-6">
                                                 <a
                                                     href="#"
-                                                    className="filter-link stext-106 trans-04"
+                                                    className={`filter-link stext-106 trans-04 ${
+                                                        selectedBrand === ""
+                                                            ? "filter-link-active"
+                                                            : ""
+                                                    }`}
+                                                    onClick={() =>
+                                                        setSelectedBrand("")
+                                                    }
                                                 >
-                                                    Default
+                                                    Tất cả
                                                 </a>
                                             </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Popularity
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Average rating
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04 filter-link-active"
-                                                >
-                                                    Newness
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Price: Low to High
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Price: High to Low
-                                                </a>
-                                            </li>
+                                            {brandChunks.map((chunk, index) => (
+                                                <ul key={index}>
+                                                    {chunk.map((brand) => (
+                                                        <li
+                                                            className="p-b-6"
+                                                            key={brand.brand_id}
+                                                        >
+                                                            <a
+                                                                href="#"
+                                                                className={`filter-link stext-106 trans-04 ${
+                                                                    selectedBrand ===
+                                                                    brand.brand_id
+                                                                        ? "filter-link-active"
+                                                                        : ""
+                                                                }`}
+                                                                onClick={() =>
+                                                                    setSelectedBrand(
+                                                                        brand.brand_id
+                                                                    )
+                                                                }
+                                                            >
+                                                                {
+                                                                    brand.brand_name
+                                                                }
+                                                            </a>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ))}
                                         </ul>
                                     </div>
-                                    <div className="filter-col2 p-r-15 p-b-27">
+                                    <div className="filter-col p-r-15 p-b-27">
                                         <div className="mtext-102 cl2 p-b-15">
-                                            Price
+                                            Danh mục
                                         </div>
                                         <ul>
                                             <li className="p-b-6">
                                                 <a
                                                     href="#"
-                                                    className="filter-link stext-106 trans-04 filter-link-active"
+                                                    className={`filter-link stext-106 trans-04 ${
+                                                        selectedCategory === ""
+                                                            ? "filter-link-active"
+                                                            : ""
+                                                    }`}
+                                                    onClick={() =>
+                                                        setSelectedCategory("")
+                                                    }
                                                 >
-                                                    All
+                                                    Tất cả
                                                 </a>
                                             </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    $0.00 - $50.00
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    $50.00 - $100.00
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    $100.00 - $150.00
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    $150.00 - $200.00
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    $200.00+
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div className="filter-col3 p-r-15 p-b-27">
-                                        <div className="mtext-102 cl2 p-b-15">
-                                            Color
-                                        </div>
-                                        <ul>
-                                            <li className="p-b-6">
-                                                <span
-                                                    className="fs-15 lh-12 m-r-6"
-                                                    style={{ color: "#222" }}
-                                                >
-                                                    <i className="zmdi zmdi-circle" />
-                                                </span>
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Black
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <span
-                                                    className="fs-15 lh-12 m-r-6"
-                                                    style={{ color: "#4272d7" }}
-                                                >
-                                                    <i className="zmdi zmdi-circle" />
-                                                </span>
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04 filter-link-active"
-                                                >
-                                                    Blue
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <span
-                                                    className="fs-15 lh-12 m-r-6"
-                                                    style={{ color: "#b3b3b3" }}
-                                                >
-                                                    <i className="zmdi zmdi-circle" />
-                                                </span>
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Grey
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <span
-                                                    className="fs-15 lh-12 m-r-6"
-                                                    style={{ color: "#00ad5f" }}
-                                                >
-                                                    <i className="zmdi zmdi-circle" />
-                                                </span>
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Green
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <span
-                                                    className="fs-15 lh-12 m-r-6"
-                                                    style={{ color: "#fa4251" }}
-                                                >
-                                                    <i className="zmdi zmdi-circle" />
-                                                </span>
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    Red
-                                                </a>
-                                            </li>
-                                            <li className="p-b-6">
-                                                <span
-                                                    className="fs-15 lh-12 m-r-6"
-                                                    style={{ color: "#aaa" }}
-                                                >
-                                                    <i className="zmdi zmdi-circle-o" />
-                                                </span>
-                                                <a
-                                                    href="#"
-                                                    className="filter-link stext-106 trans-04"
-                                                >
-                                                    White
-                                                </a>
-                                            </li>
+                                            {categoryChunks.map(
+                                                (chunk, index) => (
+                                                    <ul key={index}>
+                                                        {chunk.map(
+                                                            (category) => (
+                                                                <li
+                                                                    className="p-b-6"
+                                                                    key={
+                                                                        category.category_id
+                                                                    }
+                                                                >
+                                                                    <a
+                                                                        href="#"
+                                                                        className={`filter-link stext-106 trans-04 ${
+                                                                            selectedCategory ===
+                                                                            category.category_id
+                                                                                ? "filter-link-active"
+                                                                                : ""
+                                                                        }`}
+                                                                        onClick={() =>
+                                                                            setSelectedCategory(
+                                                                                category.category_id
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            category.category_name
+                                                                        }
+                                                                    </a>
+                                                                </li>
+                                                            )
+                                                        )}
+                                                    </ul>
+                                                )
+                                            )}
                                         </ul>
                                     </div>
                                 </div>
@@ -396,10 +366,19 @@ function Product() {
                         </CSSTransition>
                     </div>
 
+                    {/* Display a message if no products are found */}
+                    {currentProducts.length === 0 && (
+                        <div className="flex-c-m flex-w w-full p-b-52">
+                            <p className="stext-113 cl6">
+                                Không có sản phẩm nào
+                            </p>
+                        </div>
+                    )}
+
                     {/* Product */}
                     <div
                         className="row isotope-grid"
-                        style={{ minHeight: "450px", position:"relative", }}
+                        style={{ minHeight: "450px", position: "relative" }}
                         display="flex"
                         flexwrap="wrap"
                     >
@@ -421,21 +400,30 @@ function Product() {
                                                 "http://127.0.0.1:8000/uploads/product/" +
                                                 product.image
                                             }
+                                            style={{
+                                                height: "300px",
+                                                width: "300px",
+                                            }}
                                             alt="IMG-PRODUCT"
                                         />
                                         <Link
-                                            // to={`/product`}
                                             className="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1"
-                                            onClick={() => handleQuickView(product)}
+                                            onClick={() =>
+                                                handleQuickView(product)
+                                            }
                                         >
-                                            Quick View
+                                            Xem nhanh
                                         </Link>
                                     </div>
                                     <div className="block2-txt flex-w flex-t p-t-14">
                                         <div className="block2-txt-child1 flex-col-l ">
                                             <Link
                                                 key={product.product_id}
-                                                onClick={() => handleProductClick(product.product_id)}
+                                                onClick={() =>
+                                                    handleProductClick(
+                                                        product.product_id
+                                                    )
+                                                }
                                                 className="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6"
                                             >
                                                 {product.product_name}

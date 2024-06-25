@@ -1,27 +1,52 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import { toast, ToastContainer } from "react-toastify";
+
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddBrandModal({ show, handleClose, onAddBrand }) {
-    const [brandName, setBrandName] = useState("");
-    const [status, setStatus] = useState(1);
+    const [brand, setBrand] = useState({
+        brand_name: "",
+        status: 1,
+    });
 
     const addBrand = async (e) => {
         e.preventDefault();
         try {
-            const response = await request.post("brand", {
-                brand_name: brandName,
-                status: status,
+            if (!brand.brand_name) {
+                toast.error("Trường thương hiệu là bắt buộc.", {
+                    position: "top-right"
+                });
+                return;
+            }
+            await request.post("brand", {
+                brand_name: brand.brand_name,
+                status: brand.status,
             });
-            console.log("Brand added successfully:", response.data);
+            toast.success("Thêm thương hiệu thành công!", {
+                position: "top-right"
+            });
             onAddBrand();
             handleClose();
         } catch (error) {
-            console.error("Failed to add brand:", error);
+            let errorMessage = "Thêm thương hiệu thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right"
+            });
+            console.error("Thêm thương hiệu thất bại:", error);
+            handleClose();
         }
     };
 
     return (
+        <>
+        <ToastContainer />
         <Modal show={show} onHide={handleClose} centered>
             <Modal.Header closeButton>
                 <Modal.Title>Thêm mới thương hiệu</Modal.Title>
@@ -33,16 +58,26 @@ function AddBrandModal({ show, handleClose, onAddBrand }) {
                         <Form.Control
                             type="text"
                             placeholder="Tên thương hiệu mới ..."
-                            value={brandName}
-                            onChange={(e) => setBrandName(e.target.value)}
+                            value={brand.brand_name}
+                            onChange={(e) =>
+                                setBrand({
+                                    ...brand,
+                                    brand_name: e.target.value,
+                                })
+                            }
                         />
                     </Form.Group>
                     <Form.Group controlId="status">
                         <Form.Label>Trạng thái</Form.Label>
                         <Form.Control
                             as="select"
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
+                            value={brand.status}
+                            onChange={(e) =>
+                                setBrand({
+                                    ...brand,
+                                    status: e.target.value,
+                                })
+                            }
                         >
                             <option value="1">Sử dụng</option>
                             <option value="0">Không sử dụng</option>
@@ -59,6 +94,7 @@ function AddBrandModal({ show, handleClose, onAddBrand }) {
                 </Modal.Footer>
             </Form>
         </Modal>
+        </>
     );
 }
 

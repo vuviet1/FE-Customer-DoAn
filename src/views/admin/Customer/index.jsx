@@ -2,11 +2,13 @@
 import React, { useEffect, useState, Fragment, useLayoutEffect } from "react";
 import { Table, Button, Form, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
-
+import { toast } from "react-toastify"
 import $ from "jquery";
+
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages"
 
 import EditCustomerModal from "./modal-edit";
 import ViewCustomerModal from "./modal-view";
@@ -19,29 +21,30 @@ function CustomerAdmin() {
 
     const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        const fetchCustomers = async (retryCount = 0) => {
-            try {
-                const response = await request.get("user");
-                const allUsers = response.data.data;
-                const customerUsers = allUsers.filter(
-                    (user) => user.role === 0
-                );
-                setCustomers(customerUsers);
-            } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 429 &&
-                    retryCount < 3
-                ) {
-                    setTimeout(() => fetchCustomers(retryCount + 1), 2000); // Retry after 2 seconds
-                } else {
-                    console.error("Error fetching data:", error);
-                }
-            }
-        };
+    const fetchData = async () => {
+        try {
+            const response = await request.get("user");
+            const allUsers = response.data.data;
+            const customerUsers = allUsers.filter(
+                (user) => user.role === 0
+            );
+            setCustomers(customerUsers);
+        } catch (error) {
+            let errorMessage = "Hiển thị khách hàng thất bại: "
+        if (error.response && error.response.status) {
+            errorMessage += getErrorMessage(error.response.status)
+        } else {
+            errorMessage += error.message
+        }
+        toast.error(errorMessage, {
+            position: "top-right"
+        })
+        console.error("Error fetching data:", error)
+        }
+    };
 
-        fetchCustomers();
+    useEffect(() => {
+        fetchData();
     }, []);
 
     useLayoutEffect(() => {
@@ -79,7 +82,7 @@ function CustomerAdmin() {
     const handleUpdateCustomer = () => {
         setSelectedCustomerId(null);
         setShowEditModal(false);
-        window.location.reload();
+        fetchData()
     };
 
     // View

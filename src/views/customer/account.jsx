@@ -50,7 +50,7 @@ function Account() {
                 google_id: customer.google_id,
             };
 
-            await request.put(`user/${customer.id}`, formData, {
+            await request.post(`user/${customer.id}?_method=PUT`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },

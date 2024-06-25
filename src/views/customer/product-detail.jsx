@@ -1,22 +1,22 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-/* eslint-disable no-script-url */
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
+import { toast, ToastContainer } from "react-toastify";
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Footer from "./components/footer";
 import request from "../../utils/request";
+import { getErrorMessage } from "../../utils/errorMessages";
+
 import ScriptManager from "../../utils/ScriptManager";
-import {customerScripts} from "../../App";
+import { customerScripts } from "../../App";
 
 function ProductDetail() {
     const navigate = useNavigate();
     const productId = sessionStorage.getItem("productId");
-    const cartRef = useRef(null);
-    const wrapperCartRef = useRef(null);
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ function ProductDetail() {
     useEffect(() => {
         if (!productId) {
             console.error("Product id là undefined không tồn tại");
-            navigate('/product');
+            navigate("/product");
             return;
         }
 
@@ -37,7 +37,14 @@ function ProductDetail() {
                 setProduct(response.data.data);
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching product data:", error);
+                let errorMessage = "Hiển thị sản phẩm thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, { position: "top-right" });
+                console.error("Error fetching data:", error);
                 setError("Failed to load product data");
                 setLoading(false);
             }
@@ -56,32 +63,48 @@ function ProductDetail() {
     };
 
     const incrementQuantity = () => {
-        setQuantity(prevQuantity => prevQuantity + 1);
+        setQuantity((prevQuantity) => prevQuantity + 1);
     };
 
     const decrementQuantity = () => {
-        setQuantity(prevQuantity => Math.max(1, prevQuantity - 1));
+        setQuantity((prevQuantity) => Math.max(1, prevQuantity - 1));
     };
 
     const handleAddToCart = async (e) => {
         e.preventDefault();
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
-        request.defaults.headers.common["Authorization"] = `${token_type} ${access_token}`;
-
+        request.defaults.headers.common[
+            "Authorization"
+        ] = `${token_type} ${access_token}`;
+    
         if (!selectedDetailId || quantity < 1) {
-            alert("Please select a product detail and enter a valid quantity.");
+            toast.error("Hãy chọn phân loại sản phẩm và số lượng hợp lệ.", {
+                position: "top-right"
+            });
             return;
         }
-
+    
         try {
-            const response = await request.post("add-to-cart", [{
-                product_detail_id: selectedDetailId,
-                quantity: quantity
-            }]);
-            console.log(response);
+            await request.post("add-to-cart", [
+                {
+                    product_detail_id: selectedDetailId,
+                    quantity: quantity,
+                },
+            ]);
+            toast.success("Thêm sản phẩm vào giỏ hàng thành công!", {
+                position: "top-right"
+            });
         } catch (error) {
-            console.error("Error adding to cart:", error);
+            let errorMessage = "Thêm sản phẩm vào giỏ hàng thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right"
+            });
         }
     };
 
@@ -99,9 +122,10 @@ function ProductDetail() {
 
     return (
         <Fragment>
-            <Header cartRef={cartRef} />
+            <ToastContainer />
+            <Header />
             <Sidebar />
-            <Cart wrapperCartRef={wrapperCartRef} />
+            <Cart />
             {/* Content */}
             <section
                 className="bg-img1 txt-center p-lr-15 p-tb-92"
@@ -115,26 +139,20 @@ function ProductDetail() {
                 {/* breadcrumb */}
                 <div className="container">
                     <div className="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-                        <Link
-                            to="/"
-                            className="stext-109 cl8 hov-cl1 trans-04"
-                        >
+                        <Link to="/" className="stext-109 cl8 hov-cl1 trans-04">
                             Home
                             <i
                                 className="fa fa-angle-right m-l-9 m-r-10"
                                 aria-hidden="true"
                             />
                         </Link>
-                        <Link
-                            to="/product"
-                            className="stext-109 cl8 hov-cl1 trans-04"
-                        >
+                        <span className="stext-109 cl8 hov-cl1 trans-04">
                             {product.category.category_name}
                             <i
                                 className="fa fa-angle-right m-l-9 m-r-10"
                                 aria-hidden="true"
                             />
-                        </Link>
+                        </span>
                         <span className="stext-109 cl4">
                             {product.product_name}
                         </span>
@@ -189,50 +207,51 @@ function ProductDetail() {
                                                 Các loại sản phẩm
                                             </div>
                                             <div className="size-204 respon6-next">
-                                                <div className="rs1-select2 bor8 bg0">
-                                                    <select
-                                                        className="js-select2"
-                                                        name="color"
-                                                        onChange={handleSelectProductDetail}
-                                                    >
-                                                        <option>
-                                                            Chọn
-                                                        </option>
-                                                        {product.product_details.map(
-                                                            (detail) => (
-                                                                <option
-                                                                    key={
-                                                                        detail
-                                                                            .product_detail_id
-                                                                    }
-                                                                    value={
-                                                                        detail
-                                                                            .product_detail_id
-                                                                    }
-                                                                >
-                                                                    Màu: {
-                                                                        detail
-                                                                            .color
-                                                                            .color
-                                                                    }
-                                                                    --  
-                                                                    Kích cỡ: {
-                                                                        detail
-                                                                            .size
-                                                                            .size
-                                                                    }
-                                                                </option>
-                                                            )
-                                                        )}
-                                                    </select>
-                                                    <div className="dropDownSelect2" />
-                                                </div>
+                                                <Form.Select
+                                                    className="form-select"
+                                                    onChange={
+                                                        handleSelectProductDetail
+                                                    }
+                                                >
+                                                    <option value="">
+                                                        Chọn
+                                                    </option>
+                                                    {product.product_details.map(
+                                                        (detail) => (
+                                                            <option
+                                                                key={
+                                                                    detail.product_detail_id
+                                                                }
+                                                                value={
+                                                                    detail.product_detail_id
+                                                                }
+                                                            >
+                                                                Màu:{" "}
+                                                                {
+                                                                    detail.color
+                                                                        .color
+                                                                }{" "}
+                                                                -- Kích cỡ:{" "}
+                                                                {
+                                                                    detail.size
+                                                                        .size
+                                                                }
+                                                            </option>
+                                                        )
+                                                    )}
+                                                </Form.Select>
+                                                <div className="select-dropdown" />
                                             </div>
                                         </div>
                                         <div className="flex-w flex-r-m p-b-10">
                                             <div className="size-204 flex-w flex-m respon6-next">
                                                 <div className="wrap-num-product flex-w m-r-20 m-tb-10">
-                                                    <div className="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m" onClick={decrementQuantity}>
+                                                    <div
+                                                        className="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
+                                                        onClick={
+                                                            decrementQuantity
+                                                        }
+                                                    >
                                                         <i className="fs-16 zmdi zmdi-minus" />
                                                     </div>
                                                     <input
@@ -240,10 +259,17 @@ function ProductDetail() {
                                                         type="number"
                                                         name="num-product"
                                                         value={quantity}
-                                                        onChange={handleQuantityChange}
+                                                        onChange={
+                                                            handleQuantityChange
+                                                        }
                                                         min={1}
                                                     />
-                                                    <div className="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m" onClick={incrementQuantity}>
+                                                    <div
+                                                        className="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
+                                                        onClick={
+                                                            incrementQuantity
+                                                        }
+                                                    >
                                                         <i className="fs-16 zmdi zmdi-plus" />
                                                     </div>
                                                 </div>
@@ -262,7 +288,7 @@ function ProductDetail() {
                                             <a
                                                 href="#"
                                                 className="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100"
-                                                data-tooltip="Add to Wishlist"
+                                                data-tooltip="Thêm vào yêu thích"
                                             >
                                                 <i className="zmdi zmdi-favorite" />
                                             </a>

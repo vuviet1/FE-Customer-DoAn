@@ -1,64 +1,103 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import { toast, ToastContainer } from "react-toastify";
+
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddSizeModal({ show, handleClose, onAddSize }) {
-    const [size, setSize] = useState("");
-    const [status, setStatus] = useState(1);
+    const [size, setSize] = useState({
+        size: "",
+        status: 1,
+    });
 
     const addSize = async (e) => {
         e.preventDefault();
         try {
-            const response = await request.post("size", {
-                size: size,
-                status: status,
+            if (!size.size) {
+                toast.error("Trường kích cỡ là bắt buộc.", {
+                    position: "top-right",
+                });
+                return;
+            }
+
+            await request.post("size", {
+                size: size.size,
+                status: size.status,
             });
-            console.log("Size added successfully:", response.data);
+            toast.success("Thêm kích cỡ thành công!", {
+                position: "top-right",
+            });
             onAddSize();
             handleClose();
         } catch (error) {
-            console.error("Failed to add size:", error);
+            let errorMessage = "Thêm kích cỡ thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Thêm kích cỡ thất bại:", error);
+            handleClose();
         }
     };
 
     return (
-        <Modal show={show} onHide={handleClose} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>Thêm mới kích thước</Modal.Title>
-            </Modal.Header>
-            <Form onSubmit={addSize}>
-                <Modal.Body>
-                    <Form.Group controlId="size">
-                        <Form.Label>Kích thước</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Tên kích thước mới ..."
-                            value={size}
-                            onChange={(e) => setSize(e.target.value)}
-                        />
-                    </Form.Group>
-                    <Form.Group controlId="status">
-                        <Form.Label>Trạng thái</Form.Label>
-                        <Form.Control
-                            as="select"
-                            value={status}
-                            onChange={(e) => setStatus(e.target.value)}
-                        >
-                            <option value="1" defaultValue={1}>Sử dụng</option>
-                            <option value="0">Không sử dụng</option>
-                        </Form.Control>
-                    </Form.Group>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={handleClose}>
-                        Hủy bỏ
-                    </Button>
-                    <Button type="submit" variant="primary">
-                        Thêm mới
-                    </Button>
-                </Modal.Footer>
-            </Form>
-        </Modal>
+        <>
+            <ToastContainer />
+            <Modal show={show} onHide={handleClose} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Thêm mới kích thước</Modal.Title>
+                </Modal.Header>
+                <Form onSubmit={addSize}>
+                    <Modal.Body>
+                        <Form.Group controlId="size">
+                            <Form.Label>Kích thước</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="Tên kích thước mới ..."
+                                value={size.size}
+                                onChange={(e) =>
+                                    setSize({
+                                        ...size,
+                                        size: e.target.value,
+                                    })
+                                }
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="status">
+                            <Form.Label>Trạng thái</Form.Label>
+                            <Form.Control
+                                as="select"
+                                value={size.status}
+                                onChange={(e) =>
+                                    setSize({
+                                        ...size,
+                                        status: e.target.value,
+                                    })
+                                }
+                            >
+                                <option value="1" defaultValue={1}>
+                                    Sử dụng
+                                </option>
+                                <option value="0">Không sử dụng</option>
+                            </Form.Control>
+                        </Form.Group>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Hủy bỏ
+                        </Button>
+                        <Button type="submit" variant="primary">
+                            Thêm mới
+                        </Button>
+                    </Modal.Footer>
+                </Form>
+            </Modal>
+        </>
     );
 }
 

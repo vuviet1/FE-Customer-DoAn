@@ -1,30 +1,47 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
+
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddPaymentModal({ show, handleClose, onAddPayment }) {
-    const [paymentMethod, setPaymentMethod] = useState("");
-    const [status, setStatus] = useState(1);
+    const [payment, setPayment] = useState({
+        payment_method: "",
+        status: 1,
+    });
 
     const addPayment = async (e) => {
         e.preventDefault();
         try {
-            const response = await request.post("payment", {
-                payment_method: paymentMethod,
-                status: status,
+            if (!payment.payment_method) {
+                toast.error("Trường phương thức thanh toán là bắt buộc.", {
+                    position: "top-right"
+                });
+                return;
+            }
+
+            await request.post("payment", {
+                payment_method: payment.payment_method,
+                status: payment.status,
             });
-            console.log("Payment method added successfully:", response.data);
-            toast.success("Payment method added successfully!", {
+            toast.success("Thêm phương thức thanh toán thành công!", {
                 position: "top-right"
             });
             onAddPayment();
             handleClose();
         } catch (error) {
-            toast.error("Failed to add payment method: " + error.message, {
+            let errorMessage = "Thêm phương thức thanh toán thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
                 position: "top-right"
             });
-            console.error("Failed to add payment method:", error);
+            console.error("Thêm phương thức thất bại:", error);
+            handleClose();
         }
     };
 
@@ -33,27 +50,37 @@ function AddPaymentModal({ show, handleClose, onAddPayment }) {
             <ToastContainer />
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Thêm mới phương thức thanh toán</Modal.Title>
+                    <Modal.Title>Thêm phương thức thanh toán</Modal.Title>
                 </Modal.Header>
                 <Form onSubmit={addPayment}>
                     <Modal.Body>
-                        <Form.Group controlId="paymentMethod">
+                        <Form.Group controlId="paymentMethodAdd">
                             <Form.Label>Tên phương thức</Form.Label>
                             <Form.Control
                                 type="text"
-                                placeholder="Tên phương thức thanh toán mới ..."
-                                value={paymentMethod}
-                                onChange={(e) => setPaymentMethod(e.target.value)}
+                                placeholder="Nhập tên phương thức thanh toán ..."
+                                value={payment.payment_method}
+                                onChange={(e) =>
+                                    setPayment({
+                                        ...payment,
+                                        payment_method: e.target.value,
+                                    })
+                                }
                             />
                         </Form.Group>
-                        <Form.Group controlId="status">
+                        <Form.Group controlId="statusAdd">
                             <Form.Label>Trạng thái</Form.Label>
                             <Form.Control
                                 as="select"
-                                value={status}
-                                onChange={(e) => setStatus(e.target.value)}
+                                value={payment.status}
+                                onChange={(e) =>
+                                    setPayment({
+                                        ...payment,
+                                        status: e.target.value,
+                                    })
+                                }
                             >
-                                <option value="1" defaultValue={1}>Sử dụng</option>
+                                <option value="1">Sử dụng</option>
                                 <option value="0">Không sử dụng</option>
                             </Form.Control>
                         </Form.Group>
@@ -63,7 +90,7 @@ function AddPaymentModal({ show, handleClose, onAddPayment }) {
                             Hủy bỏ
                         </Button>
                         <Button type="submit" variant="primary">
-                            Thêm mới
+                            Thêm
                         </Button>
                     </Modal.Footer>
                 </Form>

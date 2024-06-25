@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Image } from "react-bootstrap";
+import { toast } from "react-toastify";
+
 import request from "../../../utils/request";
 import ImageUploader from "../components/ImageUploader";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
     const [admin, setAdmin] = useState({
@@ -28,7 +31,16 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                console.error("Error while fetching admin data:", error);
+                let errorMessage = "Hiển thị nhân viên thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -40,6 +52,12 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
     const updateAdmin = async (e) => {
         e.preventDefault();
         try {
+            if (!admin.name) {
+                toast.error("Trường tên nhân viên là bắt buộc.", {
+                    position: "top-right",
+                });
+                return;
+            }
 
             const formData = {
                 name: admin.name,
@@ -55,16 +73,29 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
 
             console.log(formData);
 
-            await request.put(`user/${selectedAdminId}`, formData, {
+            await request.post(`user/${selectedAdminId}?_method=PUT`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
                 mode: "no-cors",
             });
+            toast.success("Cập nhật nhân viên thành công!", {
+                position: "top-right",
+            });
             onUpdateAdmin();
             handleClose();
         } catch (error) {
-            console.error("Error updating admin:", error);
+            let errorMessage = "Cập nhật nhân viên thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Cập nhật nhân viên thất bại:", error);
+            handleClose();
         }
     };
 

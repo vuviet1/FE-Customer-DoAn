@@ -45,7 +45,7 @@ function Slider() {
                                             href="product.html"
                                             className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn2 p-lr-15 trans-04"
                                         >
-                                            Shop Now
+                                            Mua sắm ngay
                                         </a>
                                     </div>
                                 </div>
@@ -88,7 +88,7 @@ function Slider() {
                                             href="product.html"
                                             className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn2 p-lr-15 trans-04"
                                         >
-                                            Shop Now
+                                            Mua sắm ngay
                                         </a>
                                     </div>
                                 </div>
@@ -131,7 +131,7 @@ function Slider() {
                                             href="product.html"
                                             className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn2 p-lr-15 trans-04"
                                         >
-                                            Shop Now
+                                            Mua sắm ngay
                                         </a>
                                     </div>
                                 </div>

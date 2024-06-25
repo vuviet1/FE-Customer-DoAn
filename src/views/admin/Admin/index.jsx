@@ -2,11 +2,13 @@
 import React, { useEffect, useState, Fragment, useLayoutEffect } from "react";
 import { Table, Button, Form, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
-
+import { toast } from "react-toastify"
 import $ from "jquery";
+
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages"
 
 import AddAdminModal from "./modal-add";
 import EditAdminModal from "./modal-edit";
@@ -21,29 +23,30 @@ function AdminAdmin() {
 
     const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        const fetchAdmins = async (retryCount = 0) => {
-            try {
-                const response = await request.get("user");
-                const allAdmins = response.data.data;
-                const adminUsers = allAdmins.filter(
-                    (admin) => admin.role === 1
-                );
-                setAdmins(adminUsers);
-            } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 429 &&
-                    retryCount < 3
-                ) {
-                    setTimeout(() => fetchAdmins(retryCount + 1), 2000); // Retry after 2 seconds
-                } else {
-                    console.error("Error fetching data:", error);
-                }
+    const fetchData = async () => {
+        try {
+            const response = await request.get("user");
+            const allAdmins = response.data.data;
+            const adminUsers = allAdmins.filter(
+                (admin) => admin.role === 1
+            );
+            setAdmins(adminUsers);
+        } catch (error) {
+            let errorMessage = "Hiển thị nhân viên thất bại: "
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status)
+            } else {
+                errorMessage += error.message
             }
-        };
+            toast.error(errorMessage, {
+                position: "top-right"
+            })
+            console.error("Error fetching data:", error)
+        }
+    };
 
-        fetchAdmins();
+    useEffect(() => {
+        fetchData();
     }, []);
 
     useLayoutEffect(() => {
@@ -75,7 +78,7 @@ function AdminAdmin() {
     // Add
     const handleAddAdmin = () => {
         setShowAddModal(false);
-        window.location.reload();
+        fetchData()
     };
 
     // Update
@@ -87,7 +90,7 @@ function AdminAdmin() {
     const handleUpdateAdmin = () => {
         setSelectedAdminId(null);
         setShowEditModal(false);
-        window.location.reload();
+        fetchData()
     };
 
     // View

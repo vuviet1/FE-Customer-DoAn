@@ -2,12 +2,13 @@
 import React, { useEffect, useState, Fragment, useLayoutEffect } from "react";
 import { Table, Button, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify"
 
-// import database from "../components/database";
 import $ from "jquery";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages"
 
 import AddProductModal from "./modal-add";
 import EditProductModal from "./modal-edit";
@@ -21,31 +22,30 @@ function ProductAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
     const [showAddDetailModal, setShowAddDetailModal] = useState(false);
-    const [manualRender, setManualRender] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState("");
 
-    useEffect(() => {
-        const fetchProduct = async (retryCount = 0) => {
-            try {
-                // Product
-                const response = await request.get("product");
-                setProducts(response.data.data);
-            } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 429 &&
-                    retryCount < 3
-                ) {
-                    setTimeout(() => fetchProduct(retryCount + 1), 2000); // Retry after 2 seconds
-                } else {
-                    console.error("Error fetching data:", error);
-                }
-            }
-        };
+    const fetchData = async () => {
+        try {
+            const response = await request.get("product");
+            setProducts(response.data.data);
+        } catch (error) {
+            let errorMessage = "Hiển thị sản phẩm thất bại: "
+        if (error.response && error.response.status) {
+            errorMessage += getErrorMessage(error.response.status)
+        } else {
+            errorMessage += error.message
+        }
+        toast.error(errorMessage, {
+            position: "top-right"
+        })
+        console.error("Error fetching data:", error)
+        }
+    };
 
-        fetchProduct();
-    }, [manualRender]);
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     useLayoutEffect(() => {
         let table;
@@ -77,7 +77,7 @@ function ProductAdmin() {
     // Add
     const handleAddProduct = () => {
         setShowAddModal(false);
-        setManualRender(new Date().getTime());
+        fetchData()
     };
 
     // Update
@@ -89,7 +89,7 @@ function ProductAdmin() {
     const handleUpdateProduct = () => {
         setSelectedProductId(null);
         setShowEditModal(false);
-        setManualRender(new Date().getTime());
+        fetchData()
     };
 
     // Add detail
@@ -101,7 +101,7 @@ function ProductAdmin() {
     const handleAddDetail = () => {
         setSelectedProductId(null);
         setShowAddDetailModal(false);
-        setManualRender(new Date().getTime());
+        fetchData()
     };
 
     // View
@@ -115,9 +115,21 @@ function ProductAdmin() {
         if (window.confirm("Bạn có chắc muốn xóa sản phẩm này không?")) {
             try {
                 await request.delete(`product/${product_id}`);
-                window.location.reload();
+                toast.success("Xóa sản phẩm thành công!", {
+                    position: "top-right",
+                })
+                fetchData()
             } catch (error) {
-                console.error("Error deleting product:", error);
+                let errorMessage = "Xóa sản phẩm thất bại: "
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status)
+                } else {
+                    errorMessage += error.message
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                })
+                console.error("Xóa sản phẩm thất bại:", error)
             }
         }
     };

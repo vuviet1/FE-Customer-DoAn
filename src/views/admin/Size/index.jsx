@@ -1,11 +1,13 @@
 import React, { useEffect, useState, Fragment } from "react"
 import { Table, Button } from "react-bootstrap"
 import { Link } from "react-router-dom"
+import { toast } from "react-toastify";
 
 import database from "../components/database"
 import Topbar from "../components/topbar"
 import Footer from "../components/footer"
 import request from "../../../utils/request"
+import { getErrorMessage } from "../../../utils/errorMessages"
 
 import AddSizeModal from "./modal-add"
 import EditSizeModal from "./modal-edit"
@@ -16,15 +18,25 @@ function SizeAdmin() {
     const [showAddModal, setShowAddModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await request.get("size")
-                setSizes(response.data.data)
-            } catch (error) {
-                console.error("Error fetching data:", error)
-            }
+    const fetchData = async () => {
+        try {
+            const response = await request.get("size")
+            setSizes(response.data.data)
+        } catch (error) {
+            let errorMessage = "Hiển thị kích cỡ thất bại: "
+        if (error.response && error.response.status) {
+            errorMessage += getErrorMessage(error.response.status)
+        } else {
+            errorMessage += error.message
         }
+        toast.error(errorMessage, {
+            position: "top-right"
+        })
+        console.error("Error fetching data:", error)
+        }
+    }
+
+    useEffect(() => {
         fetchData()
     }, [])
 
@@ -47,22 +59,34 @@ function SizeAdmin() {
 
     const handleAddSize = () => {
         setShowAddModal(false)
-        window.location.reload()
+        fetchData()
     }
 
     const handleUpdateSize = () => {
         setSelectedSizeId(null)
         setShowEditModal(false)
-        window.location.reload()
+        fetchData()
     }
 
     const deleteSize = async (size_id) => {
         if (window.confirm("Bạn có chắc muốn xóa kích thước này không?")) {
             try {
                 await request.delete(`size/${size_id}`)
-                window.location.reload() // Reload trang sau khi xóa
+                toast.success("Xóa phương thức thanh toán thành công!", {
+                    position: "top-right",
+                })
+                fetchData()
             } catch (error) {
-                console.error("Error deleting size:", error)
+                let errorMessage = "Xóa phương thức thanh toán thất bại: "
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status)
+                } else {
+                    errorMessage += error.message
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                })
+                console.error("Xóa phương thức thất bại:", error)
             }
         }
     }

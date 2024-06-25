@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
+import { toast } from "react-toastify";
+
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditShippingModal({ show, handleClose, selectedShippingId, onUpdateShipping }) {
     const [shipping, setShipping] = useState({
         shipping_method: "",
-        status: "",
+        status: 1,
     });
 
     useEffect(() => {
@@ -18,7 +21,16 @@ function EditShippingModal({ show, handleClose, selectedShippingId, onUpdateShip
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                console.error("Error while fetching shipping data:", error);
+                let errorMessage = "Hiển thị phương thức thanh toán thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 
@@ -31,18 +43,33 @@ function EditShippingModal({ show, handleClose, selectedShippingId, onUpdateShip
         e.preventDefault();
         try {
             if (!shipping.shipping_method) {
-                console.error("Trường phương thức vận chuyển là bắt buộc.");
+                toast.error("Trường tên phương thức là bắt buộc.", {
+                    position: "top-right",
+                });
                 return;
             }
 
-            await request.put(`shipping/${selectedShippingId}`, {
+            await request.put(`shipping/${selectedShippingId}?_method=PUT`, {
                 shipping_method: shipping.shipping_method,
                 status: shipping.status,
             });
             onUpdateShipping();
             handleClose();
+            toast.success("Cập nhật phương thức thanh toán thành công!", {
+                position: "top-right",
+            });
         } catch (error) {
-            console.error("Error updating shipping:", error);
+            let errorMessage = "Cập nhật phương thức thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Cập nhật phương thức thất bại:", error);
+            handleClose();
         }
     };
 

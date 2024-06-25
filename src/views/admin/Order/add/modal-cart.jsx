@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Table, FormControl, InputGroup } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 import request from "../../../../utils/request";
+import { getErrorMessage } from "../../../../utils/errorMessages";
 import ProductSelectionModal from "./modal-add-product";
 
 function CartModal({ show, handleClose }) {
@@ -32,7 +34,16 @@ function CartModal({ show, handleClose }) {
             setCartItems(cartData);
             setFilteredItems(cartData);
         } catch (error) {
-            console.error("Error fetching cart items:", error);
+            let errorMessage = "Lấy dữ liệu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lấy dữ liệu thất bại:", error);
         }
     };
 
@@ -49,7 +60,7 @@ function CartModal({ show, handleClose }) {
                 .includes(query)
         );
         setFilteredItems(filtered);
-        setCurrentPage(0); // Reset to the first page
+        setCurrentPage(0);
     };
 
     const removeFromCart = async (product_detail_id) => {
@@ -66,7 +77,16 @@ function CartModal({ show, handleClose }) {
             setCartItems(updatedCartItems);
             setFilteredItems(updatedCartItems);
         } catch (error) {
-            console.error("Error removing item from cart:", error);
+            let errorMessage = "Xóa dữ liệu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Xóa dữ liệu thất bại:", error);
         }
     };
 

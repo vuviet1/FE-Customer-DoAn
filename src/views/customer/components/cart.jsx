@@ -53,7 +53,7 @@ function Cart(props) {
                 <div className="s-full js-hide-cart" />
                 <div className="header-cart flex-col-l p-l-65 p-r-25">
                     <div className="header-cart-title flex-w flex-sb-m p-b-8">
-                        <span className="mtext-103 cl2">Your Cart</span>
+                        <span className="mtext-103 cl2">Giỏ hàng của bạn</span>
                         <div className="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
                             <i className="zmdi zmdi-close" />
                         </div>
@@ -107,7 +107,7 @@ function Cart(props) {
                                     to={"/order"}
                                     className="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-b-10"
                                 >
-                                    Thanh toán
+                                    Hóa đơn
                                 </Link>
                             </div>
                         </div>

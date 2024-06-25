@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Image } from "react-bootstrap";
+import { toast } from "react-toastify";
+
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 function ViewAdminModal({ show, handleClose, selectedAdminId }) {
     const [admin, setAdmin] = useState({
         name: "",
         email: "",
         password: "",
-        role: "",
+        role: 1,
         google_id: "",
         avatar: "",
         phone: "",
@@ -25,7 +28,16 @@ function ViewAdminModal({ show, handleClose, selectedAdminId }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                console.error("Error while fetching admin data:", error);
+                let errorMessage = "Hiển thị nhân viên thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lỗi khi lấy dữ liệu:", error);
             }
         };
 

@@ -66,7 +66,7 @@ function Orders() {
             "Authorization"
         ] = `${token_type} ${access_token}`;
         try {
-            await request.delete(`/order/${orderId}`);
+            await request.post(`/order/${orderId}?_method=PUT`, { status: 0 });
             const updatedOrders = orders.filter((order) => order.id !== orderId);
             setOrders(updatedOrders);
             setFilteredOrders(updatedOrders);
@@ -146,14 +146,16 @@ function Orders() {
                                                             <td>{order.address}</td>
                                                             <td>{order.total}</td>
                                                             <td>
-                                                                {order.status === "0" ? (
-                                                                    <span className="badge badge-primary">Chờ duyệt</span>
-                                                                ) : order.status === "1" ? (
-                                                                    <span className="badge badge-info">Đang giao hàng</span>
-                                                                ) : order.status === "2" ? (
-                                                                    <span className="badge badge-success">Hoàn thành</span>
-                                                                ) : order.status === "3" ? (
+                                                                {order.status === 0 ? (
                                                                     <span className="badge badge-danger">Đã hủy</span>
+                                                                ) : order.status === 1 ? (
+                                                                    <span className="badge badge-warning">Chờ duyệt</span>
+                                                                ) : order.status === 2 ? (
+                                                                    <span className="badge badge-primary">Chờ lấy hàng</span>
+                                                                ) : order.status === 3 ? (
+                                                                    <span className="badge badge-info">Đang giao hàng</span>
+                                                                ) : order.status === 4 ? (
+                                                                    <span className="badge badge-success">Hoàn thành</span>
                                                                 ) : (
                                                                     <span className="badge badge-secondary">Không xác định</span>
                                                                 )}

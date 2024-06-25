@@ -1,0 +1,85 @@
+/* Style cho filter và search */
+.flex-w.flex-sb-m.p-b-52 {
+    align-items: center;
+  }
+  
+  .filter-tope-group {
+    margin-right: auto;
+  }
+  
+  .flex-c-m {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .pointer {
+    cursor: pointer;
+  }
+  
+  .panel-search-enter {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+  }
+  
+  .panel-search-enter-active {
+    max-height: 100px;
+    opacity: 1;
+  }
+  
+  .panel-search-exit {
+    max-height: 100px;
+    opacity: 1;
+  }
+  
+  .panel-search-exit-active {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+  }
+  
+  .panel-filter-enter {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+  }
+  
+  .panel-filter-enter-active {
+    max-height: 300px;
+    opacity: 1;
+  }
+  
+  .panel-filter-exit {
+    max-height: 300px;
+    opacity: 1;
+  }
+  
+  .panel-filter-exit-active {
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 300ms ease-in-out, opacity 300ms ease-in-out;
+  }
+  
+  .wrap-filter {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .filter-col {
+    width: 50%;
+    padding-right: 15px;
+    padding-bottom: 27px;
+  }
+  
+  @media (min-width: 768px) {
+    .filter-col {
+      width: 25%;
+    }
+  }
+  
+  .filter-link-active {
+    font-weight: bold;
+    color: #333;
+  }
+  

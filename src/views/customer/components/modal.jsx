@@ -62,11 +62,10 @@ const ProductModal = ({ showModal, handleClose, product }) => {
 
         try {
             const response = await request.post("add-to-cart", {
-                product_detail_id: selectedDetailId,
+                product_detail_id: Number(selectedDetailId),
                 quantity: quantity,
             });
             console.log("Add to cart response:", response);
-            // Optionally, you can add success handling or redirect to cart here
         } catch (error) {
             console.error("Error adding to cart:", error);
             alert("Failed to add item to cart. Please try again.");
@@ -262,7 +261,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                     {loading && <div className="text-center">Loading...</div>}
                     {!loading && !error && (
                         <div className="row">
-                            <div className="col-md-6">
+                            <div className="col-md-6" style={{ display: "flex", justifyContent: "center" }}>
                                 <img
                                     src={`http://127.0.0.1:8000/uploads/product/${product.image}`}
                                     alt="Product"
@@ -283,14 +282,14 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                                         className="form-control"
                                         onChange={handleSelectProductDetail}
                                     >
-                                        <option value="">Select...</option>
+                                        <option value="">Chọn sản phẩm...</option>
                                         {productDetails.map((detail) => (
                                             <option
                                                 key={detail.product_detail_id}
                                                 value={detail.product_detail_id}
                                             >
-                                                {detail.color.color} -{" "}
-                                                {detail.size.size}
+                                                Màu sắc: {detail.color.color} -{" "}
+                                                Kích cỡ: {detail.size.size}
                                             </option>
                                         ))}
                                     </select>

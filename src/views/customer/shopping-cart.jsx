@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Table, Button, Form, Modal, Image } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
+import { toast, ToastContainer } from "react-toastify";
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -42,7 +43,9 @@ function ShoppingCart() {
             const shippingResponse = await request.get("shipping");
             setShippingMethods(shippingResponse.data.data);
         } catch (error) {
-            console.error("Error fetching data:", error);
+            toast.error("Lấy dữ liệu thất bại.", {
+                position: "top-right"
+            });
         }
     };
 
@@ -58,7 +61,9 @@ function ShoppingCart() {
             setCartItems(cartData);
             setFilteredItems(cartData);
         } catch (error) {
-            console.error("Error fetching cart items:", error);
+            toast.error("Lấy dữ liệu thất bại.", {
+                position: "top-right"
+            });
         }
     };
 
@@ -81,18 +86,20 @@ function ShoppingCart() {
         ] = `${token_type} ${access_token}`;
 
         try {
-            const response = await request.post("order", orderData);
-            console.log("Order added successfully:", response.data);
+            await request.post("order", orderData);
             onAddOrder();
+            fetchCartItems();
         } catch (error) {
-            console.error("Failed to add order:", error);
+            toast.error("Thêm hóa đơn thất bại.", {
+                position: "top-right"
+            });
         }
     };
 
     const onAddOrder = () => {
-        // Cập nhật giao diện sau khi tạo hóa đơn thành công
-        // Ví dụ: Hiển thị thông báo thành công
-        alert("Đã tạo hóa đơn thành công!");
+        toast.success("Đã tạo hóa đơn thành công!", {
+            position: "top-right"
+        });
     };
 
     const handlePageClick = (data) => {
@@ -128,7 +135,6 @@ function ShoppingCart() {
         });
         setCartItems(updatedCartItems);
         setFilteredItems(updatedCartItems);
-        // Optionally, you can update the quantity in the backend as well
     };
 
     const confirmRemoveProduct = async () => {
@@ -145,8 +151,14 @@ function ShoppingCart() {
             setCartItems(updatedCartItems);
             setFilteredItems(updatedCartItems);
             setShowModal(false);
+            toast.success("Xóa sản phẩm khỏi giỏ hàng thành công!", {
+                position: "top-right"
+            });
         } catch (error) {
             console.error("Error removing item from cart:", error);
+            toast.error("Xóa sản phẩm khỏi giỏ hàng thất bại.", {
+                position: "top-right"
+            });
         }
     };
 
@@ -167,13 +179,13 @@ function ShoppingCart() {
     };
 
     const handleProductClick = (productId) => {
-        // Lưu productId vào session storage
         sessionStorage.setItem("productId", productId);
         window.location.href = `/product-detail`;
     };
 
     return (
         <Fragment>
+            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />
@@ -201,7 +213,7 @@ function ShoppingCart() {
                                 aria-hidden="true"
                             />
                         </Link>
-                        <span className="stext-109 cl4">Shopping Cart</span>
+                        <span className="stext-109 cl4">Giỏ hàng</span>
                     </div>
                 </div>
                 {/* Shopping Cart */}
@@ -566,7 +578,7 @@ function ShoppingCart() {
             </>
             <Footer />
 
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
+            <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Xác nhận xóa</Modal.Title>
                 </Modal.Header>

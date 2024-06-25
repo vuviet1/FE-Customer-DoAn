@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Form, Modal, Button, InputGroup } from "react-bootstrap";
+import { Form, Modal, Button } from "react-bootstrap";
+import { toast, ToastContainer } from "react-toastify";
 
 import request from "../../../../utils/request";
+import { getErrorMessage } from "../../../../utils/errorMessages";
 import CartModal from "./modal-cart";
 
 function AddOrderModal({ show, handleClose, onAddOrder }) {
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [shippingMethods, setShippingMethods] = useState([]);
-    const [vouchers, setVouchers] = useState([]);
     const [address, setAddress] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
-    const [total, setTotal] = useState("");
     const [paymentMethodId, setPaymentMethodId] = useState("");
     const [shippingMethodId, setShippingMethodId] = useState("");
-    const [userId, setUserId] = useState("");
-    const [voucherId, setVoucherId] = useState("");
+    const [name, setName] = useState("");
 
     const [showCartModal, setShowCartModal] = useState(false);
     const token_type = localStorage.getItem("token_type");
@@ -29,12 +28,17 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
 
                 const shippingResponse = await request.get("shipping");
                 setShippingMethods(shippingResponse.data.data);
-
-                const vouchersResponse = await request.get("voucher");
-                setVouchers(vouchersResponse.data.data);
-                
             } catch (error) {
-                console.error("Error fetching data:", error);
+                let errorMessage = "Lấy dữ liệu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Lấy dữ liệu thất bại:", error);
             }
         };
 
@@ -46,11 +50,11 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
 
         const orderData = {
             address,
+            name: name ? name : user_data.name,
             phone_number: phoneNumber,
             payment_method_id: paymentMethodId,
             shipping_method_id: shippingMethodId,
-            // user_id: userId,
-            // voucher_id: voucherId,
+            voucher_code: "",
         };
 
         request.defaults.headers.common[
@@ -58,12 +62,24 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
         ] = `${token_type} ${access_token}`;
 
         try {
-            const response = await request.post("order", orderData);
-            console.log("Order added successfully:", response.data);
+            await request.post("order", orderData);
+            toast.success("Thêm hóa đơn thành công!", {
+                position: "top-right",
+            });
             onAddOrder();
             handleClose();
         } catch (error) {
-            console.error("Failed to add order:", error);
+            let errorMessage = "Thêm hóa đơn thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Thêm hóa đơn thất bại:", error);
+            handleClose();
         }
     };
 
@@ -71,6 +87,7 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
 
     return (
         <>
+            <ToastContainer />
             <Modal show={show} onHide={handleClose} size="xl" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới đơn hàng</Modal.Title>
@@ -81,15 +98,14 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
                         <div className="row">
                             <div className="col-6">
                                 <Form.Group controlId="inputUser">
-                                    <Form.Label>Người tạo</Form.Label>
+                                    <Form.Label>Tên khách hàng</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Người tạo ..."
-                                        value={user_data.name}
-                                        // onChange={(e) =>
-                                        //     setPhoneNumber(e.target.value)
-                                        // }
-                                        readOnly
+                                        placeholder="Tên khách hàng ..."
+                                        value={name}
+                                        onChange={(e) =>
+                                            setName(e.target.value)
+                                        }
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="inputPhoneNumber">
@@ -100,17 +116,6 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
                                         value={phoneNumber}
                                         onChange={(e) =>
                                             setPhoneNumber(e.target.value)
-                                        }
-                                    />
-                                </Form.Group>
-                                <Form.Group controlId="inputAddress">
-                                    <Form.Label>Địa chỉ</Form.Label>
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Địa chỉ ..."
-                                        value={address}
-                                        onChange={(e) =>
-                                            setAddress(e.target.value)
                                         }
                                     />
                                 </Form.Group>
@@ -166,20 +171,18 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
                                         ))}
                                     </Form.Control>
                                 </Form.Group>
-                                <Form.Group controlId="inputTotal">
-                                    <Form.Label>Tổng tiền</Form.Label>
-                                    <InputGroup>
-                                        <Form.Control
-                                            type="number"
-                                            placeholder="Tổng tiền ..."
-                                            value={total}
-                                            onChange={(e) =>
-                                                setTotal(e.target.value)
-                                            }
-                                            readOnly
-                                        />
-                                        <InputGroup.Text>VNĐ</InputGroup.Text>
-                                    </InputGroup>
+                            </div>
+                            <div className="col-12">
+                                <Form.Group controlId="inputAddress">
+                                    <Form.Label>Địa chỉ</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Địa chỉ ..."
+                                        value={address}
+                                        onChange={(e) =>
+                                            setAddress(e.target.value)
+                                        }
+                                    />
                                 </Form.Group>
                             </div>
                         </div>

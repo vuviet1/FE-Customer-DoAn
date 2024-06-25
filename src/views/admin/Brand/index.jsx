@@ -1,11 +1,13 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import database from "../components/database";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddBrandModal from "./modal-add";
 import EditBrandModal from "./modal-edit";
@@ -16,15 +18,25 @@ function BrandAdmin() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
 
+    const fetchData = async () => {
+        try {
+            const response = await request.get("brand");
+            setBrands(response.data.data);
+        } catch (error) {
+            let errorMessage = "Hiển thị thương hiệu thất bại: ";
+        if (error.response && error.response.status) {
+            errorMessage += getErrorMessage(error.response.status);
+        } else {
+            errorMessage += error.message;
+        }
+        toast.error(errorMessage, {
+            position: "top-right"
+        });
+            console.error("Error fetching data:", error);
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await request.get("brand");
-                setBrands(response.data.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
         fetchData();
     }, []);
 
@@ -42,7 +54,7 @@ function BrandAdmin() {
 
     const handleAddBrand = () => {
         setShowAddModal(false);
-        window.location.reload();
+        fetchData();
     };
 
     const handleEditButtonClick = (brand_id) => {
@@ -53,16 +65,28 @@ function BrandAdmin() {
     const handleUpdateBrand = () => {
         setSelectedBrandId(null);
         setShowEditModal(false);
-        window.location.reload();
+        fetchData();
     };
 
     const deleteBrand = async (brand_id) => {
         if (window.confirm("Bạn có chắc muốn xóa thương hiệu này không?")) {
             try {
                 await request.delete(`brand/${brand_id}`);
-                window.location.reload();
+                toast.success("Xóa thương hiệu thành công!", {
+                    position: "top-right",
+                });
+                fetchData();
             } catch (error) {
-                console.error("Error deleting brand:", error);
+                let errorMessage = "Xóa thương hiệu thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Xóa thương hiệu thất bại:", error);
             }
         }
     };

@@ -1,11 +1,13 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import database from "../components/database";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddVoucherModal from "./modal-add";
 import EditVoucherModal from "./modal-edit";
@@ -16,15 +18,25 @@ function VoucherAdmin() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await request.get("voucher");
-                setVouchers(response.data.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
+    const fetchData = async () => {
+        try {
+            const response = await request.get("voucher");
+            setVouchers(response.data.data);
+        } catch (error) {
+            let errorMessage = "Hiển thị mã giảm giá thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
             }
-        };
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Error fetching data:", error);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -42,7 +54,7 @@ function VoucherAdmin() {
 
     const handleAddVoucher = () => {
         setShowAddModal(false);
-        window.location.reload();
+        fetchData();
     };
 
     const handleEditButtonClick = (voucher_id) => {
@@ -53,16 +65,28 @@ function VoucherAdmin() {
     const handleUpdateVoucher = () => {
         setSelectedVoucherId(null);
         setShowEditModal(false);
-        window.location.reload();
+        fetchData();
     };
 
     const deleteVoucher = async (voucher_id) => {
         if (window.confirm("Bạn có chắc muốn xóa voucher này không?")) {
             try {
                 await request.delete(`voucher/${voucher_id}`);
-                window.location.reload();
+                toast.success("Xóa mã giảm giá thành công!", {
+                    position: "top-right",
+                });
+                fetchData();
             } catch (error) {
-                console.error("Error deleting voucher:", error);
+                let errorMessage = "Xóa mã giảm giá thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Xóa mã giảm giá thất bại:", error);
             }
         }
     };
