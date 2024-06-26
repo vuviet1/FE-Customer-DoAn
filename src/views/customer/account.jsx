@@ -2,8 +2,7 @@
 /* eslint-disable no-script-url */
 import React, { Fragment, useEffect, useState } from "react";
 import { Form, Button, Image } from "react-bootstrap";
-import ReactQuill from "react-quill";
-import { htmlToText } from 'html-to-text';
+import { toast, ToastContainer } from "react-toastify";
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -20,7 +19,6 @@ function Account() {
         email: "",
         password: "",
         role: 0,
-        note: "",
         avatar: "",
         phone: "",
         address: "",
@@ -42,7 +40,6 @@ function Account() {
                 email: customer.email,
                 password: customer.password,
                 role: customer.role,
-                note: htmlToText(customer.note, { wordwrap: false }),
                 avatar: images[0],
                 phone: customer.phone,
                 address: customer.address,
@@ -50,14 +47,26 @@ function Account() {
                 google_id: customer.google_id,
             };
 
-            await request.post(`user/${customer.id}?_method=PUT`, formData, {
+            await request.post(`user/${customer.user_id}?_method=PUT`, formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            alert("Profile updated successfully!");
+
+            const updatedCustomer = {
+                ...customer,
+                avatar:images[0],
+            };
+            localStorage.setItem("user_data", JSON.stringify(updatedCustomer));
+            setCustomer(updatedCustomer);
+            
+            toast.success("Cập nhật thông tin thành công!", {
+                position: "top-right",
+            });
         } catch (error) {
-            console.error("Error updating admin:", error);
+            toast.error("Cập nhật thông tin thất bại.", {
+                position: "top-right",
+            });
         }
     };
 
@@ -66,12 +75,9 @@ function Account() {
         setCustomer({ ...customer, [name]: value });
     };
 
-    const handleNoteChange = (value) => {
-        setCustomer({ ...customer, note: value });
-    };
-
     return (
         <Fragment>
+            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />
@@ -101,11 +107,11 @@ function Account() {
                                             <div className="col-6">
                                                 <div
                                                     className=" m-b-20 how-pos4-parent"
-                                                    // style={{
-                                                    //     display: "flex",
-                                                    //     flexDirection: "column",
-                                                    //     alignItems: "center",
-                                                    // }}
+                                                    style={{
+                                                        display: "flex",
+                                                        flexDirection: "column",
+                                                        alignItems: "center",
+                                                    }}
                                                 >
                                                     <Form.Label>
                                                         Ảnh đại diện
@@ -126,6 +132,7 @@ function Account() {
                                                                     height: "250px",
                                                                 }}
                                                                 thumbnail
+                                                                roundedCircle
                                                             />
                                                         )}
                                                 </div>
@@ -202,21 +209,6 @@ function Account() {
                                                     />
                                                 </Form.Group>
                                             </div>
-                                            <Form.Group
-                                                controlId="profileNotes"
-                                                className="m-b-30"
-                                            >
-                                                <Form.Label>Ghi chú</Form.Label>
-                                                <ReactQuill
-                                                    value={customer.note}
-                                                    onChange={handleNoteChange}
-                                                    placeholder="Ghi chú ..."
-                                                    style={{
-                                                        height: "200px",
-                                                        marginBottom: "50px",
-                                                    }}
-                                                />
-                                            </Form.Group>
                                         </div>
 
                                         <Button

@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useEffect, useState, Fragment } from "react";
-import { Modal, Button } from "react-bootstrap";
+import { Modal, Button, Image } from "react-bootstrap";
+import { toast, ToastContainer } from "react-toastify";
+
 import request from "../../../utils/request";
 
 const ProductModal = ({ showModal, handleClose, product }) => {
@@ -14,12 +16,14 @@ const ProductModal = ({ showModal, handleClose, product }) => {
         const fetchProductDetails = async () => {
             try {
                 const response = await request.get(
-                    `/product/${product.product_id}`
+                    `product/${product.product_id}`
                 );
                 setProductDetails(response.data.data.product_details);
                 setLoading(false);
             } catch (error) {
-                console.error("Error fetching product details:", error);
+                toast.error("Lỗi khi lấy dữ liệu", {
+                    position: "top-right",
+                });
                 setError("Failed to load product details");
                 setLoading(false);
             }
@@ -51,29 +55,39 @@ const ProductModal = ({ showModal, handleClose, product }) => {
         e.preventDefault();
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
-        request.defaults.headers.common[
-            "Authorization"
-        ] = `${token_type} ${access_token}`;
 
         if (!selectedDetailId || quantity < 1) {
-            alert("Please select a product detail and enter a valid quantity.");
+            toast.error("Hãy chọn phân loại sản phẩm và số lượng hợp lệ.", {
+                position: "top-right",
+            });
             return;
         }
 
         try {
-            const response = await request.post("add-to-cart", {
-                product_detail_id: Number(selectedDetailId),
-                quantity: quantity,
+            request.defaults.headers.common[
+                "Authorization"
+            ] = `${token_type} ${access_token}`;
+
+            await request.post("add-to-cart", [
+                {
+                    product_detail_id: Number(selectedDetailId),
+                    quantity: quantity,
+                },
+            ]);
+            toast.success("Thêm sản phẩm vào giỏ hàng thành công!", {
+                position: "top-right",
             });
-            console.log("Add to cart response:", response);
+            handleClose();
         } catch (error) {
-            console.error("Error adding to cart:", error);
-            alert("Failed to add item to cart. Please try again.");
+            toast.error("Thêm sản phẩm vào giỏ hàng thất bại", {
+                position: "top-right",
+            });
         }
     };
 
     return (
         <Fragment>
+            <ToastContainer />
             {/* <Modal show={showModal} onHide={handleClose} size="xl">
                 <div className="wrap-modal1 js-modal1 p-t-60 p-b-20">
                     <div className="overlay-modal1 js-hide-modal1" />
@@ -261,8 +275,14 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                     {loading && <div className="text-center">Loading...</div>}
                     {!loading && !error && (
                         <div className="row">
-                            <div className="col-md-6" style={{ display: "flex", justifyContent: "center" }}>
-                                <img
+                            <div
+                                className="col-md-6"
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Image
                                     src={`http://127.0.0.1:8000/uploads/product/${product.image}`}
                                     alt="Product"
                                     className="img-fluid rounded"
@@ -282,7 +302,9 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                                         className="form-control"
                                         onChange={handleSelectProductDetail}
                                     >
-                                        <option value="">Chọn sản phẩm...</option>
+                                        <option value="">
+                                            Chọn sản phẩm...
+                                        </option>
                                         {productDetails.map((detail) => (
                                             <option
                                                 key={detail.product_detail_id}

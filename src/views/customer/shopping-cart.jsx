@@ -44,7 +44,7 @@ function ShoppingCart() {
             setShippingMethods(shippingResponse.data.data);
         } catch (error) {
             toast.error("Lấy dữ liệu thất bại.", {
-                position: "top-right"
+                position: "top-right",
             });
         }
     };
@@ -62,7 +62,7 @@ function ShoppingCart() {
             setFilteredItems(cartData);
         } catch (error) {
             toast.error("Lấy dữ liệu thất bại.", {
-                position: "top-right"
+                position: "top-right",
             });
         }
     };
@@ -86,19 +86,31 @@ function ShoppingCart() {
         ] = `${token_type} ${access_token}`;
 
         try {
-            await request.post("order", orderData);
+            const response = await request.post("order", orderData);
+            const paymentUrl = response.data;
+            console.log(paymentUrl);
             onAddOrder();
             fetchCartItems();
+            if (paymentUrl) {
+                toast.success("Thêm hóa đơn thành công.", {
+                    position: "top-right",
+                });
+                window.location.href = paymentUrl;
+            } else {
+                toast.error("Không nhận được URL thanh toán.", {
+                    position: "top-right",
+                });
+            }
         } catch (error) {
             toast.error("Thêm hóa đơn thất bại.", {
-                position: "top-right"
+                position: "top-right",
             });
         }
     };
 
     const onAddOrder = () => {
         toast.success("Đã tạo hóa đơn thành công!", {
-            position: "top-right"
+            position: "top-right",
         });
     };
 
@@ -144,7 +156,7 @@ function ShoppingCart() {
             "Authorization"
         ] = `${token_type} ${access_token}`;
         try {
-            await request.delete(`/cart/${productToRemove}`);
+            await request.delete(`cart/${productToRemove}`);
             const updatedCartItems = cartItems.filter(
                 (item) => item.product_detail_id !== productToRemove
             );
@@ -152,12 +164,11 @@ function ShoppingCart() {
             setFilteredItems(updatedCartItems);
             setShowModal(false);
             toast.success("Xóa sản phẩm khỏi giỏ hàng thành công!", {
-                position: "top-right"
+                position: "top-right",
             });
         } catch (error) {
-            console.error("Error removing item from cart:", error);
             toast.error("Xóa sản phẩm khỏi giỏ hàng thất bại.", {
-                position: "top-right"
+                position: "top-right",
             });
         }
     };
@@ -256,7 +267,6 @@ function ShoppingCart() {
                                                             >
                                                                 <td>
                                                                     <div className="">
-                                                                        {/* <div className="how-itemcart1"> */}
                                                                         <Link
                                                                             key={
                                                                                 item
@@ -431,7 +441,10 @@ function ShoppingCart() {
                     </div>
                 </div>
                 {/*  */}
-                <div className="col-12 m-lr-auto m-b-50" style={{ marginTop:"-100px" }}>
+                <div
+                    className="col-12 m-lr-auto m-b-50"
+                    style={{ marginTop: "-100px" }}
+                >
                     <div className="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
                         <h4 className="mtext-109 cl2 p-b-30">
                             Tổng quan giỏ hàng
@@ -447,7 +460,7 @@ function ShoppingCart() {
                             </Form.Group>
                             <div className="row">
                                 <div className="col-12">
-                                <Form.Group>
+                                    <Form.Group>
                                         <Form.Label className="size-208 w-full-ssm stext-110 cl2">
                                             Tên người nhận:
                                         </Form.Label>

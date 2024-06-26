@@ -44,7 +44,6 @@ function ProductDetail() {
                     errorMessage += error.message;
                 }
                 toast.error(errorMessage, { position: "top-right" });
-                console.error("Error fetching data:", error);
                 setError("Failed to load product data");
                 setLoading(false);
             }
@@ -74,10 +73,7 @@ function ProductDetail() {
         e.preventDefault();
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
-        request.defaults.headers.common[
-            "Authorization"
-        ] = `${token_type} ${access_token}`;
-    
+        
         if (!selectedDetailId || quantity < 1) {
             toast.error("Hãy chọn phân loại sản phẩm và số lượng hợp lệ.", {
                 position: "top-right"
@@ -86,9 +82,12 @@ function ProductDetail() {
         }
     
         try {
+            request.defaults.headers.common[
+                "Authorization"
+            ] = `${token_type} ${access_token}`;
             await request.post("add-to-cart", [
                 {
-                    product_detail_id: selectedDetailId,
+                    product_detail_id: Number(selectedDetailId),
                     quantity: quantity,
                 },
             ]);

@@ -3,6 +3,7 @@
 import React, { Fragment, useEffect, useState } from "react";
 import request from "../../../utils/request";
 import { Link } from "react-router-dom";
+import { Image } from "react-bootstrap";
 
 function Cart(props) {
     const [cartItems, setCartItems] = useState([]);
@@ -14,7 +15,9 @@ function Cart(props) {
     const fetchCartItems = async () => {
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
-        request.defaults.headers.common["Authorization"] = `${token_type} ${access_token}`;
+        request.defaults.headers.common[
+            "Authorization"
+        ] = `${token_type} ${access_token}`;
         try {
             const response = await request.get("cart");
             const cartData = response.data.data;
@@ -27,9 +30,11 @@ function Cart(props) {
     const removeFromCart = async (product_detail_id) => {
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
-        request.defaults.headers.common["Authorization"] = `${token_type} ${access_token}`;
+        request.defaults.headers.common[
+            "Authorization"
+        ] = `${token_type} ${access_token}`;
         try {
-            await request.delete(`/cart/${product_detail_id}`);
+            await request.delete(`cart/${product_detail_id}`);
             const updatedCartItems = cartItems.filter(
                 (item) => item.product_detail_id !== product_detail_id
             );
@@ -47,9 +52,17 @@ function Cart(props) {
         );
     };
 
+    const handleProductClick = (productId) => {
+        sessionStorage.setItem("productId", productId);
+        window.location.href = `/product-detail`;
+    };
+
     return (
         <Fragment>
-            <div className="wrap-header-cart js-panel-cart" ref={props?.wrapperCartRef}>
+            <div
+                className="wrap-header-cart js-panel-cart"
+                ref={props?.wrapperCartRef}
+            >
                 <div className="s-full js-hide-cart" />
                 <div className="header-cart flex-col-l p-l-65 p-r-25">
                     <div className="header-cart-title flex-w flex-sb-m p-b-8">
@@ -62,26 +75,71 @@ function Cart(props) {
                         {cartItems.length > 0 ? (
                             <ul className="header-cart-wrapitem w-full">
                                 {cartItems.map((item) => (
-                                    <li key={item.product_detail_id} className="header-cart-item flex-w flex-t m-b-12">
-                                        <div className="header-cart-item-img">
-                                            <img
-                                                src={`http://127.0.0.1:8000/uploads/product/${item.product_detail.product.image}`}
-                                                alt="IMG"
-                                            />
+                                    <li
+                                        key={item.product_detail_id}
+                                        className="header-cart-item flex-w flex-t m-b-12"
+                                    >
+                                        <div
+                                            className="header-cart-item-img"
+                                            style={{
+                                                width: "60px",
+                                                position: "relative",
+                                                marginRight: "20px",
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            <Link
+                                                key={
+                                                    item.product_detail.product
+                                                        .product_id
+                                                }
+                                                onClick={() =>
+                                                    handleProductClick(
+                                                        item.product_detail
+                                                            .product.product_id
+                                                    )
+                                                }
+                                            >
+                                                <Image
+                                                    src={`http://127.0.0.1:8000/uploads/product/${item.product_detail.product.image}`}
+                                                    alt="IMG"
+                                                />
+                                            </Link>
                                         </div>
                                         <div className="header-cart-item-txt p-t-8">
-                                            <a
-                                                href="#"
+                                            <Link
+                                                key={
+                                                    item.product_detail.product
+                                                        .product_id
+                                                }
+                                                onClick={() =>
+                                                    handleProductClick(
+                                                        item.product_detail
+                                                            .product.product_id
+                                                    )
+                                                }
                                                 className="header-cart-item-name m-b-18 hov-cl1 trans-04"
                                             >
-                                                {item.product_detail.product.product_name}
-                                            </a>
+                                                {
+                                                    item.product_detail.product
+                                                        .product_name
+                                                }
+                                            </Link>
                                             <span className="header-cart-item-info">
-                                                {item.quantity} x {item.product_detail.product.price} VNĐ
+                                                {item.quantity} x{" "}
+                                                {
+                                                    item.product_detail.product
+                                                        .price
+                                                }{" "}
+                                                VNĐ
                                             </span>
                                             <button
                                                 className="btn-remove-cart-item cl8 hov-btn3 trans-04 flex-c-m"
-                                                onClick={() => removeFromCart(item.product_detail_id)}
+                                                onClick={() =>
+                                                    removeFromCart(
+                                                        item.product_detail_id
+                                                    )
+                                                }
                                             >
                                                 Xóa
                                             </button>
@@ -90,7 +148,9 @@ function Cart(props) {
                                 ))}
                             </ul>
                         ) : (
-                            <p className="text-center w-full">Không có sản phẩm nào</p>
+                            <p className="text-center w-full">
+                                Không có sản phẩm nào
+                            </p>
                         )}
                         <div className="w-full">
                             <div className="header-cart-total w-full p-tb-40">

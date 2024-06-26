@@ -221,6 +221,7 @@ function Orders() {
                                                                     onClick={() => handleShowProductModal(
                                                                         order.order_id
                                                                     )}
+                                                                    style={{ marginRight:"10px" }}
                                                                 >
                                                                     Xem sản phẩm
                                                                 </Button>
@@ -232,7 +233,7 @@ function Orders() {
                                                                         )
                                                                     }
                                                                 >
-                                                                    Xóa
+                                                                    Hủy hóa đơn
                                                                 </Button>
                                                             </td>
                                                         </tr>
@@ -291,7 +292,7 @@ function Orders() {
                     <Modal.Title>Xác nhận xóa hóa đơn</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    Bạn có chắc chắn muốn xóa hóa đơn này không?
+                    Bạn có chắc chắn muốn hủy bỏ hóa đơn này không?
                 </Modal.Body>
                 <Modal.Footer>
                     <Button
