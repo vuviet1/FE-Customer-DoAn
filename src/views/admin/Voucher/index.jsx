@@ -1,9 +1,8 @@
 import React, { useEffect, useState, Fragment } from "react";
-import { Table, Button } from "react-bootstrap";
+import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import database from "../components/database";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
@@ -17,6 +16,9 @@ function VoucherAdmin() {
     const [selectedVoucherId, setSelectedVoucherId] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
@@ -40,26 +42,14 @@ function VoucherAdmin() {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        let table;
-        if (vouchers && vouchers.length > 0) {
-            table = database.initializeDataTable("#dataTableHover");
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [vouchers]);
+    const handleEditButtonClick = (voucher_id) => {
+        setSelectedVoucherId(voucher_id);
+        setShowEditModal(true);
+    };
 
     const handleAddVoucher = () => {
         setShowAddModal(false);
         fetchData();
-    };
-
-    const handleEditButtonClick = (voucher_id) => {
-        setSelectedVoucherId(voucher_id);
-        setShowEditModal(true);
     };
 
     const handleUpdateVoucher = () => {
@@ -91,18 +81,47 @@ function VoucherAdmin() {
         }
     };
 
-    const VoucherTableBody = ({
-        vouchers,
-        handleEditButtonClick,
-        deleteVoucher,
-    }) => {
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredVouchers = vouchers.filter((voucher) =>
+        voucher.voucher.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredVouchers.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredVouchers.length / itemsPerPage);
+
+    const VoucherTableBody = ({ vouchers, handleEditButtonClick, deleteVoucher }) => {
         if (!vouchers || vouchers.length === 0) {
             return (
-                <tr>
-                    <td colSpan="6" style={{ textAlign: "center" }}>
-                        Không có dữ liệu
-                    </td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <td colSpan="7" style={{ textAlign: "center" }}>
+                            Không có dữ liệu
+                        </td>
+                    </tr>
+                </tbody>
             );
         }
 
@@ -110,44 +129,27 @@ function VoucherAdmin() {
             <tbody>
                 {vouchers.map((voucher, index) => (
                     <tr key={index}>
-                        <td style={{ textAlign: "left" }}>
-                            {voucher.voucher_id}
-                        </td>
+                        <td style={{ textAlign: "left" }}>{voucher.voucher_id}</td>
                         <td style={{ textAlign: "left" }}>{voucher.voucher}</td>
-                        <td style={{ textAlign: "left" }}>
-                            {voucher.quantity}
-                        </td>
-                        <td style={{ textAlign: "left" }}>
-                            {voucher.start_day}
-                        </td>
+                        <td style={{ textAlign: "left" }}>{voucher.quantity}</td>
+                        <td style={{ textAlign: "left" }}>{voucher.start_day}</td>
                         <td style={{ textAlign: "left" }}>{voucher.end_day}</td>
                         <td style={{ textAlign: "left" }}>
                             {voucher.status === 1 ? (
-                                <span className="badge badge-success">
-                                    Sử dụng
-                                </span>
+                                <span className="badge badge-success">Sử dụng</span>
                             ) : (
-                                <span className="badge badge-danger">
-                                    Không sử dụng
-                                </span>
+                                <span className="badge badge-danger">Không sử dụng</span>
                             )}
                         </td>
                         <td style={{ textAlign: "center" }}>
                             <Button
                                 variant="success"
-                                onClick={() =>
-                                    handleEditButtonClick(voucher.voucher_id)
-                                }
+                                onClick={() => handleEditButtonClick(voucher.voucher_id)}
                                 style={{ marginRight: "5px" }}
                             >
                                 <i className="far fa-edit" />
                             </Button>
-                            <Button
-                                variant="danger"
-                                onClick={() =>
-                                    deleteVoucher(voucher.voucher_id)
-                                }
-                            >
+                            <Button variant="danger" onClick={() => deleteVoucher(voucher.voucher_id)}>
                                 <i className="fas fa-trash" />
                             </Button>
                         </td>
@@ -166,20 +168,13 @@ function VoucherAdmin() {
 
                         <div className="container-fluid" id="container-wrapper">
                             <div className="d-sm-flex align-items-center justify-content-between mb-4">
-                                <h1 className="h3 mb-0 text-gray-800">
-                                    Mã giảm giá
-                                </h1>
+                                <h1 className="h3 mb-0 text-gray-800">Mã giảm giá</h1>
                                 <ol className="breadcrumb">
                                     <li className="breadcrumb-item">
                                         <Link to={"/admin-home"}>Home</Link>
                                     </li>
-                                    <li className="breadcrumb-item">
-                                        Danh mục quản lý
-                                    </li>
-                                    <li
-                                        className="breadcrumb-item active"
-                                        aria-current="page"
-                                    >
+                                    <li className="breadcrumb-item">Danh mục quản lý</li>
+                                    <li className="breadcrumb-item active" aria-current="page">
                                         Mã giảm giá
                                     </li>
                                 </ol>
@@ -192,14 +187,21 @@ function VoucherAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Danh sách mã giảm giá
                                             </h6>
+                                            <div className="col-6">
+                                                <Form.Group controlId="search">
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Tìm kiếm..."
+                                                        value={searchTerm}
+                                                        onChange={handleSearchChange}
+                                                    />
+                                                </Form.Group>
+                                            </div>
                                             <Button
                                                 variant="primary"
-                                                onClick={() =>
-                                                    setShowAddModal(true)
-                                                }
+                                                onClick={() => setShowAddModal(true)}
                                             >
-                                                <i className="fas fa-plus" />{" "}
-                                                Thêm mới
+                                                <i className="fas fa-plus" /> Thêm mới
                                             </Button>
                                         </div>
                                         <div className="table-responsive p-3">
@@ -209,74 +211,44 @@ function VoucherAdmin() {
                                             >
                                                 <thead className="thead-light">
                                                     <tr>
-                                                        <th
-                                                            style={{
-                                                                textAlign:
-                                                                    "left",
-                                                            }}
-                                                        >
-                                                            Mã
-                                                        </th>
-                                                        <th
-                                                            style={{
-                                                                textAlign:
-                                                                    "left",
-                                                            }}
-                                                        >
-                                                            Tên Voucher
-                                                        </th>
-                                                        <th
-                                                            style={{
-                                                                textAlign:
-                                                                    "left",
-                                                            }}
-                                                        >
-                                                            Số lượng
-                                                        </th>
-                                                        <th
-                                                            style={{
-                                                                textAlign:
-                                                                    "left",
-                                                            }}
-                                                        >
-                                                            Ngày bắt đầu
-                                                        </th>
-                                                        <th
-                                                            style={{
-                                                                textAlign:
-                                                                    "left",
-                                                            }}
-                                                        >
-                                                            Ngày kết thúc
-                                                        </th>
-                                                        <th
-                                                            style={{
-                                                                textAlign:
-                                                                    "left",
-                                                            }}
-                                                        >
-                                                            Trạng thái
-                                                        </th>
-                                                        <th
-                                                            style={{
-                                                                textAlign:
-                                                                    "center",
-                                                            }}
-                                                        >
-                                                            Hành động
-                                                        </th>
+                                                        <th style={{ textAlign: "left" }}>Mã</th>
+                                                        <th style={{ textAlign: "left" }}>Tên Voucher</th>
+                                                        <th style={{ textAlign: "left" }}>Số lượng</th>
+                                                        <th style={{ textAlign: "left" }}>Ngày bắt đầu</th>
+                                                        <th style={{ textAlign: "left" }}>Ngày kết thúc</th>
+                                                        <th style={{ textAlign: "left" }}>Trạng thái</th>
+                                                        <th style={{ textAlign: "center" }}>Hành động</th>
                                                     </tr>
                                                 </thead>
                                                 <VoucherTableBody
-                                                    vouchers={vouchers}
-                                                    handleEditButtonClick={
-                                                        handleEditButtonClick
-                                                    }
-                                                    deleteVoucher={
-                                                        deleteVoucher
-                                                    }
+                                                    vouchers={currentItems}
+                                                    handleEditButtonClick={handleEditButtonClick}
+                                                    deleteVoucher={deleteVoucher}
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First onClick={handleFirstPage} />
+                                                    <Pagination.Prev onClick={handlePrevPage} />
+                                                    {Array.from({ length: totalPages }, (_, index) => (
+                                                        <Pagination.Item
+                                                            key={index + 1}
+                                                            active={index + 1 === currentPage}
+                                                            onClick={() => handlePageChange(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </Pagination.Item>
+                                                    ))}
+                                                    <Pagination.Next onClick={handleNextPage} />
+                                                    <Pagination.Last onClick={handleLastPage} />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

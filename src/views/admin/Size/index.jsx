@@ -1,105 +1,128 @@
-import React, { useEffect, useState, Fragment } from "react"
-import { Table, Button } from "react-bootstrap"
-import { Link } from "react-router-dom"
+import React, { useEffect, useState, Fragment } from "react";
+import { Table, Button, Form, Pagination } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import database from "../components/database"
-import Topbar from "../components/topbar"
-import Footer from "../components/footer"
-import request from "../../../utils/request"
-import { getErrorMessage } from "../../../utils/errorMessages"
+import Topbar from "../components/topbar";
+import Footer from "../components/footer";
+import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
-import AddSizeModal from "./modal-add"
-import EditSizeModal from "./modal-edit"
+import AddSizeModal from "./modal-add";
+import EditSizeModal from "./modal-edit";
 
 function SizeAdmin() {
-    const [sizes, setSizes] = useState([])
-    const [selectedSizeId, setSelectedSizeId] = useState(null)
-    const [showAddModal, setShowAddModal] = useState(false)
-    const [showEditModal, setShowEditModal] = useState(false)
+    const [sizes, setSizes] = useState([]);
+    const [selectedSizeId, setSelectedSizeId] = useState(null);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
-            const response = await request.get("size")
-            setSizes(response.data.data)
+            const response = await request.get("size");
+            setSizes(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị kích cỡ thất bại: "
-        if (error.response && error.response.status) {
-            errorMessage += getErrorMessage(error.response.status)
-        } else {
-            errorMessage += error.message
-        }
-        toast.error(errorMessage, {
-            position: "top-right"
-        })
-        console.error("Error fetching data:", error)
-        }
-    }
-
-    useEffect(() => {
-        fetchData()
-    }, [])
-
-    useEffect(() => {
-        let table
-        if (sizes && sizes.length > 0) {
-            table = database.initializeDataTable("#dataTableHover")
-        }
-        return () => {
-            if (table) {
-                table.destroy()
+            let errorMessage = "Hiển thị kích cỡ thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
             }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Error fetching data:", error);
         }
-    }, [sizes])
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const handleEditButtonClick = (size_id) => {
-        setSelectedSizeId(size_id)
-        setShowEditModal(true)
-    }
+        setSelectedSizeId(size_id);
+        setShowEditModal(true);
+    };
 
     const handleAddSize = () => {
-        setShowAddModal(false)
-        fetchData()
-    }
+        setShowAddModal(false);
+        fetchData();
+    };
 
     const handleUpdateSize = () => {
-        setSelectedSizeId(null)
-        setShowEditModal(false)
-        fetchData()
-    }
+        setSelectedSizeId(null);
+        setShowEditModal(false);
+        fetchData();
+    };
 
     const deleteSize = async (size_id) => {
         if (window.confirm("Bạn có chắc muốn xóa kích thước này không?")) {
             try {
-                await request.delete(`size/${size_id}`)
-                toast.success("Xóa phương thức thanh toán thành công!", {
+                await request.delete(`size/${size_id}`);
+                toast.success("Xóa kích thước thành công!", {
                     position: "top-right",
-                })
-                fetchData()
+                });
+                fetchData();
             } catch (error) {
-                let errorMessage = "Xóa phương thức thanh toán thất bại: "
+                let errorMessage = "Xóa kích thước thất bại: ";
                 if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status)
+                    errorMessage += getErrorMessage(error.response.status);
                 } else {
-                    errorMessage += error.message
+                    errorMessage += error.message;
                 }
                 toast.error(errorMessage, {
                     position: "top-right",
-                })
-                console.error("Xóa phương thức thất bại:", error)
+                });
+                console.error("Xóa kích thước thất bại:", error);
             }
         }
-    }
+    };
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredSizes = sizes.filter((size) =>
+        size.size.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredSizes.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredSizes.length / itemsPerPage);
 
     const SizeTableBody = ({ sizes, handleEditButtonClick, deleteSize }) => {
         if (!sizes || sizes.length === 0) {
             return (
-                <tr>
-                    <td colSpan="4" style={{ textAlign: "center" }}>
-                        Không có dữ liệu
-                    </td>
-                </tr>
-            )
+                <tbody>
+                    <tr>
+                        <td colSpan="3" style={{ textAlign: "center" }}>
+                            Không có dữ liệu
+                        </td>
+                    </tr>
+                </tbody>
+            );
         }
 
         return (
@@ -122,18 +145,15 @@ function SizeAdmin() {
                             >
                                 <i className="far fa-edit" />
                             </Button>
-                            <Button
-                                variant="danger"
-                                onClick={() => deleteSize(size.size_id)}
-                            >
+                            <Button variant="danger" onClick={() => deleteSize(size.size_id)}>
                                 <i className="fas fa-trash" />
                             </Button>
                         </td>
                     </tr>
                 ))}
             </tbody>
-        )
-    }
+        );
+    };
 
     return (
         <Fragment>
@@ -163,6 +183,16 @@ function SizeAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Kích thước
                                             </h6>
+                                            <div className="col-6">
+                                                <Form.Group controlId="search">
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Tìm kiếm..."
+                                                        value={searchTerm}
+                                                        onChange={handleSearchChange}
+                                                    />
+                                                </Form.Group>
+                                            </div>
                                             <Button
                                                 variant="primary"
                                                 onClick={() => setShowAddModal(true)}
@@ -183,17 +213,44 @@ function SizeAdmin() {
                                                     </tr>
                                                 </thead>
                                                 <SizeTableBody
-                                                    sizes={sizes}
+                                                    sizes={currentItems}
                                                     handleEditButtonClick={handleEditButtonClick}
                                                     deleteSize={deleteSize}
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First onClick={handleFirstPage} />
+                                                    <Pagination.Prev onClick={handlePrevPage} />
+                                                    {Array.from({ length: totalPages }, (_, index) => (
+                                                        <Pagination.Item
+                                                            key={index + 1}
+                                                            active={index + 1 === currentPage}
+                                                            onClick={() => handlePageChange(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </Pagination.Item>
+                                                    ))}
+                                                    <Pagination.Next onClick={handleNextPage} />
+                                                    <Pagination.Last onClick={handleLastPage} />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <AddSizeModal show={showAddModal} handleClose={() => setShowAddModal(false)} onAddSize={handleAddSize} />
+                            <AddSizeModal
+                                show={showAddModal}
+                                handleClose={() => setShowAddModal(false)}
+                                onAddSize={handleAddSize}
+                            />
                             {selectedSizeId && (
                                 <EditSizeModal
                                     show={showEditModal}
@@ -206,12 +263,19 @@ function SizeAdmin() {
                         <Footer />
                     </div>
                 </div>
-                <a href="#page-top" className="scroll-to-top rounded" onClick={(e) => {e.preventDefault(); window.scrollTo({top: 0, behavior: "smooth"})}}>
+                <a
+                    href="#page-top"
+                    className="scroll-to-top rounded"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                >
                     <i className="fas fa-angle-up" />
                 </a>
             </div>
         </Fragment>
-    )
+    );
 }
 
-export default SizeAdmin
+export default SizeAdmin;

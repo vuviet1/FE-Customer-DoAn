@@ -1,9 +1,8 @@
 import React, { useEffect, useState, Fragment } from "react";
-import { Table, Button } from "react-bootstrap";
+import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import database from "../components/database";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
@@ -17,6 +16,9 @@ function BrandAdmin() {
     const [selectedBrandId, setSelectedBrandId] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
@@ -24,14 +26,14 @@ function BrandAdmin() {
             setBrands(response.data.data);
         } catch (error) {
             let errorMessage = "Hiển thị thương hiệu thất bại: ";
-        if (error.response && error.response.status) {
-            errorMessage += getErrorMessage(error.response.status);
-        } else {
-            errorMessage += error.message;
-        }
-        toast.error(errorMessage, {
-            position: "top-right"
-        });
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
             console.error("Error fetching data:", error);
         }
     };
@@ -40,26 +42,14 @@ function BrandAdmin() {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        let table;
-        if (brands && brands.length > 0) {
-            table = database.initializeDataTable("#dataTableHover");
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [brands]);
+    const handleEditButtonClick = (brand_id) => {
+        setSelectedBrandId(brand_id);
+        setShowEditModal(true);
+    };
 
     const handleAddBrand = () => {
         setShowAddModal(false);
         fetchData();
-    };
-
-    const handleEditButtonClick = (brand_id) => {
-        setSelectedBrandId(brand_id);
-        setShowEditModal(true);
     };
 
     const handleUpdateBrand = () => {
@@ -91,14 +81,47 @@ function BrandAdmin() {
         }
     };
 
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredBrands = brands.filter((brand) =>
+        brand.brand_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredBrands.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredBrands.length / itemsPerPage);
+
     const BrandTableBody = ({ brands, handleEditButtonClick, deleteBrand }) => {
         if (!brands || brands.length === 0) {
             return (
-                <tr>
-                    <td colSpan="4" style={{ textAlign: "center" }}>
-                        Không có dữ liệu
-                    </td>
-                </tr>
+                <tbody>
+                    <tr>
+                        <td colSpan="3" style={{ textAlign: "center" }}>
+                            Không có dữ liệu
+                        </td>
+                    </tr>
+                </tbody>
             );
         }
 
@@ -160,12 +183,28 @@ function BrandAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Danh sách thương hiệu
                                             </h6>
-                                            <Button variant="primary" onClick={() => setShowAddModal(true)}>
+                                            <div className="col-6">
+                                                <Form.Group controlId="search">
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Tìm kiếm..."
+                                                        value={searchTerm}
+                                                        onChange={handleSearchChange}
+                                                    />
+                                                </Form.Group>
+                                            </div>
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => setShowAddModal(true)}
+                                            >
                                                 <i className="fas fa-plus" /> Thêm mới
                                             </Button>
                                         </div>
                                         <div className="table-responsive p-3">
-                                            <Table className="table align-items-center table-flush table-hover" id="dataTableHover">
+                                            <Table
+                                                className="table align-items-center table-flush table-hover"
+                                                id="dataTableHover"
+                                            >
                                                 <thead className="thead-light">
                                                     <tr>
                                                         <th style={{ textAlign: "left" }}>Tên thương hiệu</th>
@@ -174,11 +213,34 @@ function BrandAdmin() {
                                                     </tr>
                                                 </thead>
                                                 <BrandTableBody
-                                                    brands={brands}
+                                                    brands={currentItems}
                                                     handleEditButtonClick={handleEditButtonClick}
                                                     deleteBrand={deleteBrand}
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First onClick={handleFirstPage} />
+                                                    <Pagination.Prev onClick={handlePrevPage} />
+                                                    {Array.from({ length: totalPages }, (_, index) => (
+                                                        <Pagination.Item
+                                                            key={index + 1}
+                                                            active={index + 1 === currentPage}
+                                                            onClick={() => handlePageChange(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </Pagination.Item>
+                                                    ))}
+                                                    <Pagination.Next onClick={handleNextPage} />
+                                                    <Pagination.Last onClick={handleLastPage} />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -201,7 +263,14 @@ function BrandAdmin() {
                         <Footer />
                     </div>
                 </div>
-                <a href="#page-top" className="scroll-to-top rounded" onClick={(e) => {e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" });}}>
+                <a
+                    href="#page-top"
+                    className="scroll-to-top rounded"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                >
                     <i className="fas fa-angle-up" />
                 </a>
             </div>

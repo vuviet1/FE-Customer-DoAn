@@ -3,6 +3,8 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
+
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
@@ -17,8 +19,24 @@ function Home() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
+    const fetchData = async () => {
+        try {
+            // Sản phẩm mới nhất
+            const response = await request.get("product");
+            const latestProducts = response.data.data.slice(0, 4);
+            setProducts(latestProducts);
+        } catch (error) {
+            toast.error("Lấy dữ liệu thất bại.", {
+                position: "top-right",
+            });
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     const handleProductClick = (productId) => {
-        // Lưu productId vào session storage
         sessionStorage.setItem("productId", productId);
         window.location.href = `/product-detail`;
     };
@@ -28,28 +46,6 @@ function Home() {
         setShowModal(true);
         sessionStorage.setItem("productId", product.product_id);
     };
-
-    useEffect(() => {
-        const fetchProduct = async (retryCount = 0) => {
-            try {
-                // Product
-                const response = await request.get("product");
-                setProducts(response.data.data);
-            } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 429 &&
-                    retryCount < 3
-                ) {
-                    setTimeout(() => fetchProduct(retryCount + 1), 2000); // Retry after 2 seconds
-                } else {
-                    console.error("Error fetching data:", error);
-                }
-            }
-        };
-
-        fetchProduct();
-    }, []);
 
     return (
         <Fragment>
@@ -62,11 +58,23 @@ function Home() {
             <section className="bg0 p-t-23 p-b-130">
                 <div className="container">
                     <div className="p-b-10">
-                        <h3 className="ltext-103 cl5">Sản phẩm bán chạy</h3>
+                        <h3
+                            className="ltext-103 cl5"
+                            style={{
+                                display: "flex",
+                                justifyContent: "center",
+                            }}
+                        >
+                            Sản phẩm mới nhất
+                        </h3>
                     </div>
                     <div
                         className="row isotope-grid"
-                        style={{ minHeight: "450px", position: "relative" }}
+                        style={{
+                            minHeight: "450px",
+                            position: "relative",
+                            marginTop: "30px",
+                        }}
                         display="flex"
                         flexwrap="wrap"
                     >
@@ -138,6 +146,15 @@ function Home() {
                                 </div>
                             </div>
                         ))}
+                    </div>
+                    <div style={{  width:"100%", display:"flex", justifyContent:"center" }}>
+                        <Link
+                            to={"/product"}
+                            className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
+                            style={{ width:"25%" }}
+                        >
+                            Hiển thị thêm
+                        </Link>
                     </div>
                 </div>
             </section>

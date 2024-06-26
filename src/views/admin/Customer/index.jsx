@@ -1,14 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, Fragment, useLayoutEffect } from "react";
-import { Table, Button, Form, Image } from "react-bootstrap";
+import React, { useEffect, useState, Fragment } from "react";
+import { Table, Button, Form, Image, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify"
-import $ from "jquery";
+import { toast } from "react-toastify";
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages"
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 import EditCustomerModal from "./modal-edit";
 import ViewCustomerModal from "./modal-view";
@@ -20,26 +19,28 @@ function CustomerAdmin() {
     const [showViewModal, setShowViewModal] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("user");
             const allUsers = response.data.data;
-            const customerUsers = allUsers.filter(
-                (user) => user.role === 0
-            );
+            const customerUsers = allUsers.filter((user) => user.role === 0);
             setCustomers(customerUsers);
+            setTotalPages(Math.ceil(customerUsers.length / itemsPerPage));
         } catch (error) {
-            let errorMessage = "Hiển thị khách hàng thất bại: "
-        if (error.response && error.response.status) {
-            errorMessage += getErrorMessage(error.response.status)
-        } else {
-            errorMessage += error.message
-        }
-        toast.error(errorMessage, {
-            position: "top-right"
-        })
-        console.error("Error fetching data:", error)
+            let errorMessage = "Hiển thị khách hàng thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Error fetching data:", error);
         }
     };
 
@@ -47,33 +48,6 @@ function CustomerAdmin() {
         fetchData();
     }, []);
 
-    useLayoutEffect(() => {
-        let table;
-        if (filteredCustomers && filteredCustomers.length > 0) {
-            $(document).ready(function () {
-                table = $("#dataTableHover").DataTable({
-                    destroy: true, // Destroy any existing table first
-                    searching: false, // Disable default search
-                    language: {
-                        lengthMenu: "Hiển thị _MENU_ mục",
-                        zeroRecords: "Không tìm thấy dữ liệu",
-                        info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
-                        infoEmpty: "Không có mục nào để hiển thị",
-                        infoFiltered: "(lọc từ _MAX_ tổng số mục)",
-                    },
-                    lengthMenu: [5, 10, 25, 50], // Number of rows per page
-                    pageLength: 5, // Default number of rows per page
-                });
-            });
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [customers, searchTerm]); // Only use this if you are sure that filteredCustomers should not be a dependency
-
-    // Update
     const handleEditButtonClick = (user_id) => {
         setSelectedCustomerId(user_id);
         setShowEditModal(true);
@@ -82,14 +56,69 @@ function CustomerAdmin() {
     const handleUpdateCustomer = () => {
         setSelectedCustomerId(null);
         setShowEditModal(false);
-        fetchData()
+        fetchData();
     };
 
-    // View
     const handleView = (user_id) => {
         setSelectedCustomerId(user_id);
         setShowViewModal(true);
     };
+
+    const handleDeleteCustomer = async (user_id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa khách hàng này?")) {
+            try {
+                await request.delete(`user/${user_id}`);
+                toast.success("Xóa khách hàng thành công!", {
+                    position: "top-right",
+                });
+                fetchData();
+            } catch (error) {
+                let errorMessage = "Xóa khách hàng thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Error deleting customer:", error);
+            }
+        }
+    };
+
+    const filteredCustomers = customers.filter((customer) =>
+        customer.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const paginatedCustomers = filteredCustomers.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const CustomerTableBody = ({ customers, handleEditButtonClick }) => {
         if (!customers || customers.length === 0) {
@@ -149,16 +178,20 @@ function CustomerAdmin() {
                             >
                                 <i className="far fa-edit" />
                             </Button>
+                            <Button
+                                variant="danger"
+                                onClick={() =>
+                                    handleDeleteCustomer(customer.user_id)
+                                }
+                            >
+                                <i className="far fa-trash-alt" />
+                            </Button>
                         </td>
                     </tr>
                 ))}
             </tbody>
         );
     };
-
-    const filteredCustomers = customers.filter((customer) =>
-        customer.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     return (
         <Fragment>
@@ -260,13 +293,75 @@ function CustomerAdmin() {
                                                 </thead>
                                                 <CustomerTableBody
                                                     customers={
-                                                        filteredCustomers
+                                                        paginatedCustomers
                                                     }
                                                     handleEditButtonClick={
                                                         handleEditButtonClick
                                                     }
+                                                    handleDeleteCustomer={
+                                                        handleDeleteCustomer
+                                                    }
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First
+                                                        onClick={
+                                                            handleFirstPage
+                                                        }
+                                                        disabled={
+                                                            currentPage === 1
+                                                        }
+                                                    />
+                                                    <Pagination.Prev
+                                                        onClick={handlePrevPage}
+                                                        disabled={
+                                                            currentPage === 1
+                                                        }
+                                                    />
+                                                    {Array.from(
+                                                        { length: totalPages },
+                                                        (_, index) => (
+                                                            <Pagination.Item
+                                                                key={index + 1}
+                                                                active={
+                                                                    index +
+                                                                        1 ===
+                                                                    currentPage
+                                                                }
+                                                                onClick={() =>
+                                                                    handlePageChange(
+                                                                        index +
+                                                                            1
+                                                                    )
+                                                                }
+                                                            >
+                                                                {index + 1}
+                                                            </Pagination.Item>
+                                                        )
+                                                    )}
+                                                    <Pagination.Next
+                                                        onClick={handleNextPage}
+                                                        disabled={
+                                                            currentPage ===
+                                                            totalPages
+                                                        }
+                                                    />
+                                                    <Pagination.Last
+                                                        onClick={handleLastPage}
+                                                        disabled={
+                                                            currentPage ===
+                                                            totalPages
+                                                        }
+                                                    />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

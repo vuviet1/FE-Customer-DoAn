@@ -1,72 +1,62 @@
-import React, { useEffect, useState, Fragment } from "react"
-import { Table, Button } from "react-bootstrap"
-import { Link } from "react-router-dom"
-import { toast } from "react-toastify"
+import React, { useEffect, useState, Fragment } from "react";
+import { Table, Button, Pagination, Form } from "react-bootstrap";
+import { Link } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import database from "../components/database"
-import Topbar from "../components/topbar"
-import Footer from "../components/footer"
-import request from "../../../utils/request"
-import { getErrorMessage } from "../../../utils/errorMessages"
+import Topbar from "../components/topbar";
+import Footer from "../components/footer";
+import request from "../../../utils/request";
+import { getErrorMessage } from "../../../utils/errorMessages";
 
-import AddPaymentModal from "./modal-add"
-import EditPaymentModal from "./modal-edit"
+import AddPaymentModal from "./modal-add";
+import EditPaymentModal from "./modal-edit";
 
 function PaymentAdmin() {
-    const [payments, setPayments] = useState([])
-    const [selectedPaymentId, setSelectedPaymentId] = useState(null)
-    const [showAddModal, setShowAddModal] = useState(false)
-    const [showEditModal, setShowEditModal] = useState(false)
+    const [payments, setPayments] = useState([]);
+    const [selectedPaymentId, setSelectedPaymentId] = useState(null);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
-            const response = await request.get("payment")
-            setPayments(response.data.data)
+            const response = await request.get("payment");
+            setPayments(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị phương thức thanh toán thất bại: "
+            let errorMessage = "Hiển thị phương thức thanh toán thất bại: ";
             if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status)
+                errorMessage += getErrorMessage(error.response.status);
             } else {
-                errorMessage += error.message
+                errorMessage += error.message;
             }
             toast.error(errorMessage, {
-                position: "top-right"
-            })
-            console.error("Error fetching data:", error)
+                position: "top-right",
+            });
+            console.error("Error fetching data:", error);
         }
-    }
+    };
 
     useEffect(() => {
-        fetchData()
-    }, [])
-
-    useEffect(() => {
-        let table
-        if (payments && payments.length > 0) {
-            table = database.initializeDataTable("#dataTableHover")
-        }
-        return () => {
-            if (table) {
-                table.destroy()
-            }
-        }
-    }, [payments])
+        fetchData();
+    }, []);
 
     const handleEditButtonClick = (payment_method_id) => {
-        setSelectedPaymentId(payment_method_id)
-        setShowEditModal(true)
-    }
+        setSelectedPaymentId(payment_method_id);
+        setShowEditModal(true);
+    };
 
     const handleAddPayment = () => {
-        setShowAddModal(false)
-        fetchData()
-    }
+        setShowAddModal(false);
+        fetchData();
+    };
 
     const handleUpdatePayment = () => {
-        setSelectedPaymentId(null)
-        setShowEditModal(false)
-        fetchData()
-    }
+        setSelectedPaymentId(null);
+        setShowEditModal(false);
+        fetchData();
+    };
 
     const deletePayment = async (payment_method_id) => {
         if (
@@ -75,25 +65,56 @@ function PaymentAdmin() {
             )
         ) {
             try {
-                await request.delete(`payment/${payment_method_id}`)
+                await request.delete(`payment/${payment_method_id}`);
                 toast.success("Xóa phương thức thanh toán thành công!", {
                     position: "top-right",
-                })
-                fetchData()
+                });
+                fetchData();
             } catch (error) {
-                let errorMessage = "Xóa phương thức thanh toán thất bại: "
+                let errorMessage = "Xóa phương thức thanh toán thất bại: ";
                 if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status)
+                    errorMessage += getErrorMessage(error.response.status);
                 } else {
-                    errorMessage += error.message
+                    errorMessage += error.message;
                 }
                 toast.error(errorMessage, {
                     position: "top-right",
-                })
-                console.error("Xóa phương thức thất bại:", error)
+                });
+                console.error("Xóa phương thức thất bại:", error);
             }
         }
-    }
+    };
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredPayments = payments.filter((payment) =>
+        payment.payment_method.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredPayments.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
 
     const PaymentTableBody = ({
         payments,
@@ -102,12 +123,14 @@ function PaymentAdmin() {
     }) => {
         if (!payments || payments.length === 0) {
             return (
-                <tr>
-                    <td colSpan="4" style={{ textAlign: "center" }}>
-                        Không có dữ liệu
-                    </td>
-                </tr>
-            )
+                <tbody>
+                    <tr>
+                        <td colSpan="3" style={{ textAlign: "center" }}>
+                            Không có dữ liệu
+                        </td>
+                    </tr>
+                </tbody>
+            );
         }
 
         return (
@@ -152,8 +175,8 @@ function PaymentAdmin() {
                     </tr>
                 ))}
             </tbody>
-        )
-    }
+        );
+    };
 
     return (
         <Fragment>
@@ -190,6 +213,18 @@ function PaymentAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Phương thức thanh toán
                                             </h6>
+                                            <div className="col-6">
+                                                <Form.Group controlId="search">
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Tìm kiếm..."
+                                                        value={searchTerm}
+                                                        onChange={
+                                                            handleSearchChange
+                                                        }
+                                                    />
+                                                </Form.Group>
+                                            </div>
                                             <Button
                                                 variant="primary"
                                                 onClick={() =>
@@ -234,7 +269,7 @@ function PaymentAdmin() {
                                                     </tr>
                                                 </thead>
                                                 <PaymentTableBody
-                                                    payments={payments}
+                                                    payments={currentItems}
                                                     handleEditButtonClick={
                                                         handleEditButtonClick
                                                     }
@@ -243,6 +278,51 @@ function PaymentAdmin() {
                                                     }
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First
+                                                        onClick={
+                                                            handleFirstPage
+                                                        }
+                                                    />
+                                                    <Pagination.Prev
+                                                        onClick={handlePrevPage}
+                                                    />
+                                                    {Array.from(
+                                                        { length: totalPages },
+                                                        (_, index) => (
+                                                            <Pagination.Item
+                                                                key={index + 1}
+                                                                active={
+                                                                    index +
+                                                                        1 ===
+                                                                    currentPage
+                                                                }
+                                                                onClick={() =>
+                                                                    handlePageChange(
+                                                                        index +
+                                                                            1
+                                                                    )
+                                                                }
+                                                            >
+                                                                {index + 1}
+                                                            </Pagination.Item>
+                                                        )
+                                                    )}
+                                                    <Pagination.Next
+                                                        onClick={handleNextPage}
+                                                    />
+                                                    <Pagination.Last
+                                                        onClick={handleLastPage}
+                                                    />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -269,15 +349,15 @@ function PaymentAdmin() {
                     href="#page-top"
                     className="scroll-to-top rounded"
                     onClick={(e) => {
-                        e.preventDefault()
-                        window.scrollTo({ top: 0, behavior: "smooth" })
+                        e.preventDefault();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                 >
                     <i className="fas fa-angle-up" />
                 </a>
             </div>
         </Fragment>
-    )
+    );
 }
 
-export default PaymentAdmin
+export default PaymentAdmin;

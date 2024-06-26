@@ -2,9 +2,9 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import Table from "react-bootstrap/Table";
+import { Button, Form, Pagination } from "react-bootstrap";
 import { toast } from "react-toastify";
 
-import database from "../components/database";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
@@ -18,6 +18,9 @@ function ColorAdmin() {
     const [selectedColorId, setSelectedColorId] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
@@ -40,18 +43,6 @@ function ColorAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
-
-    useEffect(() => {
-        let table;
-        if (colors.length > 0) {
-            table = database.initializeDataTable("#dataTableHover");
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [colors]);
 
     const handleEditButtonClick = async (color_id) => {
         setSelectedColorId(color_id);
@@ -91,18 +82,50 @@ function ColorAdmin() {
         }
     };
 
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredColors = colors.filter((color) =>
+        color.color.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredColors.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredColors.length / itemsPerPage);
+
     const ColorTableBody = ({ colors, handleEditButtonClick, deleteColor }) => {
         if (!colors || colors.length === 0) {
             return (
                 <tbody>
                     <tr>
-                        <td colSpan="5" style={{ textAlign: "center" }}>
+                        <td colSpan="3" style={{ textAlign: "center" }}>
                             Không có dữ liệu
                         </td>
                     </tr>
                 </tbody>
             );
         }
+
         return (
             <tbody>
                 {colors.map((color, index) => (
@@ -120,22 +143,21 @@ function ColorAdmin() {
                             )}
                         </td>
                         <td style={{ textAlign: "center" }}>
-                            <button
-                                type="button"
-                                className="btn btn-success ml-2"
+                            <Button
+                                variant="success"
                                 onClick={() =>
                                     handleEditButtonClick(color.color_id)
                                 }
+                                style={{ marginRight: "5px" }}
                             >
                                 <i className="far fa-edit" />
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-danger ml-2"
+                            </Button>
+                            <Button
+                                variant="danger"
                                 onClick={() => deleteColor(color.color_id)}
                             >
                                 <i className="fas fa-trash" />
-                            </button>
+                            </Button>
                         </td>
                     </tr>
                 ))}
@@ -184,16 +206,25 @@ function ColorAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Danh sách màu
                                             </h6>
-                                            <button
-                                                type="button"
-                                                className="btn btn-primary"
+                                            <div className="col-6">
+                                            <Form.Group controlId="search">
+                                                <Form.Control
+                                                    type="text"
+                                                    placeholder="Tìm kiếm..."
+                                                    value={searchTerm}
+                                                    onChange={handleSearchChange}
+                                                />
+                                            </Form.Group>
+                                            </div>
+                                            <Button
+                                                variant="primary"
                                                 onClick={() =>
                                                     setShowAddModal(true)
                                                 }
                                             >
                                                 <i className="fas fa-plus" />{" "}
                                                 Thêm mới
-                                            </button>
+                                            </Button>
                                         </div>
                                         <div className="table-responsive p-3">
                                             <Table
@@ -229,13 +260,57 @@ function ColorAdmin() {
                                                     </tr>
                                                 </thead>
                                                 <ColorTableBody
-                                                    colors={colors}
+                                                    colors={currentItems}
                                                     handleEditButtonClick={
                                                         handleEditButtonClick
                                                     }
                                                     deleteColor={deleteColor}
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent:
+                                                        "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First
+                                                        onClick={handleFirstPage}
+                                                    />
+                                                    <Pagination.Prev
+                                                        onClick={handlePrevPage}
+                                                    />
+                                                    {Array.from(
+                                                        {
+                                                            length: totalPages,
+                                                        },
+                                                        (_, index) => (
+                                                            <Pagination.Item
+                                                                key={index + 1}
+                                                                active={
+                                                                    index + 1 ===
+                                                                    currentPage
+                                                                }
+                                                                onClick={() =>
+                                                                    handlePageChange(
+                                                                        index + 1
+                                                                    )
+                                                                }
+                                                            >
+                                                                {index + 1}
+                                                            </Pagination.Item>
+                                                        )
+                                                    )}
+                                                    <Pagination.Next
+                                                        onClick={handleNextPage}
+                                                    />
+                                                    <Pagination.Last
+                                                        onClick={handleLastPage}
+                                                    />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -245,12 +320,16 @@ function ColorAdmin() {
                                 handleClose={() => setShowAddModal(false)}
                                 onAddColor={handleAddColor}
                             />
-                            <EditColorModal
-                                show={showEditModal}
-                                handleClose={() => setShowEditModal(false)}
-                                selectedColorId={selectedColorId}
-                                onUpdateColor={handleUpdateColor}
-                            />
+                            {selectedColorId && (
+                                <EditColorModal
+                                    show={showEditModal}
+                                    handleClose={() =>
+                                        setShowEditModal(false)
+                                    }
+                                    selectedColorId={selectedColorId}
+                                    onUpdateColor={handleUpdateColor}
+                                />
+                            )}
                         </div>
                         <Footer />
                     </div>

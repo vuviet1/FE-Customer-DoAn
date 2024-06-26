@@ -197,7 +197,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                 </Modal.Footer>
             </Modal>
 
-            {/* Modal giỏ hàng */}
+            {/* Modal hiển thị sản phẩm */}
             <ProductModal
                 show={showProductModal}
                 handleClose={() => setShowProductModal(false)}

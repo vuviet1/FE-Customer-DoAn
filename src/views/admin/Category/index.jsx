@@ -3,8 +3,8 @@ import React, { useEffect, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import Table from "react-bootstrap/Table";
 import { toast } from "react-toastify";
+import { Pagination, Form, Button } from "react-bootstrap";
 
-import database from "../components/database";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
@@ -14,17 +14,20 @@ import AddCategoryModal from "./modal-add";
 import EditCategoryModal from "./modal-edit";
 
 function CategoryAdmin() {
-    const [categorys, setCategorys] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("category");
-            setCategorys(response.data.data);
+            setCategories(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị phương thức thanh toán thất bại: ";
+            let errorMessage = "Hiển thị danh mục thất bại: ";
             if (error.response && error.response.status) {
                 errorMessage += getErrorMessage(error.response.status);
             } else {
@@ -41,18 +44,6 @@ function CategoryAdmin() {
         fetchData();
     }, []);
 
-    useEffect(() => {
-        let table;
-        if (categorys && categorys.length > 0) {
-            table = database.initializeDataTable("#dataTableHover");
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [categorys]);
-
     const handleEditButtonClick = async (category_id) => {
         setSelectedCategoryId(category_id);
         setShowEditModal(true);
@@ -60,12 +51,12 @@ function CategoryAdmin() {
 
     const handleAddCategory = () => {
         setShowAddModal(false);
-        fetchData()
+        fetchData();
     };
 
     const handleUpdateCategory = () => {
         setShowEditModal(false);
-        fetchData()
+        fetchData();
     };
 
     const deleteCategory = async (category_id) => {
@@ -91,15 +82,46 @@ function CategoryAdmin() {
         }
     };
 
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredCategories = categories.filter((category) =>
+        category.category_name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredCategories.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+
     const CategoryTableBody = ({
-        categorys,
+        categories,
         handleEditButtonClick,
         deleteCategory,
     }) => {
-        if (!categorys || categorys.length === 0) {
+        if (!categories || categories.length === 0) {
             return (
                 <tr>
-                    <td colSpan="4" style={{ textAlign: "center" }}>
+                    <td colSpan="3" style={{ textAlign: "center" }}>
                         Không có dữ liệu
                     </td>
                 </tr>
@@ -108,7 +130,7 @@ function CategoryAdmin() {
 
         return (
             <tbody>
-                {categorys.map((category, index) => (
+                {categories.map((category, index) => (
                     <tr key={index}>
                         <td style={{ textAlign: "left" }}>
                             {category.category_name}
@@ -125,24 +147,21 @@ function CategoryAdmin() {
                             )}
                         </td>
                         <td style={{ textAlign: "center" }}>
-                            <button
-                                type="button"
-                                className="btn btn-success ml-2"
+                            <Button
+                                variant="success"
                                 onClick={() =>
                                     handleEditButtonClick(category.category_id)
                                 }
+                                style={{ marginRight: "5px" }}
                             >
                                 <i className="far fa-edit" />
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-danger ml-2"
-                                onClick={() =>
-                                    deleteCategory(category.category_id)
-                                }
+                            </Button>
+                            <Button
+                                variant="danger"
+                                onClick={() => deleteCategory(category.category_id)}
                             >
                                 <i className="fas fa-trash" />
-                            </button>
+                            </Button>
                         </td>
                     </tr>
                 ))}
@@ -189,18 +208,24 @@ function CategoryAdmin() {
                                     <div className="card mb-4">
                                         <div className="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                             <h6 className="m-0 font-weight-bold text-primary">
-                                                Danh mục
+                                                Danh sách danh mục
                                             </h6>
-                                            <button
-                                                type="button"
-                                                className="btn btn-primary"
-                                                onClick={() =>
-                                                    setShowAddModal(true)
-                                                }
+                                            <div className="col-6">
+                                                <Form.Group controlId="search">
+                                                    <Form.Control
+                                                        type="text"
+                                                        placeholder="Tìm kiếm..."
+                                                        value={searchTerm}
+                                                        onChange={handleSearchChange}
+                                                    />
+                                                </Form.Group>
+                                            </div>
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => setShowAddModal(true)}
                                             >
-                                                <i className="fas fa-plus" />{" "}
-                                                Thêm mới
-                                            </button>
+                                                <i className="fas fa-plus" /> Thêm mới
+                                            </Button>
                                         </div>
                                         <div className="table-responsive p-3">
                                             <Table
@@ -236,15 +261,34 @@ function CategoryAdmin() {
                                                     </tr>
                                                 </thead>
                                                 <CategoryTableBody
-                                                    categorys={categorys}
-                                                    handleEditButtonClick={
-                                                        handleEditButtonClick
-                                                    }
-                                                    deleteCategory={
-                                                        deleteCategory
-                                                    }
+                                                    categories={currentItems}
+                                                    handleEditButtonClick={handleEditButtonClick}
+                                                    deleteCategory={deleteCategory}
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First onClick={handleFirstPage} />
+                                                    <Pagination.Prev onClick={handlePrevPage} />
+                                                    {Array.from({ length: totalPages }, (_, index) => (
+                                                        <Pagination.Item
+                                                            key={index + 1}
+                                                            active={index + 1 === currentPage}
+                                                            onClick={() => handlePageChange(index + 1)}
+                                                        >
+                                                            {index + 1}
+                                                        </Pagination.Item>
+                                                    ))}
+                                                    <Pagination.Next onClick={handleNextPage} />
+                                                    <Pagination.Last onClick={handleLastPage} />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -266,12 +310,14 @@ function CategoryAdmin() {
                 handleClose={() => setShowAddModal(false)}
                 onAddCategory={handleAddCategory}
             />
-            <EditCategoryModal
-                show={showEditModal}
-                handleClose={() => setShowEditModal(false)}
-                selectedCategoryId={selectedCategoryId}
-                onUpdateCategory={handleUpdateCategory}
-            />
+            {selectedCategoryId && (
+                <EditCategoryModal
+                    show={showEditModal}
+                    handleClose={() => setShowEditModal(false)}
+                    selectedCategoryId={selectedCategoryId}
+                    onUpdateCategory={handleUpdateCategory}
+                />
+            )}
         </Fragment>
     );
 }

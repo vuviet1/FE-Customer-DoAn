@@ -1,14 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, Fragment, useLayoutEffect } from "react";
-import { Table, Button, Form, Image } from "react-bootstrap";
+import React, { useEffect, useState, Fragment } from "react";
+import { Table, Button, Form, Image, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify"
-import $ from "jquery";
+import { toast } from "react-toastify";
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages"
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddAdminModal from "./modal-add";
 import EditAdminModal from "./modal-edit";
@@ -21,27 +20,27 @@ function AdminAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
 
+    const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("user");
             const allAdmins = response.data.data;
-            const adminUsers = allAdmins.filter(
-                (admin) => admin.role === 1
-            );
+            const adminUsers = allAdmins.filter((admin) => admin.role === 1);
             setAdmins(adminUsers);
         } catch (error) {
-            let errorMessage = "Hiển thị nhân viên thất bại: "
+            let errorMessage = "Hiển thị nhân viên thất bại: ";
             if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status)
+                errorMessage += getErrorMessage(error.response.status);
             } else {
-                errorMessage += error.message
+                errorMessage += error.message;
             }
             toast.error(errorMessage, {
-                position: "top-right"
-            })
-            console.error("Error fetching data:", error)
+                position: "top-right",
+            });
+            console.error("Error fetching data:", error);
         }
     };
 
@@ -49,57 +48,81 @@ function AdminAdmin() {
         fetchData();
     }, []);
 
-    useLayoutEffect(() => {
-        let table;
-        if (filteredAdmins && filteredAdmins.length > 0) {
-            $(document).ready(function () {
-                table = $("#dataTableHover").DataTable({
-                    destroy: true, // Destroy any existing table first
-                    searching: false, // Disable default search
-                    language: {
-                        lengthMenu: "Hiển thị _MENU_ mục",
-                        zeroRecords: "Không tìm thấy dữ liệu",
-                        info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
-                        infoEmpty: "Không có mục nào để hiển thị",
-                        infoFiltered: "(lọc từ _MAX_ tổng số mục)",
-                    },
-                    lengthMenu: [5, 10, 25, 50], // Number of rows per page
-                    pageLength: 5, // Default number of rows per page
-                });
-            });
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [admins, searchTerm]); // Only use this if you are sure that filteredAdmins should not be a dependency
-
-    // Add
-    const handleAddAdmin = () => {
-        setShowAddModal(false);
-        fetchData()
-    };
-
-    // Update
     const handleEditButtonClick = (user_id) => {
         setSelectedAdminId(user_id);
         setShowEditModal(true);
     };
 
-    const handleUpdateAdmin = () => {
-        setSelectedAdminId(null);
-        setShowEditModal(false);
-        fetchData()
+    const handleAddAdmin = () => {
+        setShowAddModal(false);
+        fetchData();
     };
 
-    // View
-    const handleView = (user_id) => {
+    const handleUpdateAdmin = () => {
+        setShowEditModal(false);
+        fetchData();
+    };
+
+    const handleViewAdmin = (user_id) => {
         setSelectedAdminId(user_id);
         setShowViewModal(true);
     };
 
-    const AdminTableBody = ({ admins, handleEditButtonClick }) => {
+    const deleteAdmin = async (user_id) => {
+        if (window.confirm("Bạn có chắc muốn xóa quản trị viên này không?")) {
+            try {
+                await request.delete(`user/${user_id}`);
+                toast.success("Xóa quản trị viên thành công!", {
+                    position: "top-right",
+                });
+                fetchData();
+            } catch (error) {
+                let errorMessage = "Xóa quản trị viên thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
+                console.error("Error deleting admin:", error);
+            }
+        }
+    };
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const filteredAdmins = admins.filter((admin) =>
+        admin.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredAdmins.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
+
+    const AdminTableBody = ({ admins, handleEditButtonClick, deleteAdmin }) => {
         if (!admins || admins.length === 0) {
             return (
                 <tbody>
@@ -143,7 +166,7 @@ function AdminAdmin() {
                         <td style={{ textAlign: "center" }}>
                             <Button
                                 variant="info"
-                                onClick={() => handleView(admin.user_id)}
+                                onClick={() => handleViewAdmin(admin.user_id)}
                                 style={{ marginRight: "5px" }}
                             >
                                 <i className="far fa-eye" />
@@ -157,16 +180,18 @@ function AdminAdmin() {
                             >
                                 <i className="far fa-edit" />
                             </Button>
+                            <Button
+                                variant="danger"
+                                onClick={() => deleteAdmin(admin.user_id)}
+                            >
+                                <i className="fas fa-trash" />
+                            </Button>
                         </td>
                     </tr>
                 ))}
             </tbody>
         );
     };
-
-    const filteredAdmins = admins.filter((admin) =>
-        admin.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
 
     return (
         <Fragment>
@@ -208,14 +233,9 @@ function AdminAdmin() {
                                                     type="text"
                                                     placeholder="Tìm kiếm quản trị viên..."
                                                     value={searchTerm}
-                                                    onChange={(e) =>
-                                                        setSearchTerm(
-                                                            e.target.value
-                                                        )
-                                                    }
+                                                    onChange={handleSearchChange}
                                                 />
                                             </div>
-
                                             <Button
                                                 variant="primary"
                                                 onClick={() =>
@@ -276,12 +296,73 @@ function AdminAdmin() {
                                                     </tr>
                                                 </thead>
                                                 <AdminTableBody
-                                                    admins={filteredAdmins}
+                                                    admins={currentItems}
                                                     handleEditButtonClick={
                                                         handleEditButtonClick
                                                     }
+                                                    deleteAdmin={deleteAdmin}
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First
+                                                        onClick={
+                                                            handleFirstPage
+                                                        }
+                                                        disabled={
+                                                            currentPage === 1
+                                                        }
+                                                    />
+                                                    <Pagination.Prev
+                                                        onClick={handlePrevPage}
+                                                        disabled={
+                                                            currentPage === 1
+                                                        }
+                                                    />
+                                                    {Array.from(
+                                                        {
+                                                            length: totalPages,
+                                                        },
+                                                        (_, index) => (
+                                                            <Pagination.Item
+                                                                key={index + 1}
+                                                                active={
+                                                                    index + 1 ===
+                                                                    currentPage
+                                                                }
+                                                                onClick={() =>
+                                                                    handlePageChange(
+                                                                        index +
+                                                                            1
+                                                                    )
+                                                                }
+                                                            >
+                                                                {index + 1}
+                                                            </Pagination.Item>
+                                                        )
+                                                    )}
+                                                    <Pagination.Next
+                                                        onClick={handleNextPage}
+                                                        disabled={
+                                                            currentPage ===
+                                                            totalPages
+                                                        }
+                                                    />
+                                                    <Pagination.Last
+                                                        onClick={handleLastPage}
+                                                        disabled={
+                                                            currentPage ===
+                                                            totalPages
+                                                        }
+                                                    />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -295,7 +376,9 @@ function AdminAdmin() {
                             {selectedAdminId && (
                                 <EditAdminModal
                                     show={showEditModal}
-                                    handleClose={() => setShowEditModal(false)}
+                                    handleClose={() =>
+                                        setShowEditModal(false)
+                                    }
                                     selectedAdminId={selectedAdminId}
                                     onUpdateAdmin={handleUpdateAdmin}
                                 />
@@ -303,7 +386,9 @@ function AdminAdmin() {
                             {selectedAdminId && (
                                 <ViewAdminModal
                                     show={showViewModal}
-                                    handleClose={() => setShowViewModal(false)}
+                                    handleClose={() =>
+                                        setShowViewModal(false)
+                                    }
                                     selectedAdminId={selectedAdminId}
                                 />
                             )}

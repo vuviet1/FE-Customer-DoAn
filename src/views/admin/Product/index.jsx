@@ -1,14 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, Fragment, useLayoutEffect } from "react";
-import { Table, Button, Form } from "react-bootstrap";
+import React, { useEffect, useState, Fragment } from "react";
+import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify"
-
-import $ from "jquery";
+import { toast } from "react-toastify";
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages"
+import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddProductModal from "./modal-add";
 import EditProductModal from "./modal-edit";
@@ -24,22 +22,24 @@ function ProductAdmin() {
     const [showAddDetailModal, setShowAddDetailModal] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("product");
             setProducts(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị sản phẩm thất bại: "
-        if (error.response && error.response.status) {
-            errorMessage += getErrorMessage(error.response.status)
-        } else {
-            errorMessage += error.message
-        }
-        toast.error(errorMessage, {
-            position: "top-right"
-        })
-        console.error("Error fetching data:", error)
+            let errorMessage = "Hiển thị sản phẩm thất bại: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, {
+                position: "top-right",
+            });
+            console.error("Error fetching data:", error);
         }
     };
 
@@ -47,37 +47,30 @@ function ProductAdmin() {
         fetchData();
     }, []);
 
-    useLayoutEffect(() => {
-        let table;
-        if (filteredProducts && filteredProducts.length > 0) {
-            $(document).ready(function () {
-                table = $("#dataTableHover").DataTable({
-                    destroy: true, // Destroy any existing table first
-                    searching: false, // Disable default search
-                    language: {
-                        lengthMenu: "Hiển thị _MENU_ mục",
-                        zeroRecords: "Không tìm thấy dữ liệu",
-                        info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
-                        infoEmpty: "Không có mục nào để hiển thị",
-                        infoFiltered: "(lọc từ _MAX_ tổng số mục)",
-                    },
-                    paging: true,
-                    lengthMenu: [5, 10, 25, 50], // Number of rows per page
-                    pageLength: 5, // Default number of rows per page
-                });
-            });
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [products, searchTerm]);
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handlePrevPage = () => {
+        setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+        setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
 
     // Add
     const handleAddProduct = () => {
         setShowAddModal(false);
-        fetchData()
+        fetchData();
     };
 
     // Update
@@ -89,7 +82,7 @@ function ProductAdmin() {
     const handleUpdateProduct = () => {
         setSelectedProductId(null);
         setShowEditModal(false);
-        fetchData()
+        fetchData();
     };
 
     // Add detail
@@ -101,7 +94,7 @@ function ProductAdmin() {
     const handleAddDetail = () => {
         setSelectedProductId(null);
         setShowAddDetailModal(false);
-        fetchData()
+        fetchData();
     };
 
     // View
@@ -117,19 +110,19 @@ function ProductAdmin() {
                 await request.delete(`product/${product_id}`);
                 toast.success("Xóa sản phẩm thành công!", {
                     position: "top-right",
-                })
-                fetchData()
+                });
+                fetchData();
             } catch (error) {
-                let errorMessage = "Xóa sản phẩm thất bại: "
+                let errorMessage = "Xóa sản phẩm thất bại: ";
                 if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status)
+                    errorMessage += getErrorMessage(error.response.status);
                 } else {
-                    errorMessage += error.message
+                    errorMessage += error.message;
                 }
                 toast.error(errorMessage, {
                     position: "top-right",
-                })
-                console.error("Xóa sản phẩm thất bại:", error)
+                });
+                console.error("Xóa sản phẩm thất bại:", error);
             }
         }
     };
@@ -144,7 +137,7 @@ function ProductAdmin() {
             return (
                 <tbody>
                     <tr>
-                        <td colSpan="4" style={{ textAlign: "center" }}>
+                        <td colSpan="6" style={{ textAlign: "center" }}>
                             Không có dữ liệu
                         </td>
                     </tr>
@@ -232,6 +225,10 @@ function ProductAdmin() {
         product.product_name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredProducts.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
     return (
         <Fragment>
             <div id="wrapper">
@@ -311,7 +308,7 @@ function ProductAdmin() {
                                                                     "left",
                                                             }}
                                                         >
-                                                            Ảnh sản phẩm
+                                                            Hình ảnh
                                                         </th>
                                                         <th
                                                             style={{
@@ -348,8 +345,7 @@ function ProductAdmin() {
                                                     </tr>
                                                 </thead>
                                                 <ProductTableBody
-                                                    // products={products}
-                                                    products={filteredProducts}
+                                                    products={currentItems}
                                                     handleEditButtonClick={
                                                         handleEditButtonClick
                                                     }
@@ -361,6 +357,53 @@ function ProductAdmin() {
                                                     }
                                                 />
                                             </Table>
+                                            <div
+                                                className="flex-c-m flex-w w-full p-t-45"
+                                                style={{
+                                                    display: "flex",
+                                                    justifyContent: "center",
+                                                }}
+                                            >
+                                                <Pagination>
+                                                    <Pagination.First
+                                                        onClick={
+                                                            handleFirstPage
+                                                        }
+                                                    />
+                                                    <Pagination.Prev
+                                                        onClick={handlePrevPage}
+                                                    />
+                                                    {Array.from(
+                                                        {
+                                                            length: totalPages,
+                                                        },
+                                                        (_, index) => (
+                                                            <Pagination.Item
+                                                                key={index + 1}
+                                                                active={
+                                                                    index +
+                                                                        1 ===
+                                                                    currentPage
+                                                                }
+                                                                onClick={() =>
+                                                                    handlePageChange(
+                                                                        index +
+                                                                            1
+                                                                    )
+                                                                }
+                                                            >
+                                                                {index + 1}
+                                                            </Pagination.Item>
+                                                        )
+                                                    )}
+                                                    <Pagination.Next
+                                                        onClick={handleNextPage}
+                                                    />
+                                                    <Pagination.Last
+                                                        onClick={handleLastPage}
+                                                    />
+                                                </Pagination>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

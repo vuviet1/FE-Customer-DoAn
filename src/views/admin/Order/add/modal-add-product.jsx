@@ -104,7 +104,7 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
 
         try {
             await request.post("add-to-cart", selectedProducts);
-            toast.success("Thêm sản phẩm thành công!", {
+            toast.success("Thêm sản phẩm vào giỏ hàng thành công!", {
                 position: "top-right",
             });
             onAddProduct();

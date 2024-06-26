@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, Fragment, useLayoutEffect } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import $ from "jquery";
 import { toast } from "react-toastify";
 
 import Topbar from "../components/topbar";
@@ -45,31 +44,6 @@ function OrderAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
-
-    useLayoutEffect(() => {
-        let table;
-        if (orders && orders.length > 0) {
-            $(document).ready(function () {
-                table = $("#dataTableHover").DataTable({
-                    searching: false,
-                    language: {
-                        lengthMenu: "Hiển thị _MENU_ mục",
-                        zeroRecords: "Không tìm thấy dữ liệu",
-                        info: "Hiển thị _START_ đến _END_ của _TOTAL_ mục",
-                        infoEmpty: "Không có mục nào để hiển thị",
-                        infoFiltered: "(lọc từ _MAX_ tổng số mục)",
-                    },
-                    lengthMenu: [5, 10, 25, 50],
-                    pageLength: 5,
-                });
-            });
-        }
-        return () => {
-            if (table) {
-                table.destroy();
-            }
-        };
-    }, [orders]);
 
     const handleAddOrder = () => {
         setShowAddModal(false);
