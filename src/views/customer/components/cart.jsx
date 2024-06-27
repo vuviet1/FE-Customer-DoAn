@@ -47,7 +47,15 @@ function Cart(props) {
     const calculateTotalPrice = () => {
         return cartItems.reduce(
             (total, item) =>
-                total + item.quantity * item.product_detail.product.price,
+                total + item.quantity * item.product_detail.product.price
+                    ? item.product_detail.product.price.toLocaleString(
+                          "vi-VN",
+                          {
+                              style: "currency",
+                              currency: "VND",
+                          }
+                      )
+                    : "N/A",
             0
         );
     };
@@ -127,11 +135,16 @@ function Cart(props) {
                                             </Link>
                                             <span className="header-cart-item-info">
                                                 {item.quantity} x{" "}
-                                                {
-                                                    item.product_detail.product
-                                                        .price
-                                                }{" "}
-                                                VNĐ
+                                                {item.product_detail.product
+                                                    .price
+                                                    ? item.product_detail.product.price.toLocaleString(
+                                                          "vi-VN",
+                                                          {
+                                                              style: "currency",
+                                                              currency: "VND",
+                                                          }
+                                                      )
+                                                    : "N/A"}
                                             </span>
                                             <button
                                                 className="btn-remove-cart-item cl8 hov-btn3 trans-04 flex-c-m"
@@ -154,7 +167,7 @@ function Cart(props) {
                         )}
                         <div className="w-full">
                             <div className="header-cart-total w-full p-tb-40">
-                                Tổng: {calculateTotalPrice()} VNĐ
+                                Tổng: {calculateTotalPrice()}
                             </div>
                             <div className="header-cart-buttons flex-w w-full">
                                 <Link

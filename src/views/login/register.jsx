@@ -19,13 +19,11 @@ function Register() {
             password,
             confirm_password: confirmPassword,
         }
-
-        console.log(dataLogin);
         try {
             const response = await request.post("auth/register", dataLogin);
             console.log(response.data);
             console.log("Check user successfully:", response.data);
-            window.location.href='http://localhost:3000'
+            window.location.href='/login'
         } catch (error) {
             console.error("Failed to check user:", error);
         }

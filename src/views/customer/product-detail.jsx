@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Form } from "react-bootstrap";
+import { Button, Image } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 
 import Header from "./components/header";
@@ -10,23 +10,30 @@ import Cart from "./components/cart";
 import Footer from "./components/footer";
 import request from "../../utils/request";
 import { getErrorMessage } from "../../utils/errorMessages";
-
-import ScriptManager from "../../utils/ScriptManager";
-import { customerScripts } from "../../App";
+import FavoriteButton from "./components/FavoriteButton";
 
 function ProductDetail() {
     const navigate = useNavigate();
     const productId = sessionStorage.getItem("productId");
 
+    // Load trang
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedDetailId, setSelectedDetailId] = useState(null);
+    // Chọn màu/kích cỡ/số lượng
+    const [selectedColor, setSelectedColor] = useState(null);
+    const [selectedSize, setSelectedSize] = useState(null);
+    const [availableColors, setAvailableColors] = useState([]);
+    const [availableSizes, setAvailableSizes] = useState([]);
     const [quantity, setQuantity] = useState(1);
+    // Ảnh
+    const [images, setImages] = useState([]);
+    const [defaultImage, setDefaultImage] = useState(null);
+    const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
         if (!productId) {
-            console.error("Product id là undefined không tồn tại");
+            console.error("Product id is undefined");
             navigate("/product");
             return;
         }
@@ -34,17 +41,29 @@ function ProductDetail() {
         const fetchProduct = async () => {
             try {
                 const response = await request.get(`/product/${productId}`);
-                setProduct(response.data.data);
+                const fetchedProduct = response.data.data;
+                setProduct(fetchedProduct);
+                setAvailableColors(
+                    fetchedProduct.product_details.map(
+                        (detail) => detail.color.color
+                    )
+                );
+                setAvailableSizes(
+                    fetchedProduct.product_details.map(
+                        (detail) => detail.size.size
+                    )
+                );
+                setDefaultImage(fetchedProduct.image);
                 setLoading(false);
             } catch (error) {
-                let errorMessage = "Hiển thị sản phẩm thất bại: ";
+                let errorMessage = "Lỗi khi lấy dữ liệu sản phẩm: ";
                 if (error.response && error.response.status) {
                     errorMessage += getErrorMessage(error.response.status);
                 } else {
                     errorMessage += error.message;
                 }
                 toast.error(errorMessage, { position: "top-right" });
-                setError("Failed to load product data");
+                setError("Lỗi khi lấy dữ liệu sản phẩm");
                 setLoading(false);
             }
         };
@@ -52,12 +71,127 @@ function ProductDetail() {
         fetchProduct();
     }, [productId, navigate]);
 
-    const handleSelectProductDetail = (e) => {
-        setSelectedDetailId(e.target.value);
+    useEffect(() => {
+        if (selectedColor && selectedSize) {
+            const selectedDetail = product.product_details.find(
+                (detail) =>
+                    detail.color.color === selectedColor &&
+                    detail.size.size === selectedSize
+            );
+
+            if (selectedDetail) {
+                fetchImages(selectedDetail.product_detail_id);
+            }
+        } else {
+            // Reset to default image when no size or color selected
+            setImages([]);
+            setDefaultImage(product ? product.image : null);
+        }
+    }, [selectedColor, selectedSize, product]);
+
+    const fetchImages = async (productDetailId) => {
+        try {
+            const response = await request.get(`library/${productDetailId}`);
+            setImages(response.data.data);
+        } catch (error) {
+            let errorMessage = "Lỗi khi lấy dữ liệu: ";
+            if (error.response && error.response.status) {
+                errorMessage += getErrorMessage(error.response.status);
+            } else {
+                errorMessage += error.message;
+            }
+            toast.error(errorMessage, { position: "top-right" });
+            console.error("Lỗi khi lấy dữ liệu:", error);
+        }
+    };
+
+    const handleSelectColor = (color) => {
+        if (selectedColor === color) {
+            setSelectedColor(null); // Bỏ chọn nếu đã được chọn trước đó
+            setSelectedSize(null); // Đồng thời reset kích cỡ đã chọn
+            setAvailableSizes(
+                product.product_details.map((detail) => detail.size.size)
+            ); // Hiển thị lại tất cả các kích cỡ có sẵn
+            setAvailableColors(
+                product.product_details.map((detail) => detail.color.color)
+            ); // Hiển thị lại tất cả các kích cỡ có sẵn
+            setDefaultImage(product ? product.image : null); // Reset lại ảnh mặc định
+            setImages([]); // Xóa danh sách ảnh đã chọn
+            setCurrentSlide(0); // Reset vị trí slide
+        } else {
+            setSelectedColor(color);
+
+            // Lấy danh sách các kích cỡ có sẵn cho màu sắc đã chọn
+            const sizesForSelectedColor = product.product_details
+                .filter((detail) => detail.color.color === color)
+                .map((detail) => detail.size.size);
+
+            // Cập nhật danh sách kích cỡ có sẵn và disable những kích cỡ không có sẵn
+            setAvailableSizes(sizesForSelectedColor);
+
+            // Lấy chi tiết sản phẩm cho màu và kích cỡ đã chọn để lấy ảnh
+            const selectedDetail = product.product_details.find(
+                (detail) =>
+                    detail.color.color === color &&
+                    detail.size.size === selectedSize
+            );
+
+            if (selectedDetail) {
+                fetchImages(selectedDetail.product_detail_id);
+            } else {
+                setDefaultImage(product ? product.image : null); // Reset lại ảnh mặc định
+                setImages([]); // Xóa danh sách ảnh đã chọn
+                setCurrentSlide(0); // Reset vị trí slide
+            }
+        }
+    };
+
+    const handleSelectSize = (size) => {
+        if (selectedSize === size) {
+            setSelectedSize(null); // Bỏ chọn nếu đã được chọn trước đó
+            setSelectedColor(null); // Đồng thời reset màu sắc đã chọn
+            setAvailableColors(
+                product.product_details.map((detail) => detail.color.color)
+            ); // Hiển thị lại tất cả các kích cỡ có sẵn
+            setAvailableSizes(
+                product.product_details.map((detail) => detail.size.size)
+            ); // Hiển thị lại tất cả các kích cỡ có sẵn
+            setDefaultImage(product ? product.image : null); // Reset lại ảnh mặc định
+            setImages([]); // Xóa danh sách ảnh đã chọn
+            setCurrentSlide(0); // Reset vị trí slide
+        } else {
+            setSelectedSize(size);
+
+            // Lấy danh sách các màu có sẵn cho kích cỡ đã chọn
+            const colorForSelectedSize = product.product_details
+                .filter((detail) => detail.size.size === size)
+                .map((detail) => detail.color.color);
+
+            // Cập nhật danh sách màu có sẵn và disable những màu không có sẵn
+            setAvailableColors(colorForSelectedSize);
+
+            // Lấy chi tiết sản phẩm cho màu và kích cỡ đã chọn để lấy ảnh
+            const selectedDetail = product.product_details.find(
+                (detail) =>
+                    detail.color.color === selectedColor &&
+                    detail.size.size === size
+            );
+
+            if (selectedDetail) {
+                fetchImages(selectedDetail.product_detail_id);
+            } else {
+                setDefaultImage(product ? product.image : null); // Reset lại ảnh mặc định
+                setImages([]); // Xóa danh sách ảnh đã chọn
+                setCurrentSlide(0); // Reset vị trí slide
+            }
+        }
     };
 
     const handleQuantityChange = (e) => {
-        const newQuantity = Math.max(1, Number(e.target.value));
+        let newQuantity = Math.max(1, Number(e.target.value));
+        if (isNaN(newQuantity)) {
+            newQuantity = 1;
+        }
         setQuantity(newQuantity);
     };
 
@@ -73,36 +207,49 @@ function ProductDetail() {
         e.preventDefault();
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
-        
-        if (!selectedDetailId || quantity < 1) {
-            toast.error("Hãy chọn phân loại sản phẩm và số lượng hợp lệ.", {
-                position: "top-right"
+
+        if (!selectedColor || !selectedSize || quantity < 1) {
+            toast.error("Hãy chọn phân loại của sản phẩm và số lượng.", {
+                position: "top-right",
             });
             return;
         }
-    
+
+        const selectedDetail = product.product_details.find(
+            (detail) =>
+                detail.color.color === selectedColor &&
+                detail.size.size === selectedSize
+        );
+
+        if (!selectedDetail) {
+            toast.error("Lỗi dữ liệu.", {
+                position: "top-right",
+            });
+            return;
+        }
+
         try {
             request.defaults.headers.common[
                 "Authorization"
             ] = `${token_type} ${access_token}`;
             await request.post("add-to-cart", [
                 {
-                    product_detail_id: Number(selectedDetailId),
+                    product_detail_id: Number(selectedDetail.product_detail_id),
                     quantity: quantity,
                 },
             ]);
-            toast.success("Thêm sản phẩm vào giỏ hàng thành công!", {
-                position: "top-right"
+            toast.success("Sản phẩm thêm vào giỏ hàng thành công!", {
+                position: "top-right",
             });
         } catch (error) {
-            let errorMessage = "Thêm sản phẩm vào giỏ hàng thất bại: ";
+            let errorMessage = "Sản phẩm thêm vào giỏ hàng thất bại: ";
             if (error.response && error.response.status) {
                 errorMessage += getErrorMessage(error.response.status);
             } else {
                 errorMessage += error.message;
             }
             toast.error(errorMessage, {
-                position: "top-right"
+                position: "top-right",
             });
         }
     };
@@ -111,13 +258,48 @@ function ProductDetail() {
         return <div>Loading...</div>;
     }
 
-    if (!product) {
-        return <div>Product not found</div>;
+    if (error) {
+        return <div>Error: {error}</div>;
     }
 
-    if (error) {
-        return <div>{error}</div>;
-    }
+    // Ảnh phân loại sản phẩm
+    const renderSlides = () => {
+        const slideStyle = {
+            transform: `translateX(-${currentSlide * 100}%)`,
+        };
+
+        if (!selectedColor || !selectedSize) {
+            return (
+                <div className="slide-product" style={slideStyle}>
+                    <Image
+                        src={`http://127.0.0.1:8000/uploads/product/${defaultImage}`}
+                        alt="Default Product Image"
+                    />
+                </div>
+            );
+        } else {
+            return images.map((image, index) => (
+                <div key={index} className="slide-product" data-thumb={image}>
+                    <Image
+                        src={`http://127.0.0.1:8000/uploads/library/${image.image}`}
+                        alt="Selected Product Image"
+                    />
+                </div>
+            ));
+        }
+    };
+
+    const nextSlide = () => {
+        setCurrentSlide(
+            currentSlide === images.length - 1 ? 0 : currentSlide + 1
+        );
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide(
+            currentSlide === 0 ? images.length - 1 : currentSlide - 1
+        );
+    };
 
     return (
         <Fragment>
@@ -132,7 +314,7 @@ function ProductDetail() {
                     backgroundImage: 'url("assets/customer/images/bg-01.jpg")',
                 }}
             >
-                <h2 className="ltext-105 cl0 txt-center">SẢN PHẨM</h2>
+                <h2 className="ltext-105 cl0 txt-center">CHI TIẾT SẢN PHẨM</h2>
             </section>
             <>
                 {/* breadcrumb */}
@@ -163,28 +345,35 @@ function ProductDetail() {
                         <div className="row">
                             <div className="col-md-6 col-lg-7 p-b-30">
                                 <div className="p-l-25 p-r-30 p-lr-0-lg">
-                                    <div className="wrap-slick3 flex-sb flex-w">
-                                        <div className="wrap-slick3-dots" />
-                                        <div className="wrap-slick3-arrows flex-sb-m flex-w" />
-                                        <div className="slick3 gallery-lb">
-                                            <div
-                                                className="item-slick3"
-                                                data-thumb={`http://127.0.0.1:8000/uploads/product/${product.image}`}
-                                            >
-                                                <div className="wrap-pic-w pos-relative">
-                                                    <img
-                                                        src={`http://127.0.0.1:8000/uploads/product/${product.image}`}
-                                                        alt="IMG-PRODUCT"
-                                                    />
-                                                    <a
-                                                        className="flex-c-m size-108 hov-btn3 trans-04"
-                                                        href={`http://127.0.0.1:8000/uploads/product/${product.image}`}
-                                                    >
-                                                        {/* <i className="fa fa-expand" /> */}
-                                                    </a>
-                                                </div>
-                                            </div>
+                                    <div className="custom-slider-product">
+                                        <div
+                                            className="slides-product"
+                                            style={{
+                                                transform: `translateX(-${
+                                                    currentSlide * 100
+                                                }%)`,
+                                            }}
+                                        >
+                                            {renderSlides()}
                                         </div>
+                                        {selectedColor &&
+                                            selectedSize &&
+                                            images.length > 1 && (
+                                                <div className="controls-product">
+                                                    <button
+                                                        className="control-button-product"
+                                                        onClick={prevSlide}
+                                                    >
+                                                        &#10094;
+                                                    </button>
+                                                    <button
+                                                        className="control-button-product"
+                                                        onClick={nextSlide}
+                                                    >
+                                                        &#10095;
+                                                    </button>
+                                                </div>
+                                            )}
                                     </div>
                                 </div>
                             </div>
@@ -194,54 +383,117 @@ function ProductDetail() {
                                         {product.product_name}
                                     </h4>
                                     <span className="mtext-106 cl2">
-                                        {product.price} VNĐ
+                                        {product.price
+                                            ? product.price.toLocaleString(
+                                                  "vi-VN",
+                                                  {
+                                                      style: "currency",
+                                                      currency: "VND",
+                                                  }
+                                              )
+                                            : "N/A"}
                                     </span>
                                     <p className="stext-102 cl3 p-t-23">
                                         {product.description}
                                     </p>
-                                    {/*  */}
+                                    {/* Product options */}
                                     <div className="p-t-33">
                                         <div className="flex-w flex-r-m p-b-10">
                                             <div className="size-203 flex-c-m respon6">
-                                                Các loại sản phẩm
+                                                Màu sắc
                                             </div>
-                                            <div className="size-204 respon6-next">
-                                                <Form.Select
-                                                    className="form-select"
-                                                    onChange={
-                                                        handleSelectProductDetail
-                                                    }
-                                                >
-                                                    <option value="">
-                                                        Chọn
-                                                    </option>
-                                                    {product.product_details.map(
-                                                        (detail) => (
-                                                            <option
-                                                                key={
-                                                                    detail.product_detail_id
-                                                                }
-                                                                value={
-                                                                    detail.product_detail_id
-                                                                }
-                                                            >
-                                                                Màu:{" "}
-                                                                {
-                                                                    detail.color
-                                                                        .color
-                                                                }{" "}
-                                                                -- Kích cỡ:{" "}
-                                                                {
-                                                                    detail.size
-                                                                        .size
-                                                                }
-                                                            </option>
+                                            <div
+                                                className="size-204 respon6-next"
+                                                toggle={true}
+                                            >
+                                                {Array.from(
+                                                    new Set(
+                                                        product.product_details.map(
+                                                            (detail) =>
+                                                                detail.color
+                                                                    .color
                                                         )
-                                                    )}
-                                                </Form.Select>
-                                                <div className="select-dropdown" />
+                                                    )
+                                                ).map((color) => (
+                                                    <Button
+                                                        key={color}
+                                                        style={{
+                                                            marginRight: "5px",
+                                                        }}
+                                                        variant={
+                                                            selectedColor ===
+                                                            color
+                                                                ? "warning"
+                                                                : availableColors.includes(
+                                                                      color
+                                                                  )
+                                                                ? "outline-warning"
+                                                                : "outline-secondary"
+                                                        }
+                                                        onClick={() =>
+                                                            handleSelectColor(
+                                                                color
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !availableColors.includes(
+                                                                color
+                                                            )
+                                                        }
+                                                    >
+                                                        {color}
+                                                    </Button>
+                                                ))}
                                             </div>
                                         </div>
+                                        <div className="flex-w flex-r-m p-b-10">
+                                            <div className="size-203 flex-c-m respon6">
+                                                Kích cỡ
+                                            </div>
+                                            <div
+                                                className="size-204 respon6-next"
+                                                toggle={true}
+                                            >
+                                                {Array.from(
+                                                    new Set(
+                                                        product.product_details.map(
+                                                            (detail) =>
+                                                                detail.size.size
+                                                        )
+                                                    )
+                                                ).map((size) => (
+                                                    <Button
+                                                        key={size}
+                                                        style={{
+                                                            marginRight: "5px",
+                                                        }}
+                                                        variant={
+                                                            selectedSize ===
+                                                            size
+                                                                ? "info"
+                                                                : availableSizes.includes(
+                                                                      size
+                                                                  )
+                                                                ? "outline-info"
+                                                                : "outline-dark"
+                                                        }
+                                                        onClick={() =>
+                                                            handleSelectSize(
+                                                                size
+                                                            )
+                                                        }
+                                                        disabled={
+                                                            !availableSizes.includes(
+                                                                size
+                                                            )
+                                                        }
+                                                    >
+                                                        {size}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        {/* Quantity selection */}
                                         <div className="flex-w flex-r-m p-b-10">
                                             <div className="size-204 flex-w flex-m respon6-next">
                                                 <div className="wrap-num-product flex-w m-r-20 m-tb-10">
@@ -261,7 +513,6 @@ function ProductDetail() {
                                                         onChange={
                                                             handleQuantityChange
                                                         }
-                                                        min={1}
                                                     />
                                                     <div
                                                         className="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
@@ -273,7 +524,7 @@ function ProductDetail() {
                                                     </div>
                                                 </div>
                                                 <Button
-                                                    className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
+                                                    className="flex-c-m stext-101 cl2 size-101 bg8 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
                                                     onClick={handleAddToCart}
                                                 >
                                                     Thêm vào giỏ hàng
@@ -281,17 +532,12 @@ function ProductDetail() {
                                             </div>
                                         </div>
                                     </div>
-                                    {/*  */}
+                                    {/* Share icons */}
                                     <div className="flex-w flex-m p-l-100 p-t-40 respon7">
-                                        <div className="flex-m bor9 p-r-10 m-r-11">
-                                            <a
-                                                href="#"
-                                                className="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 js-addwish-detail tooltip100"
-                                                data-tooltip="Thêm vào yêu thích"
-                                            >
-                                                <i className="zmdi zmdi-favorite" />
-                                            </a>
-                                        </div>
+                                        <FavoriteButton
+                                            productId={product.product_id}
+                                        />
+                                        {/* Social media icons */}
                                         <a
                                             href="#"
                                             className="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 tooltip100"
@@ -319,16 +565,24 @@ function ProductDetail() {
                         </div>
                     </div>
                 </section>
+                {/* Related Products */}
+                <section className="sec-relate-product bg0 p-t-45 p-b-105">
+                    <div className="container">
+                        <div className="p-b-45">
+                            <h3 className="ltext-106 cl5 txt-center">
+                                Sản phẩm có liên quan
+                            </h3>
+                        </div>
+                        {/* Placeholder for related products */}
+                        <div className="wrap-slick2">
+                            <div className="slick2">
+                                {/* Add your related products here */}
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </>
-            {/* Footer */}
             <Footer />
-            {/* Back to top */}
-            <div className="btn-back-to-top" id="myBtn">
-                <span className="symbol-btn-back-to-top">
-                    <i className="zmdi zmdi-chevron-up" />
-                </span>
-            </div>
-            <ScriptManager urls={customerScripts} idPrefix="customer" />
         </Fragment>
     );
 }

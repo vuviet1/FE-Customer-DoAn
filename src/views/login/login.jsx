@@ -14,17 +14,14 @@ function Login() {
         const dataLogin = {
             email,
             password,
-            // remember,
         };
         try {
             const response = await request.post("auth/login", dataLogin);
             const { access_token, token_type } = response.data;
 
-            // Lưu token vào localStorage
             localStorage.setItem("access_token", access_token);
             localStorage.setItem("token_type", token_type);
 
-            // Thêm token vào header cho các yêu cầu tiếp theo
             request.defaults.headers.common[
                 "Authorization"
             ] = `${token_type} ${access_token}`;

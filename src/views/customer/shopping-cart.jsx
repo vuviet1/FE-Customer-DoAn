@@ -71,6 +71,7 @@ function ShoppingCart() {
         e.preventDefault();
 
         const orderData = {
+            shipping_code:"",
             voucher_code: "",
             name,
             address,
@@ -303,13 +304,19 @@ function ShoppingCart() {
                                                                     }
                                                                 </td>
                                                                 <td>
-                                                                    {
-                                                                        item
-                                                                            .product_detail
-                                                                            .product
-                                                                            .price
-                                                                    }
-                                                                    VNĐ
+                                                                    {item
+                                                                        .product_detail
+                                                                        .product
+                                                                        .price
+                                                                        ? item.product_detail.product.price.toLocaleString(
+                                                                              "vi-VN",
+                                                                              {
+                                                                                  style: "currency",
+                                                                                  currency:
+                                                                                      "VND",
+                                                                              }
+                                                                          )
+                                                                        : "N/A"}
                                                                 </td>
                                                                 <td>
                                                                     {
@@ -370,12 +377,20 @@ function ShoppingCart() {
                                                                     </div>
                                                                 </td>
                                                                 <td>
-                                                                    {item.quantity *
+                                                                    {(
+                                                                        item.quantity *
                                                                         item
                                                                             .product_detail
                                                                             .product
-                                                                            .price}{" "}
-                                                                    VNĐ
+                                                                            .price
+                                                                    ).toLocaleString(
+                                                                        "vi-VN",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "VND",
+                                                                        }
+                                                                    )}
                                                                 </td>
                                                                 <td>
                                                                     <Button
@@ -455,7 +470,13 @@ function ShoppingCart() {
                                     Tổng tiền:
                                 </Form.Label>
                                 <Form.Label className="size-209 mtext-110 cl2">
-                                    {calculateTotalPrice()} VNĐ
+                                    {calculateTotalPrice().toLocaleString(
+                                        "vi-VN",
+                                        {
+                                            style: "currency",
+                                            currency: "VND",
+                                        }
+                                    )}
                                 </Form.Label>
                             </Form.Group>
                             <div className="row">

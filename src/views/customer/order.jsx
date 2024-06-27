@@ -71,6 +71,7 @@ function Orders() {
             const updatedOrders = orders.filter(
                 (order) => order.id !== orderId
             );
+            fetchOrders();
             setOrders(updatedOrders);
             setFilteredOrders(updatedOrders);
             setShowRemoveModal(false);
@@ -90,7 +91,7 @@ function Orders() {
     };
 
     const handleShowProductModal = (orderId) => {
-        setSelectedOrderId(orderId); // Set selected order ID
+        setSelectedOrderId(orderId);
         setShowProductModal(true);
     };
 
@@ -170,7 +171,14 @@ function Orders() {
                                                                 {order.address}
                                                             </td>
                                                             <td>
-                                                                {order.total}
+                                                                {order.total.toLocaleString(
+                                                                        "vi-VN",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "VND",
+                                                                        }
+                                                                    )}
                                                             </td>
                                                             <td>
                                                                 {order.status ===

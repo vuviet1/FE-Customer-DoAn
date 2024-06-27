@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { Modal, Button, Table, Form, Collapse } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
@@ -125,7 +125,7 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
     };
 
     return (
-        <>
+        <Fragment>
             <ToastContainer />
             <Modal show={show} onHide={handleClose} size="lg" centered>
                 <Modal.Header closeButton>
@@ -362,7 +362,7 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
                     </Modal.Footer>
                 </Form>
             </Modal>
-        </>
+        </Fragment>
     );
 }
 

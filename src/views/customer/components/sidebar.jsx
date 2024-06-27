@@ -103,7 +103,7 @@ function Sidebar() {
                                 <>
                                     <li className="p-b-13">
                                         <Link
-                                            to={"/"}
+                                            to={"/favorite"}
                                             className="stext-102 cl2 hov-cl1 trans-04"
                                         >
                                             Sản phẩm yêu thích

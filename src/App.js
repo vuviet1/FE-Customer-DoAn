@@ -2,8 +2,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-// Import your views
-// Login and register
+// Đăng nhập đăng ký
 import Login from "./views/login/login";
 import Register from "./views/login/register";
 import Forgot from "./views/login/forgot";
@@ -17,6 +16,7 @@ import Contact from './views/customer/contact';
 import About from './views/customer/about';
 import Order from './views/customer/order';
 import Account from './views/customer/account';
+import Favorite from './views/customer/favorite';
 
 // Admin
 import HomeAdmin from "./views/admin/home";
@@ -33,6 +33,7 @@ import SizeAdmin from "./views/admin/Size";
 import VoucherAdmin from "./views/admin/Voucher";
 import ProfileAdmin from "./views/admin/profile";
 
+// Utils
 import ProtectedRoute from "./views/admin/components/ProtectedRoute";
 import ScriptManager from './utils/ScriptManager';
 import StyleManager from './utils/StyleManager';
@@ -97,6 +98,7 @@ const customerRoutes = [
   { path: '/product-detail', element: <ProductDetail /> },
   { path: '/about', element: <About /> },
   { path: '/account', element: <Account /> },
+  { path: '/favorite', element: <Favorite /> },
 ];
 
 // Define script and style URLs
@@ -110,14 +112,13 @@ export const customerScripts = [
   "assets/customer/vendor/daterangepicker/daterangepicker.js",
   "assets/customer/vendor/slick/slick.min.js",
   "assets/customer/js/slick-custom.js",
-  "assets/customer/vendor/parallax100/parallax100.js", // Ensure this path is correct
+  "assets/customer/vendor/parallax100/parallax100.js",
   "assets/customer/vendor/MagnificPopup/jquery.magnific-popup.min.js",
   "assets/customer/vendor/isotope/isotope.pkgd.min.js",
   "assets/customer/vendor/sweetalert/sweetalert.min.js",
   "assets/customer/vendor/perfect-scrollbar/perfect-scrollbar.min.js",
   "assets/customer/js/main.js",
 ];
-
 
 export const customerStyles = [
   "assets/customer/vendor/bootstrap/css/bootstrap.min.css",
@@ -134,6 +135,9 @@ export const customerStyles = [
   "assets/customer/vendor/perfect-scrollbar/perfect-scrollbar.css",
   "assets/customer/css/util.css",
   "assets/customer/css/main.css",
+  "assets/customer/css/detail.css",
+  "assets/customer/css/product.css",
+  "assets/customer/css/filter.css",
 ];
 
 // Admin routes

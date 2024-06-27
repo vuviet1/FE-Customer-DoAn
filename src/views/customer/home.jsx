@@ -3,7 +3,7 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -13,6 +13,7 @@ import Banner from "./components/banner";
 import Footer from "./components/footer";
 import ProductModal from "./components/modal";
 import request from "../../utils/request";
+import FavoriteButton from "./components/FavoriteButton";
 
 function Home() {
     const [products, setProducts] = useState([]);
@@ -49,6 +50,7 @@ function Home() {
 
     return (
         <Fragment>
+            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />
@@ -122,36 +124,38 @@ function Home() {
                                                 {product.product_name}
                                             </Link>
                                             <span className="stext-105 cl3">
-                                                {product.price} VNĐ
+                                                {product.price
+                                                    ? product.price.toLocaleString(
+                                                          "vi-VN",
+                                                          {
+                                                              style: "currency",
+                                                              currency: "VND",
+                                                          }
+                                                      )
+                                                    : "N/A"}
                                             </span>
                                         </div>
                                         <div className="block2-txt-child2 flex-r p-t-3">
-                                            <a
-                                                href="#"
-                                                className="btn-addwish-b2 dis-block pos-relative js-addwish-b2"
-                                            >
-                                                <img
-                                                    className="icon-heart1 dis-block trans-04"
-                                                    src="assets/customer/images/icons/icon-heart-01.png"
-                                                    alt="ICON"
-                                                />
-                                                <img
-                                                    className="icon-heart2 dis-block trans-04 ab-t-l"
-                                                    src="assets/customer/images/icons/icon-heart-02.png"
-                                                    alt="ICON"
-                                                />
-                                            </a>
+                                            <FavoriteButton
+                                                productId={product.product_id}
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <div style={{  width:"100%", display:"flex", justifyContent:"center" }}>
+                    <div
+                        style={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                        }}
+                    >
                         <Link
                             to={"/product"}
                             className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
-                            style={{ width:"25%" }}
+                            style={{ width: "25%" }}
                         >
                             Hiển thị thêm
                         </Link>

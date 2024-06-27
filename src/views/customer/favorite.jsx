@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment, useState, useEffect } from "react";
@@ -14,7 +15,7 @@ import ProductModal from "./components/modal";
 import FavoriteButton from "./components/FavoriteButton";
 import request from "../../utils/request";
 
-function Product() {
+function Favorite() {
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [isFilterOpen, setFilterOpen] = useState(false);
@@ -46,27 +47,20 @@ function Product() {
         sessionStorage.setItem("productId", product.product_id);
     };
 
-    useEffect(() => {
-        const fetchProduct = async (retryCount = 0) => {
-            try {
-                const response = await request.get("product");
-                setProducts(response.data.data);
-                setFilteredProducts(response.data.data);
-            } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 429 &&
-                    retryCount < 3
-                ) {
-                    setTimeout(() => fetchProduct(retryCount + 1), 2000); // Retry after 2 seconds
-                } else {
-                    toast.error("Lấy dữ liệu thất bại.", {
-                        position: "top-right",
-                    });
-                }
-            }
-        };
+    const fetchProduct = async () => {
+        try {
+            const response = await request.get("favourite");
+            const productsData = response.data.data.map(item => item.product);
+            setProducts(productsData);
+            setFilteredProducts(productsData);
+        } catch (error) {
+            toast.error("Lấy dữ liệu thất bại.", {
+                position: "top-right",
+            });
+        }
+    };
 
+    useEffect(() => {
         fetchProduct();
     }, []);
 
@@ -172,6 +166,10 @@ function Product() {
     const brandChunks = splitArray(brands, Math.ceil(brands.length / 2));
     const categoryChunks = splitArray(category, Math.ceil(category.length / 2));
 
+    const handleFavoriteChange = () => {
+        fetchProduct();
+    };
+
     return (
         <Fragment>
             <ToastContainer />
@@ -185,7 +183,7 @@ function Product() {
                     backgroundImage: 'url("assets/customer/images/bg-01.jpg")',
                 }}
             >
-                <h2 className="ltext-105 cl0 txt-center">SẢN PHẨM</h2>
+                <h2 className="ltext-105 cl0 txt-center">SẢN PHẨM YÊU THÍCH</h2>
             </section>
 
             <div className="bg0 m-t-23 p-b-140">
@@ -279,35 +277,42 @@ function Product() {
                                                     Tất cả
                                                 </a>
                                             </li>
-                                            {brandChunks.map((chunk, index) => (
-                                                <ul key={index}>
-                                                    {chunk.map((brand) => (
-                                                        <li
-                                                            className="p-b-6"
-                                                            key={brand.brand_id}
-                                                        >
-                                                            <a
-                                                                href="#"
-                                                                className={`filter-link stext-106 trans-04 ${
-                                                                    selectedBrand ===
+                                            {brandChunks.map(
+                                                (chunk, chunkIndex) => (
+                                                    <div
+                                                        className="filter-col2"
+                                                        key={chunkIndex}
+                                                    >
+                                                        {chunk.map((brand) => (
+                                                            <li
+                                                                className="p-b-6"
+                                                                key={
                                                                     brand.brand_id
-                                                                        ? "filter-link-active"
-                                                                        : ""
-                                                                }`}
-                                                                onClick={() =>
-                                                                    setSelectedBrand(
-                                                                        brand.brand_id
-                                                                    )
                                                                 }
                                                             >
-                                                                {
-                                                                    brand.brand_name
-                                                                }
-                                                            </a>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ))}
+                                                                <a
+                                                                    href="#"
+                                                                    className={`filter-link stext-106 trans-04 ${
+                                                                        selectedBrand ===
+                                                                        brand.brand_id
+                                                                            ? "filter-link-active"
+                                                                            : ""
+                                                                    }`}
+                                                                    onClick={() =>
+                                                                        setSelectedBrand(
+                                                                            brand.brand_id
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        brand.brand_name
+                                                                    }
+                                                                </a>
+                                                            </li>
+                                                        ))}
+                                                    </div>
+                                                )
+                                            )}
                                         </ul>
                                     </div>
                                     <div className="filter-col p-r-15 p-b-27">
@@ -331,8 +336,11 @@ function Product() {
                                                 </a>
                                             </li>
                                             {categoryChunks.map(
-                                                (chunk, index) => (
-                                                    <ul key={index}>
+                                                (chunk, chunkIndex) => (
+                                                    <div
+                                                        className="filter-col2"
+                                                        key={chunkIndex}
+                                                    >
                                                         {chunk.map(
                                                             (category) => (
                                                                 <li
@@ -362,75 +370,95 @@ function Product() {
                                                                 </li>
                                                             )
                                                         )}
-                                                    </ul>
+                                                    </div>
                                                 )
                                             )}
+                                        </ul>
+                                    </div>
+                                    <div className="filter-col p-r-15 p-b-27">
+                                        <div className="mtext-102 cl2 p-b-15">
+                                            Giá
+                                        </div>
+                                        <ul>
+                                            <li className="p-b-6">
+                                                <a
+                                                    href="#"
+                                                    className="filter-link stext-106 trans-04 filter-link-active"
+                                                >
+                                                    Tất cả
+                                                </a>
+                                            </li>
+                                            <li className="p-b-6">
+                                                <a
+                                                    href="#"
+                                                    className="filter-link stext-106 trans-04"
+                                                >
+                                                    Dưới 50 triệu
+                                                </a>
+                                            </li>
+                                            <li className="p-b-6">
+                                                <a
+                                                    href="#"
+                                                    className="filter-link stext-106 trans-04"
+                                                >
+                                                    50 triệu - 100 triệu
+                                                </a>
+                                            </li>
+                                            <li className="p-b-6">
+                                                <a
+                                                    href="#"
+                                                    className="filter-link stext-106 trans-04"
+                                                >
+                                                    Trên 100 triệu
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                         </CSSTransition>
                     </div>
-
-                    {/* Display a message if no products are found */}
-                    {currentProducts.length === 0 && (
-                        <div className="flex-c-m flex-w w-full p-b-52">
-                            <p className="stext-113 cl6">
-                                Không có sản phẩm nào
-                            </p>
-                        </div>
-                    )}
-
-                    {/* Product */}
-                    <div
-                        className="row isotope-grid"
-                        style={{ minHeight: "450px", position: "relative" }}
-                        display="flex"
-                        flexwrap="wrap"
-                    >
+                    <div className="row isotope-grid">
                         {currentProducts.map((product) => (
                             <div
                                 key={product.product_id}
-                                className="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item"
+                                className="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women"
                             >
-                                <div
-                                    className="block2"
-                                    style={{ height: "420px" }}
-                                >
-                                    <div
-                                        className="block2-pic hov-img0"
-                                        style={{ height: "300px" }}
-                                    >
+                                <div className="block2">
+                                    <div className="block2-pic hov-img0">
                                         <Image
-                                            src={
-                                                "http://127.0.0.1:8000/uploads/product/" +
-                                                product.image
-                                            }
+                                            src={"http://127.0.0.1:8000/uploads/product/" + product.image}
                                             style={{
                                                 height: "300px",
                                                 width: "300px",
                                             }}
                                             alt="IMG-PRODUCT"
+                                            fluid
+                                            // onClick={() =>
+                                            //     handleProductClick(
+                                            //         product.product_id
+                                            //     )
+                                            // }
                                         />
-                                        <Link
+                                        {/* <Link
                                             className="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1"
                                             onClick={() =>
                                                 handleQuickView(product)
                                             }
                                         >
                                             Xem nhanh
-                                        </Link>
+                                        </Link> */}
                                     </div>
                                     <div className="block2-txt flex-w flex-t p-t-14">
                                         <div className="block2-txt-child1 flex-col-l ">
                                             <Link
-                                                key={product.product_id}
+                                                to="#"
+                                                className="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6"
                                                 onClick={() =>
                                                     handleProductClick(
                                                         product.product_id
                                                     )
                                                 }
-                                                className="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6"
                                             >
                                                 {product.product_name}
                                             </Link>
@@ -446,10 +474,13 @@ function Product() {
                                                     : "N/A"}
                                             </span>
                                         </div>
-                                        {/* Sản phẩm yêu thích */}
                                         <div className="block2-txt-child2 flex-r p-t-3">
                                             <FavoriteButton
                                                 productId={product.product_id}
+                                                isFavorite={product.is_favourite}
+                                                onFavoriteChange={
+                                                    handleFavoriteChange
+                                                }
                                             />
                                         </div>
                                     </div>
@@ -457,27 +488,42 @@ function Product() {
                             </div>
                         ))}
                     </div>
-                    {/* Pagination */}
-                    <div className="flex-c-m flex-w w-full p-t-45">
+                    <div className="flex-c-m flex-w w-full p-t-38">
                         <Pagination>
-                            <Pagination.First onClick={handleFirstPage} />
-                            <Pagination.Prev onClick={handlePrevPage} />
-                            {Array.from({ length: totalPages }, (_, index) => (
-                                <Pagination.Item
-                                    key={index + 1}
-                                    active={index + 1 === currentPage}
-                                    onClick={() => handlePageChange(index + 1)}
-                                >
-                                    {index + 1}
-                                </Pagination.Item>
-                            ))}
-                            <Pagination.Next onClick={handleNextPage} />
-                            <Pagination.Last onClick={handleLastPage} />
+                            <Pagination.First
+                                onClick={handleFirstPage}
+                                disabled={currentPage === 1}
+                            />
+                            <Pagination.Prev
+                                onClick={handlePrevPage}
+                                disabled={currentPage === 1}
+                            />
+                            {Array.from(
+                                { length: totalPages },
+                                (_, index) => (
+                                    <Pagination.Item
+                                        key={index + 1}
+                                        active={index + 1 === currentPage}
+                                        onClick={() =>
+                                            handlePageChange(index + 1)
+                                        }
+                                    >
+                                        {index + 1}
+                                    </Pagination.Item>
+                                )
+                            )}
+                            <Pagination.Next
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                            />
+                            <Pagination.Last
+                                onClick={handleLastPage}
+                                disabled={currentPage === totalPages}
+                            />
                         </Pagination>
                     </div>
                 </div>
             </div>
-
             <Footer />
             {selectedProduct && (
                 <ProductModal
@@ -489,4 +535,5 @@ function Product() {
         </Fragment>
     );
 }
-export default Product;
+
+export default Favorite;
