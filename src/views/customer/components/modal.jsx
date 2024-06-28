@@ -224,9 +224,15 @@ const ProductModal = ({ showModal, handleClose, product }) => {
             });
             handleClose();
         } catch (error) {
-            toast.error("Thêm sản phẩm vào giỏ hàng thất bại", {
-                position: "top-right",
-            });
+            if(!access_token){
+                toast.warning("Hãy đăng nhập để sử dụng chức năng này", {
+                    position: "top-right",
+                });
+            } else{
+                toast.error("Thêm sản phẩm vào giỏ hàng thất bại", {
+                    position: "top-right",
+                });
+            }
         }
     };
 
@@ -286,7 +292,12 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                         <p>{error}</p>
                     ) : (
                         <div className="product-detail-container">
-                            <div style={{ display:"flex", justifyContent:"center" }}>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "center",
+                                }}
+                            >
                                 <h4 className="mtext-105 cl2 js-name-detail p-b-14">
                                     {product.product_name}
                                 </h4>
@@ -342,6 +353,24 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                                 </div>
                                 <div className="col-8">
                                     <div className="product-detail-info">
+                                        <div>
+                                            Giá tiền: {" "}
+                                            <span
+                                                className="stext-105 cl3"
+                                                style={{ color: "red" }}
+                                            >
+                                                {product.price
+                                                    ? product.price.toLocaleString(
+                                                          "vi-VN",
+                                                          {
+                                                              style: "currency",
+                                                              currency: "VND",
+                                                          }
+                                                      )
+                                                    : "N/A"}
+                                            </span>
+                                        </div>
+
                                         <p>Mô tả: {product.description}</p>
                                         <div className="p-t-33">
                                             <div className="flex-w flex-r-m p-b-10">

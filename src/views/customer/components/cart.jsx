@@ -15,6 +15,7 @@ function Cart(props) {
     const fetchCartItems = async () => {
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
+        if (!access_token) return;
         request.defaults.headers.common[
             "Authorization"
         ] = `${token_type} ${access_token}`;

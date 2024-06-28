@@ -25,11 +25,25 @@ function Account() {
         status: 1,
     });
 
-    useEffect(() => {
+    const fetchData = async () => {
         const userData = JSON.parse(localStorage.getItem("user_data"));
-        if (userData) {
-            setCustomer(userData);
+        const userId = userData.user_id;
+        if (userId) {
+            try {
+                const response = await request.get(
+                    `user/${userId}`
+                );
+                setCustomer(response.data.data);
+            } catch (error) {
+                toast.error("Lấy dữ liệu thất bại", {
+                    position: "top-right",
+                });
+            }
         }
+    };
+
+    useEffect(() => {
+        fetchData()
     }, []);
 
     const updateCustomer = async (e) => {
@@ -58,11 +72,11 @@ function Account() {
                 avatar:images[0],
             };
             localStorage.setItem("user_data", JSON.stringify(updatedCustomer));
-            setCustomer(updatedCustomer);
             
             toast.success("Cập nhật thông tin thành công!", {
                 position: "top-right",
             });
+            fetchData()
         } catch (error) {
             toast.error("Cập nhật thông tin thất bại.", {
                 position: "top-right",
@@ -150,6 +164,7 @@ function Account() {
                                                         onChange={
                                                             handleInputChange
                                                         }
+                                                        required
                                                     />
                                                 </Form.Group>
 
@@ -164,6 +179,7 @@ function Account() {
                                                         onChange={
                                                             handleInputChange
                                                         }
+                                                        required
                                                     />
                                                 </Form.Group>
 
@@ -192,6 +208,7 @@ function Account() {
                                                         onChange={
                                                             handleInputChange
                                                         }
+                                                        required
                                                     />
                                                 </Form.Group>
 
@@ -206,6 +223,7 @@ function Account() {
                                                         onChange={
                                                             handleInputChange
                                                         }
+                                                        required
                                                     />
                                                 </Form.Group>
                                             </div>

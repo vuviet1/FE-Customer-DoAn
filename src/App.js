@@ -167,6 +167,5 @@ const adminScripts = [
 const adminStyles = [
   "assets/admin/vendors/fontawesome-free/css/all.min.css",
   "assets/admin/vendors/bootstrap/css/bootstrap.min.css",
-  "assets/admin/css/ruang-admin.min.css",
-  "assets/admin/vendors/datatables/dataTables.bootstrap4.min.css",
+  "assets/admin/css/ruang-admin.min.css", 
 ];

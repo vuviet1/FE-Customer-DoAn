@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Image, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+
 import request from "../../utils/request";
 
 function Login() {
@@ -30,7 +32,6 @@ function Login() {
             const userResponse = await request.post("auth/me");
             const userData = userResponse.data;
 
-            console.log(userData);
             localStorage.setItem("user_data", JSON.stringify(userData));
 
             if (userData.role === 1) {
@@ -41,7 +42,9 @@ function Login() {
                 window.location.href = '/';
             }
         } catch (error) {
-            console.error("Failed to check user:", error);
+            toast.error("Đăng nhập thất bại.", {
+                position: "top-right",
+            });
         }
     };
 
@@ -50,6 +53,8 @@ function Login() {
     };
 
     return (
+        <>
+        <ToastContainer />
         <div className="login">
             <link
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
@@ -117,19 +122,6 @@ function Login() {
                 </div>
                 <div className="login__check">
                     <div className="login__check-group">
-                        {/* <input
-                            type="checkbox"
-                            className="login__check-input"
-                            id="login-check"
-                            value={remember}
-                            onChange={(e) => setRemember(e.target.value)}
-                        />
-                        <label
-                            htmlFor="login-check"
-                            className="login__check-label"
-                        >
-                            Ghi nhớ tôi
-                        </label> */}
                     </div>
 
                     <div className="login__check-group"></div>
@@ -149,6 +141,7 @@ function Login() {
                 </p>
             </Form>
         </div>
+        </>
     );
 }
 

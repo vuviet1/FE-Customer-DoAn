@@ -3,6 +3,9 @@
 import React, { Fragment, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "react-bootstrap";
+import { toast } from "react-toastify";
+
+import request from "../../../utils/request";
 
 function Sidebar() {
     const [customer, setCustomer] = useState({
@@ -16,11 +19,27 @@ function Sidebar() {
         status: 1,
     });
 
-    useEffect(() => {
+    const fetchData = async () => {
+        const access_token = localStorage.getItem("access_token");
+        if (!access_token) return;
         const userData = JSON.parse(localStorage.getItem("user_data"));
-        if (userData) {
-            setCustomer(userData);
+        const userId = userData.user_id;
+        if (userId) {
+            try {
+                const response = await request.get(
+                    `user/${userId}`
+                );
+                setCustomer(response.data.data);
+            } catch (error) {
+                toast.error("Lấy dữ liệu thất bại", {
+                    position: "top-right",
+                });
+            }
         }
+    };
+
+    useEffect(() => {
+        fetchData()
     }, []);
 
     const handleLogout = () => {

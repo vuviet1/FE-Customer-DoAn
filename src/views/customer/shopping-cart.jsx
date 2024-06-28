@@ -56,6 +56,7 @@ function ShoppingCart() {
             "Authorization"
         ] = `${token_type} ${access_token}`;
         try {
+            if (!access_token) return;
             const response = await request.get("cart");
             const cartData = response.data.data;
             setCartItems(cartData);
@@ -303,7 +304,7 @@ function ShoppingCart() {
                                                                             .product_name
                                                                     }
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ color:"red" }}>
                                                                     {item
                                                                         .product_detail
                                                                         .product
@@ -376,7 +377,7 @@ function ShoppingCart() {
                                                                         </div>
                                                                     </div>
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ color:"red" }}>
                                                                     {(
                                                                         item.quantity *
                                                                         item
@@ -469,7 +470,7 @@ function ShoppingCart() {
                                 <Form.Label className="size-208 stext-110 cl2">
                                     Tổng tiền:
                                 </Form.Label>
-                                <Form.Label className="size-209 mtext-110 cl2">
+                                <Form.Label className="size-209 mtext-110 cl2" style={{ color:"red" }}>
                                     {calculateTotalPrice().toLocaleString(
                                         "vi-VN",
                                         {

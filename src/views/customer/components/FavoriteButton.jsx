@@ -9,6 +9,8 @@ const FavoriteButton = ({ productId, onFavoriteChange  }) => {
     useEffect(() => {
         const checkIfFavorite = async () => {
             const access_token = localStorage.getItem("access_token");
+            if (!access_token) return;
+
             try {
                 const response = await request.get("favourite", {
                     headers: {
@@ -29,6 +31,13 @@ const FavoriteButton = ({ productId, onFavoriteChange  }) => {
 
     const handleAddToFavorites = async () => {
         const access_token = localStorage.getItem("access_token");
+        if (!access_token) {
+            toast.warning("Chưa đăng nhập. Vui lòng đăng nhập để thêm sản phẩm vào yêu thích.", {
+                position: "top-right",
+            });
+            return;
+        }
+
         if (isFavorite) {
             try {
                 await request.delete(`favourite/${productId}`, {

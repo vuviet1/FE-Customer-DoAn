@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Form, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import request from "../../utils/request";
+import { toast, ToastContainer } from "react-toastify";
 
 function Forgot() {
     const [email, setEmail] = useState("");
@@ -11,13 +12,19 @@ function Forgot() {
         try {
             const response = await request.post("auth/me", email);
             console.log(response.data);
-            console.log("Check user successfully:", response.data);
+            toast.success("Kiểm tra người dùng thành công. Hãy kiểm tra email!", {
+                position: "top-right",
+            });
         } catch (error) {
-            console.error("Failed to check user:", error);
+            toast.error("Kiểm tra người dùng thất bại.", {
+                position: "top-right",
+            });
         }
     };
 
     return (
+        <>
+        <ToastContainer />
         <div className="login">
             <link
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
@@ -64,6 +71,7 @@ function Forgot() {
                 </p>
             </Form>
         </div>
+        </>
     );
 }
 export default Forgot;

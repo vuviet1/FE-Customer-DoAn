@@ -12,6 +12,9 @@ import request from "../../utils/request";
 import { getErrorMessage } from "../../utils/errorMessages";
 import FavoriteButton from "./components/FavoriteButton";
 
+import ScriptManager from "../../utils/ScriptManager";
+import { customerScripts } from "../../App";
+
 function ProductDetail() {
     const navigate = useNavigate();
     const productId = sessionStorage.getItem("productId");
@@ -382,7 +385,7 @@ function ProductDetail() {
                                     <h4 className="mtext-105 cl2 js-name-detail p-b-14">
                                         {product.product_name}
                                     </h4>
-                                    <span className="mtext-106 cl2">
+                                    <span className="mtext-106 cl2" style={{ color:"red" }}>
                                         {product.price
                                             ? product.price.toLocaleString(
                                                   "vi-VN",
@@ -583,6 +586,13 @@ function ProductDetail() {
                 </section>
             </>
             <Footer />
+            {/* Back to top */}
+            <div className="btn-back-to-top" id="myBtn">
+                <span className="symbol-btn-back-to-top">
+                    <i className="zmdi zmdi-chevron-up" />
+                </span>
+            </div>
+            <ScriptManager urls={customerScripts} idPrefix="customer" />
         </Fragment>
     );
 }

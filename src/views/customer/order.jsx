@@ -27,6 +27,7 @@ function Orders() {
 
     const fetchOrders = async () => {
         const access_token = localStorage.getItem("access_token");
+        if (!access_token) return;
         request.defaults.headers.common[
             "Token"
         ] = `${access_token}`;
@@ -170,7 +171,7 @@ function Orders() {
                                                             <td>
                                                                 {order.address}
                                                             </td>
-                                                            <td>
+                                                            <td style={{ color: "red" }}>
                                                                 {order.total.toLocaleString(
                                                                         "vi-VN",
                                                                         {

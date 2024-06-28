@@ -434,7 +434,7 @@ function Product() {
                                             >
                                                 {product.product_name}
                                             </Link>
-                                            <span className="stext-105 cl3">
+                                            <span className="stext-105 cl3" style={{ color:"red" }}>
                                                 {product.price
                                                     ? product.price.toLocaleString(
                                                           "vi-VN",

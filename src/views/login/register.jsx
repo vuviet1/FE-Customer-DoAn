@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Image, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+
 import request from "../../utils/request";
 
 function Register() {
@@ -13,19 +15,53 @@ function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const dataLogin = {
+        const dataRegis = {
             name,
             email,
             password,
             confirm_password: confirmPassword,
         }
+
+        const dataLogin = {
+            email: dataRegis.email,
+            password: dataRegis.password,
+        };
+
         try {
-            const response = await request.post("auth/register", dataLogin);
-            console.log(response.data);
-            console.log("Check user successfully:", response.data);
-            window.location.href='/login'
+            await request.post("auth/register", dataRegis);
+            toast.success("Đăng ký thành công.", {
+                position: "top-right",
+            });
+            // 
+            const response = await request.post("auth/login", dataLogin);
+            const { access_token, token_type } = response.data;
+
+            localStorage.setItem("access_token", access_token);
+            localStorage.setItem("token_type", token_type);
+
+            request.defaults.headers.common[
+                "Authorization"
+            ] = `${token_type} ${access_token}`;
+
+            // Kiểm tra role người dùng
+            const userResponse = await request.post("auth/me");
+            const userData = userResponse.data;
+
+            localStorage.setItem("user_data", JSON.stringify(userData));
+
+            if (userData.role === 1) {
+                window.location.reload();
+                window.location.href = '/admin-home';
+            } else if (userData.role === 0) {
+                window.location.reload();
+                window.location.href = '/';
+            }
+            
+            // window.location.href='/login'
         } catch (error) {
-            console.error("Failed to check user:", error);
+            toast.error("Đăng ký thất bại.", {
+                position: "top-right",
+            });
         }
     };
 
@@ -40,6 +76,8 @@ function Register() {
 
 
     return (
+        <>
+        <ToastContainer />
         <div className="login">
             <link
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
@@ -159,6 +197,7 @@ function Register() {
                 </p>
             </Form>
         </div>
+        </>
     );
 }
 export default Register;
