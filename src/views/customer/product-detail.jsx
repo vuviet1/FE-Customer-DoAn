@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Button, Image } from "react-bootstrap";
+import { Button, Image, Spinner } from "react-bootstrap";
 import { toast, ToastContainer } from "react-toastify";
 
 import Header from "./components/header";
@@ -245,20 +245,38 @@ function ProductDetail() {
                 position: "top-right",
             });
         } catch (error) {
-            let errorMessage = "Sản phẩm thêm vào giỏ hàng thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
+            if (!access_token) {
+                toast.warning(
+                    "Chưa đăng nhập. Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.",
+                    {
+                        position: "top-right",
+                    }
+                );
             } else {
-                errorMessage += error.message;
+                let errorMessage = "Sản phẩm thêm vào giỏ hàng thất bại: ";
+                if (error.response && error.response.status) {
+                    errorMessage += getErrorMessage(error.response.status);
+                } else {
+                    errorMessage += error.message;
+                }
+                toast.error(errorMessage, {
+                    position: "top-right",
+                });
             }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
         }
     };
 
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div
+                className="d-flex justify-content-center align-items-center"
+                style={{ minHeight: "200px" }}
+            >
+                <Spinner animation="border" role="status">
+                    <span className="sr-only">Loading...</span>
+                </Spinner>
+            </div>
+        );
     }
 
     if (error) {
@@ -385,7 +403,10 @@ function ProductDetail() {
                                     <h4 className="mtext-105 cl2 js-name-detail p-b-14">
                                         {product.product_name}
                                     </h4>
-                                    <span className="mtext-106 cl2" style={{ color:"red" }}>
+                                    <span
+                                        className="mtext-106 cl2"
+                                        style={{ color: "red" }}
+                                    >
                                         {product.price
                                             ? product.price.toLocaleString(
                                                   "vi-VN",
@@ -397,6 +418,15 @@ function ProductDetail() {
                                             : "N/A"}
                                     </span>
                                     <p className="stext-102 cl3 p-t-23">
+                                        <strong>- Thương hiệu: </strong>
+                                        {product.brand.brand_name}
+                                    </p>
+                                    <p className="stext-102 cl3 p-t-23">
+                                        <strong>- Danh mục: </strong>
+                                        {product.category.category_name}
+                                    </p>
+                                    <p className="stext-102 cl3 p-t-23">
+                                        <strong>- Mô tả: </strong>
                                         {product.description}
                                     </p>
                                     {/* Product options */}

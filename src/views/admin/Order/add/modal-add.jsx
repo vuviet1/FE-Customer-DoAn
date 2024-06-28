@@ -55,6 +55,7 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
             payment_method_id: paymentMethodId,
             shipping_method_id: shippingMethodId,
             voucher_code: "",
+            shipping_code:"",
         };
 
         request.defaults.headers.common[

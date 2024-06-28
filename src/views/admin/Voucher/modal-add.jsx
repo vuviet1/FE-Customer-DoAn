@@ -30,6 +30,7 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
             }
 
             await request.post("voucher", {
+                voucher_code: "",
                 voucher: voucher.voucher,
                 quantity: voucher.quantity,
                 start_day: voucher.start_day,
@@ -87,7 +88,7 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
                                 onChange={(e) =>
                                     setVoucher({
                                         ...voucher,
-                                        status: e.target.value,
+                                        quantity: e.target.value,
                                     })
                                 }
                             />
@@ -100,7 +101,7 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
                                 onChange={(e) =>
                                     setVoucher({
                                         ...voucher,
-                                        status: e.target.value,
+                                        start_day: e.target.value,
                                     })
                                 }
                             />
@@ -113,7 +114,7 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
                                 onChange={(e) =>
                                     setVoucher({
                                         ...voucher,
-                                        status: e.target.value,
+                                        end_day: e.target.value,
                                     })
                                 }
                                 disabled={!voucher.start_day}

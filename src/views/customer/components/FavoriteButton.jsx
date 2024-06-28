@@ -32,7 +32,7 @@ const FavoriteButton = ({ productId, onFavoriteChange  }) => {
     const handleAddToFavorites = async () => {
         const access_token = localStorage.getItem("access_token");
         if (!access_token) {
-            toast.warning("Chưa đăng nhập. Vui lòng đăng nhập để thêm sản phẩm vào yêu thích.", {
+            toast.warning("Chưa đăng nhập. Vui lòng đăng nhập để thêm sản phẩm yêu thích.", {
                 position: "top-right",
             });
             return;
