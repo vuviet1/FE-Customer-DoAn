@@ -76,7 +76,7 @@ function Account() {
             toast.success("Cập nhật thông tin thành công!", {
                 position: "top-right",
             });
-            fetchData()
+            window.location.reload();
         } catch (error) {
             toast.error("Cập nhật thông tin thất bại.", {
                 position: "top-right",

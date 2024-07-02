@@ -22,6 +22,8 @@ function ProductAdmin() {
     const [showAddDetailModal, setShowAddDetailModal] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredProduct, setFilteredProduct] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
@@ -29,6 +31,7 @@ function ProductAdmin() {
         try {
             const response = await request.get("product");
             setProducts(response.data.data);
+            setFilteredProduct(response.data.data);
         } catch (error) {
             let errorMessage = "Hiển thị sản phẩm thất bại: ";
             if (error.response && error.response.status) {
@@ -46,6 +49,11 @@ function ProductAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterProduct(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -127,6 +135,34 @@ function ProductAdmin() {
         }
     };
 
+    // Lọc và tìm kiếm
+    const filterProduct = (query, status) => {
+        let filtered = products;
+        if (query) {
+            filtered = filtered.filter((product) =>
+                product.product_name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter(
+                (product) => product.status.toString() === status
+            );
+        }
+        setFilteredProduct(filtered);
+    };
+
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
+
+    const offset = (currentPage - 1) * itemsPerPage;
+    const currentItems = filteredProduct.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredProduct.length / itemsPerPage);
+
     const ProductTableBody = ({
         products,
         handleEditButtonClick,
@@ -162,6 +198,35 @@ function ProductAdmin() {
                                 style={{ width: "100px", height: "100px" }}
                                 thumbnail="true"
                             />
+                        </td>
+                        <td style={{ textAlign: "left" }}>
+                            {!product.discount ? (
+                                <span className="discounted-price">
+                                    {product.price.toLocaleString("vi-VN", {
+                                        style: "currency",
+                                        currency: "VND",
+                                    })}
+                                </span>
+                            ) : (
+                                <div className="price-container">
+                                    <span className="original-price">
+                                        {product.price.toLocaleString("vi-VN", {
+                                            style: "currency",
+                                            currency: "VND",
+                                        })}
+                                    </span>
+                                    <span className="arrow">→</span>
+                                    <span className="discounted-price">
+                                        {(
+                                            product.price *
+                                            (1 - product.discount / 100)
+                                        ).toLocaleString("vi-VN", {
+                                            style: "currency",
+                                            currency: "VND",
+                                        })}
+                                    </span>
+                                </div>
+                            )}
                         </td>
                         <td style={{ textAlign: "left" }}>
                             {product.total_quantity}
@@ -221,14 +286,6 @@ function ProductAdmin() {
         );
     };
 
-    const filteredProducts = products.filter((product) =>
-        product.product_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const offset = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredProducts.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-
     return (
         <Fragment>
             <div id="wrapper">
@@ -264,17 +321,39 @@ function ProductAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Sản phẩm
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Tìm kiếm sản phẩm..."
-                                                    value={searchTerm}
-                                                    onChange={(e) =>
-                                                        setSearchTerm(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
+                                            <div className="col-10">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo tên sản phẩm..."
+                                                            value={searchTerm}
+                                                            onChange={
+                                                                handleSearchTermChange
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <Form.Control
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={
+                                                                handleStatusFilterChange
+                                                            }
+                                                        >
+                                                            <option value="">
+                                                                Tất cả trạng
+                                                                thái
+                                                            </option>
+                                                            <option value="1">
+                                                                Sử dụng
+                                                            </option>
+                                                            <option value="0">
+                                                                Không sử dụng
+                                                            </option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                             <Button
@@ -309,6 +388,14 @@ function ProductAdmin() {
                                                             }}
                                                         >
                                                             Hình ảnh
+                                                        </th>
+                                                        <th
+                                                            style={{
+                                                                textAlign:
+                                                                    "left",
+                                                            }}
+                                                        >
+                                                            Giá sản phẩm
                                                         </th>
                                                         <th
                                                             style={{

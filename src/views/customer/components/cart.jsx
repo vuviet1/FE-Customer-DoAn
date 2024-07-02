@@ -46,19 +46,15 @@ function Cart(props) {
     };
 
     const calculateTotalPrice = () => {
-        return cartItems.reduce(
-            (total, item) =>
-                total + item.quantity * item.product_detail.product.price
-                    ? item.product_detail.product.price.toLocaleString(
-                          "vi-VN",
-                          {
-                              style: "currency",
-                              currency: "VND",
-                          }
-                      )
-                    : "N/A",
-            0
-        );
+        const total = cartItems.reduce((total, item) => {
+            const discountPrice = item.product_detail.product.price * (1 - item.product_detail.product.discount / 100);
+            return total + item.quantity * discountPrice;
+        }, 0);
+        
+        return total.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        });
     };
 
     const handleProductClick = (productId) => {
@@ -136,16 +132,17 @@ function Cart(props) {
                                             </Link>
                                             <span className="header-cart-item-info">
                                                 {item.quantity} x{" "}
-                                                {item.product_detail.product
-                                                    .price
-                                                    ? item.product_detail.product.price.toLocaleString(
-                                                          "vi-VN",
-                                                          {
-                                                              style: "currency",
-                                                              currency: "VND",
-                                                          }
-                                                      )
-                                                    : "N/A"}
+                                                {(
+                                                    item.product_detail.product
+                                                        .price *
+                                                    (1 -
+                                                        item.product_detail
+                                                            .product.discount /
+                                                            100)
+                                                ).toLocaleString("vi-VN", {
+                                                    style: "currency",
+                                                    currency: "VND",
+                                                })}
                                             </span>
                                             <button
                                                 className="btn-remove-cart-item cl8 hov-btn3 trans-04 flex-c-m"

@@ -1,0 +1,32 @@
+.discount-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: red;
+  color: white;
+  width: 40px; /* Đặt kích thước cố định cho hình tròn */
+  height: 40px;
+  display: flex; /* Để căn giữa văn bản */
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center; /* Căn giữa văn bản */
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: grey;
+}
+
+.discounted-price {
+  color: red;
+  font-weight: bold;
+}
+
+.arrow {
+  margin: 0 5px; /* Khoảng cách giữa mũi tên và giá */
+  color: black;
+}
+  

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useEffect, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
@@ -20,12 +21,15 @@ function CategoryAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredCategory, setFilteredCategory] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("category");
             setCategories(response.data.data);
+            setFilteredCategory(response.data.data);
         } catch (error) {
             let errorMessage = "Hiển thị danh mục thất bại: ";
             if (error.response && error.response.status) {
@@ -43,6 +47,11 @@ function CategoryAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterCategory(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleEditButtonClick = async (category_id) => {
         setSelectedCategoryId(category_id);
@@ -102,16 +111,31 @@ function CategoryAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
+    // Lọc và tìm kiếm
+    const filterCategory = (query, status) => {
+        let filtered = categories;
+        if (query) {
+            filtered = filtered.filter((category) =>
+                category.category_name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter((category) => category.status.toString() === status);
+        }
+        setFilteredCategory(filtered);
     };
 
-    const filteredCategories = categories.filter((category) =>
-        category.category_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
+    
     const offset = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredCategories.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+    const currentItems = filteredCategory.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredCategory.length / itemsPerPage);
 
     const CategoryTableBody = ({
         categories,
@@ -210,15 +234,28 @@ function CategoryAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Danh sách danh mục
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Group controlId="search">
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Tìm kiếm..."
-                                                        value={searchTerm}
-                                                        onChange={handleSearchChange}
-                                                    />
-                                                </Form.Group>
+                                            <div className="col-9">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo tên danh mục..."
+                                                            value={searchTerm}
+                                                            onChange={handleSearchTermChange}
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                    <Form.Control 
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={handleStatusFilterChange}
+                                                        >
+                                                            <option value="">Tất cả trạng thái</option>
+                                                            <option value="1">Sử dụng</option>
+                                                            <option value="0">Không sử dụng</option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Button
                                                 variant="primary"

@@ -72,7 +72,7 @@ function ShoppingCart() {
         e.preventDefault();
 
         const orderData = {
-            shipping_code:"",
+            shipping_code: "",
             voucher_code: "",
             name,
             address,
@@ -184,11 +184,17 @@ function ShoppingCart() {
     const currentPageItems = filteredItems.slice(offset, offset + itemsPerPage);
 
     const calculateTotalPrice = () => {
-        return filteredItems.reduce(
-            (total, item) =>
-                total + item.quantity * item.product_detail.product.price,
-            0
-        );
+        const total = filteredItems.reduce((total, item) => {
+            const discountPrice =
+                item.product_detail.product.price *
+                (1 - item.product_detail.product.discount / 100);
+            return total + item.quantity * discountPrice;
+        }, 0);
+
+        return total.toLocaleString("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        });
     };
 
     const handleProductClick = (productId) => {
@@ -229,7 +235,7 @@ function ShoppingCart() {
                         <span className="stext-109 cl4">Giỏ hàng</span>
                     </div>
                 </div>
-                {/* Shopping Cart */}
+                {/* Giỏ hàng */}
                 <div className="bg0 p-t-75 p-b-85">
                     <div className="container">
                         <div className="row">
@@ -304,20 +310,30 @@ function ShoppingCart() {
                                                                             .product_name
                                                                     }
                                                                 </td>
-                                                                <td style={{ color:"red" }}>
-                                                                    {item
-                                                                        .product_detail
-                                                                        .product
-                                                                        .price
-                                                                        ? item.product_detail.product.price.toLocaleString(
-                                                                              "vi-VN",
-                                                                              {
-                                                                                  style: "currency",
-                                                                                  currency:
-                                                                                      "VND",
-                                                                              }
-                                                                          )
-                                                                        : "N/A"}
+                                                                <td
+                                                                    style={{
+                                                                        color: "red",
+                                                                    }}
+                                                                >
+                                                                    {(
+                                                                        item
+                                                                            .product_detail
+                                                                            .product
+                                                                            .price *
+                                                                        (1 -
+                                                                            item
+                                                                                .product_detail
+                                                                                .product
+                                                                                .discount /
+                                                                                100)
+                                                                    ).toLocaleString(
+                                                                        "vi-VN",
+                                                                        {
+                                                                            style: "currency",
+                                                                            currency:
+                                                                                "VND",
+                                                                        }
+                                                                    )}
                                                                 </td>
                                                                 <td>
                                                                     {
@@ -377,13 +393,23 @@ function ShoppingCart() {
                                                                         </div>
                                                                     </div>
                                                                 </td>
-                                                                <td style={{ color:"red" }}>
+                                                                <td
+                                                                    style={{
+                                                                        color: "red",
+                                                                    }}
+                                                                >
                                                                     {(
                                                                         item.quantity *
-                                                                        item
+                                                                        (item
                                                                             .product_detail
                                                                             .product
-                                                                            .price
+                                                                            .price *
+                                                                            (1 -
+                                                                                item
+                                                                                    .product_detail
+                                                                                    .product
+                                                                                    .discount /
+                                                                                    100))
                                                                     ).toLocaleString(
                                                                         "vi-VN",
                                                                         {
@@ -470,14 +496,11 @@ function ShoppingCart() {
                                 <Form.Label className="size-208 stext-110 cl2">
                                     Tổng tiền:
                                 </Form.Label>
-                                <Form.Label className="size-209 mtext-110 cl2" style={{ color:"red" }}>
-                                    {calculateTotalPrice().toLocaleString(
-                                        "vi-VN",
-                                        {
-                                            style: "currency",
-                                            currency: "VND",
-                                        }
-                                    )}
+                                <Form.Label
+                                    className="size-209 mtext-110 cl2"
+                                    style={{ color: "red" }}
+                                >
+                                    {calculateTotalPrice()}
                                 </Form.Label>
                             </Form.Group>
                             <div className="row">

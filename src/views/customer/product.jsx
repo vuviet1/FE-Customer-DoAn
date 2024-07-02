@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment, useState, useEffect } from "react";
@@ -20,7 +21,7 @@ function Product() {
     const [isFilterOpen, setFilterOpen] = useState(false);
     const [isSearchOpen, setSearchOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8; // Number of products per page
+    const itemsPerPage = 8;
 
     const toggleFilter = () => setFilterOpen(!isFilterOpen);
     const toggleSearch = () => setSearchOpen(!isSearchOpen);
@@ -47,23 +48,16 @@ function Product() {
     };
 
     useEffect(() => {
-        const fetchProduct = async (retryCount = 0) => {
+        const fetchProduct = async () => {
             try {
                 const response = await request.get("product");
                 setProducts(response.data.data);
                 setFilteredProducts(response.data.data);
             } catch (error) {
-                if (
-                    error.response &&
-                    error.response.status === 429 &&
-                    retryCount < 3
-                ) {
-                    setTimeout(() => fetchProduct(retryCount + 1), 2000); // Retry after 2 seconds
-                } else {
-                    toast.error("Lấy dữ liệu thất bại.", {
-                        position: "top-right",
-                    });
-                }
+                toast.error("Lấy dữ liệu thất bại.", {
+                    position: "top-right",
+                });
+                console.log(error);
             }
         };
 
@@ -384,7 +378,7 @@ function Product() {
                     {/* Product */}
                     <div
                         className="row isotope-grid"
-                        style={{ minHeight: "450px", position: "relative" }}
+                        style={{ minHeight: "auto" }}
                         display="flex"
                         flexwrap="wrap"
                     >
@@ -392,6 +386,7 @@ function Product() {
                             <div
                                 key={product.product_id}
                                 className="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item"
+                                style={{ minHeight: "450px" }}
                             >
                                 <div
                                     className="block2"
@@ -412,6 +407,12 @@ function Product() {
                                             }}
                                             alt="IMG-PRODUCT"
                                         />
+                                        {!product.discount ||
+                                            (product.discount !== 0 && (
+                                                <span className="discount-badge">
+                                                    {product.discount}% Off
+                                                </span>
+                                            ))}
                                         <Link
                                             className="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1"
                                             onClick={() =>
@@ -434,17 +435,44 @@ function Product() {
                                             >
                                                 {product.product_name}
                                             </Link>
-                                            <span className="stext-105 cl3" style={{ color:"red" }}>
-                                                {product.price
-                                                    ? product.price.toLocaleString(
-                                                          "vi-VN",
-                                                          {
-                                                              style: "currency",
-                                                              currency: "VND",
-                                                          }
-                                                      )
-                                                    : "N/A"}
-                                            </span>
+                                            {!product.discount ? (
+                                                <span className="discounted-price">
+                                                    {product.price.toLocaleString(
+                                                        "vi-VN",
+                                                        {
+                                                            style: "currency",
+                                                            currency: "VND",
+                                                        }
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <div className="price-container">
+                                                    <span className="original-price">
+                                                        {product.price.toLocaleString(
+                                                            "vi-VN",
+                                                            {
+                                                                style: "currency",
+                                                                currency: "VND",
+                                                            }
+                                                        )}
+                                                    </span>
+                                                    <span className="arrow">→</span>
+                                                    <span className="discounted-price">
+                                                        {(
+                                                            product.price *
+                                                            (1 -
+                                                                product.discount /
+                                                                    100)
+                                                        ).toLocaleString(
+                                                            "vi-VN",
+                                                            {
+                                                                style: "currency",
+                                                                currency: "VND",
+                                                            }
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                         {/* Sản phẩm yêu thích */}
                                         <div className="block2-txt-child2 flex-r p-t-3">

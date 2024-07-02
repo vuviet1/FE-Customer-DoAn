@@ -12,6 +12,7 @@ function EditVoucherModal({
     onUpdateVoucher,
 }) {
     const [voucher, setVoucher] = useState({
+        voucher_code: "",
         voucher: "",
         quantity: "",
         start_day: "",
@@ -26,7 +27,16 @@ function EditVoucherModal({
                     `voucher/${selectedVoucherId}`
                 );
                 if (response.data.data) {
-                    setVoucher(response.data.data);
+                    const fetchedVoucher = response.data.data;
+                    setVoucher({
+                        ...fetchedVoucher,
+                        start_day: new Date(fetchedVoucher.start_day)
+                            .toISOString()
+                            .split("T")[0],
+                        end_day: new Date(fetchedVoucher.end_day)
+                            .toISOString()
+                            .split("T")[0],
+                    });
                 } else {
                     console.error("No data returned from the API");
                 }
@@ -65,6 +75,7 @@ function EditVoucherModal({
             }
 
             await request.post(`voucher/${selectedVoucherId}?_method=PUT`, {
+                voucher_code: voucher.voucher_code,
                 voucher: voucher.voucher,
                 quantity: voucher.quantity,
                 start_day: voucher.start_day,
@@ -98,11 +109,25 @@ function EditVoucherModal({
             </Modal.Header>
             <Form onSubmit={updateVoucher}>
                 <Modal.Body>
-                    <Form.Group controlId="voucherEdit">
-                        <Form.Label>Voucher</Form.Label>
+                    <Form.Group controlId="voucherCodeEdit">
+                        <Form.Label>Tên mã giảm giá</Form.Label>
                         <Form.Control
                             type="text"
-                            placeholder="Cập nhật mã giảm giá ..."
+                            placeholder="Cập nhật tên mã giảm giá ..."
+                            value={voucher.voucher_code}
+                            onChange={(e) =>
+                                setVoucher({
+                                    ...voucher,
+                                    voucher_code: e.target.value,
+                                })
+                            }
+                        />
+                    </Form.Group>
+                    <Form.Group controlId="voucherEdit">
+                        <Form.Label>% giảm giá</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="Cập nhật % giảm giá ..."
                             value={voucher.voucher}
                             onChange={(e) =>
                                 setVoucher({

@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators */
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
@@ -20,6 +21,8 @@ function OrderAdmin() {
     const [showViewModal, setShowViewModal] = useState(false);
     const [showStatusModal, setShowStatusModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
@@ -34,6 +37,7 @@ function OrderAdmin() {
             ] = `${token_type} ${access_token}`;
             const response = await request.get("order");
             setOrders(response.data.data);
+            setFilteredOrders(response.data.data);
         } catch (error) {
             let errorMessage = "Hiển thị hóa đơn thất bại: ";
             if (error.response && error.response.status) {
@@ -49,6 +53,11 @@ function OrderAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterOrders(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleAddOrder = () => {
         setShowAddModal(false);
@@ -91,9 +100,28 @@ function OrderAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const filteredOrders = orders.filter((order) =>
-        order.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filterOrders = (query, status) => {
+        let filtered = orders;
+        if (query) {
+            filtered = filtered.filter((order) =>
+                order.name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter(
+                (order) => order.status.toString() === status
+            );
+        }
+        setFilteredOrders(filtered);
+    };
+
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
 
     const offset = (currentPage - 1) * itemsPerPage;
     const currentItems = filteredOrders.slice(offset, offset + itemsPerPage);
@@ -204,7 +232,13 @@ function OrderAdmin() {
                                 </Button>
                             )}
                         </td>
-                        <td style={{ textAlign: "left" }}>
+                        <td
+                            style={{
+                                textAlign: "left",
+                                color: "red",
+                                fontWeight: "bold",
+                            }}
+                        >
                             {order.total.toLocaleString("vi-VN", {
                                 style: "currency",
                                 currency: "VND",
@@ -218,12 +252,16 @@ function OrderAdmin() {
                             >
                                 <i className="far fa-eye" />
                             </Button>
-                            <Button
-                                variant="danger"
-                                onClick={() => deleteOrder(order.order_id)}
-                            >
-                                <i className="fas fa-trash" />
-                            </Button>
+                            {order.status === 1 || order.status === 2 || order.status === 3 ? (
+                                    <Button
+                                        variant="danger"
+                                        onClick={() =>
+                                            deleteOrder(order.order_id)
+                                        }
+                                    >
+                                        <i className="fas fa-trash" />
+                                    </Button>
+                            ): null}
                         </td>
                     </tr>
                 ))}
@@ -266,17 +304,48 @@ function OrderAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Đơn hàng
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Tìm kiếm theo tên khách hàng..."
-                                                    value={searchTerm}
-                                                    onChange={(e) =>
-                                                        setSearchTerm(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
+                                            <div className="col-10">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo tên khách hàng..."
+                                                            value={searchTerm}
+                                                            onChange={
+                                                                handleSearchTermChange
+                                                            }
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                        <Form.Control
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={
+                                                                handleStatusFilterChange
+                                                            }
+                                                        >
+                                                            <option value="">
+                                                                Tất cả trạng
+                                                                thái
+                                                            </option>
+                                                            <option value="0">
+                                                                Đã hủy
+                                                            </option>
+                                                            <option value="1">
+                                                                Chờ duyệt
+                                                            </option>
+                                                            <option value="2">
+                                                                Chờ lấy hàng
+                                                            </option>
+                                                            <option value="3">
+                                                                Đang giao hàng
+                                                            </option>
+                                                            <option value="4">
+                                                                Hoàn thành
+                                                            </option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Button
                                                 variant="primary"

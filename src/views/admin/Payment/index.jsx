@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Pagination, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -18,12 +19,15 @@ function PaymentAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredPayment, setFilteredPayment] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("payment");
             setPayments(response.data.data);
+            setFilteredPayment(response.data.data);
         } catch (error) {
             let errorMessage = "Hiển thị phương thức thanh toán thất bại: ";
             if (error.response && error.response.status) {
@@ -41,6 +45,11 @@ function PaymentAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterPayment(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleEditButtonClick = (payment_method_id) => {
         setSelectedPaymentId(payment_method_id);
@@ -105,16 +114,31 @@ function PaymentAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
+    // Lọc và tìm kiếm
+    const filterPayment = (query, status) => {
+        let filtered = payments;
+        if (query) {
+            filtered = filtered.filter((payment) =>
+                payment.payment_method.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter((payment) => payment.status.toString() === status);
+        }
+        setFilteredPayment(filtered);
     };
 
-    const filteredPayments = payments.filter((payment) =>
-        payment.payment_method.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
+
     const offset = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredPayments.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
+    const currentItems = filteredPayment.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredPayment.length / itemsPerPage);
 
     const PaymentTableBody = ({
         payments,
@@ -213,17 +237,28 @@ function PaymentAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Phương thức thanh toán
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Group controlId="search">
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Tìm kiếm..."
-                                                        value={searchTerm}
-                                                        onChange={
-                                                            handleSearchChange
-                                                        }
-                                                    />
-                                                </Form.Group>
+                                            <div className="col-9">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo tên phương thức thanh toán..."
+                                                            value={searchTerm}
+                                                            onChange={handleSearchTermChange}
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                    <Form.Control 
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={handleStatusFilterChange}
+                                                        >
+                                                            <option value="">Tất cả trạng thái</option>
+                                                            <option value="1">Sử dụng</option>
+                                                            <option value="0">Không sử dụng</option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Button
                                                 variant="primary"

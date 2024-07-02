@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -18,12 +19,15 @@ function VoucherAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredVoucher, setFilteredVoucher] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("voucher");
             setVouchers(response.data.data);
+            setFilteredVoucher(response.data.data)
         } catch (error) {
             let errorMessage = "Hiển thị mã giảm giá thất bại: ";
             if (error.response && error.response.status) {
@@ -41,6 +45,11 @@ function VoucherAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterVoucher(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleEditButtonClick = (voucher_id) => {
         setSelectedVoucherId(voucher_id);
@@ -101,16 +110,31 @@ function VoucherAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
+    // Lọc và tìm kiếm
+    const filterVoucher = (query, status) => {
+        let filtered = vouchers;
+        if (query) {
+            filtered = filtered.filter((voucher) =>
+                voucher.voucher_code.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter((voucher) => voucher.status.toString() === status);
+        }
+        setFilteredVoucher(filtered);
     };
 
-    const filteredVouchers = vouchers.filter((voucher) =>
-        voucher.voucher.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
+
     const offset = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredVouchers.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(filteredVouchers.length / itemsPerPage);
+    const currentItems = filteredVoucher.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredVoucher.length / itemsPerPage);
 
     const VoucherTableBody = ({ vouchers, handleEditButtonClick, deleteVoucher }) => {
         if (!vouchers || vouchers.length === 0) {
@@ -129,7 +153,7 @@ function VoucherAdmin() {
             <tbody>
                 {vouchers.map((voucher, index) => (
                     <tr key={index}>
-                        <td style={{ textAlign: "left" }}>{voucher.voucher_id}</td>
+                        <td style={{ textAlign: "left" }}>{voucher.voucher_code}</td>
                         <td style={{ textAlign: "left" }}>{voucher.voucher}</td>
                         <td style={{ textAlign: "left" }}>{voucher.quantity}</td>
                         <td style={{ textAlign: "left" }}>{voucher.start_day}</td>
@@ -187,15 +211,28 @@ function VoucherAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Danh sách mã giảm giá
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Group controlId="search">
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Tìm kiếm..."
-                                                        value={searchTerm}
-                                                        onChange={handleSearchChange}
-                                                    />
-                                                </Form.Group>
+                                            <div className="col-9">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo mã giảm giá..."
+                                                            value={searchTerm}
+                                                            onChange={handleSearchTermChange}
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                    <Form.Control 
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={handleStatusFilterChange}
+                                                        >
+                                                            <option value="">Tất cả trạng thái</option>
+                                                            <option value="1">Sử dụng</option>
+                                                            <option value="0">Không sử dụng</option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Button
                                                 variant="primary"
@@ -211,8 +248,8 @@ function VoucherAdmin() {
                                             >
                                                 <thead className="thead-light">
                                                     <tr>
-                                                        <th style={{ textAlign: "left" }}>Mã</th>
-                                                        <th style={{ textAlign: "left" }}>Tên Voucher</th>
+                                                        <th style={{ textAlign: "left" }}>Mã giảm giá</th>
+                                                        <th style={{ textAlign: "left" }}>% giảm giá</th>
                                                         <th style={{ textAlign: "left" }}>Số lượng</th>
                                                         <th style={{ textAlign: "left" }}>Ngày bắt đầu</th>
                                                         <th style={{ textAlign: "left" }}>Ngày kết thúc</th>

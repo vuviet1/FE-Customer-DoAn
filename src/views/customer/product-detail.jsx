@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -11,14 +12,15 @@ import Footer from "./components/footer";
 import request from "../../utils/request";
 import { getErrorMessage } from "../../utils/errorMessages";
 import FavoriteButton from "./components/FavoriteButton";
+import ProductDescriptionReviews from './description-review';
 
 import ScriptManager from "../../utils/ScriptManager";
 import { customerScripts } from "../../App";
 
+
 function ProductDetail() {
     const navigate = useNavigate();
     const productId = sessionStorage.getItem("productId");
-
     // Load trang
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -108,6 +110,7 @@ function ProductDetail() {
         }
     };
 
+    // Xử lý chọn màu sắc, kích cỡ
     const handleSelectColor = (color) => {
         if (selectedColor === color) {
             setSelectedColor(null); // Bỏ chọn nếu đã được chọn trước đó
@@ -151,29 +154,26 @@ function ProductDetail() {
 
     const handleSelectSize = (size) => {
         if (selectedSize === size) {
-            setSelectedSize(null); // Bỏ chọn nếu đã được chọn trước đó
-            setSelectedColor(null); // Đồng thời reset màu sắc đã chọn
+            setSelectedSize(null);
+            setSelectedColor(null);
             setAvailableColors(
                 product.product_details.map((detail) => detail.color.color)
-            ); // Hiển thị lại tất cả các kích cỡ có sẵn
+            );
             setAvailableSizes(
                 product.product_details.map((detail) => detail.size.size)
-            ); // Hiển thị lại tất cả các kích cỡ có sẵn
-            setDefaultImage(product ? product.image : null); // Reset lại ảnh mặc định
-            setImages([]); // Xóa danh sách ảnh đã chọn
-            setCurrentSlide(0); // Reset vị trí slide
+            );
+            setDefaultImage(product ? product.image : null);
+            setImages([]);
+            setCurrentSlide(0);
         } else {
             setSelectedSize(size);
 
-            // Lấy danh sách các màu có sẵn cho kích cỡ đã chọn
             const colorForSelectedSize = product.product_details
                 .filter((detail) => detail.size.size === size)
                 .map((detail) => detail.color.color);
 
-            // Cập nhật danh sách màu có sẵn và disable những màu không có sẵn
             setAvailableColors(colorForSelectedSize);
 
-            // Lấy chi tiết sản phẩm cho màu và kích cỡ đã chọn để lấy ảnh
             const selectedDetail = product.product_details.find(
                 (detail) =>
                     detail.color.color === selectedColor &&
@@ -183,13 +183,14 @@ function ProductDetail() {
             if (selectedDetail) {
                 fetchImages(selectedDetail.product_detail_id);
             } else {
-                setDefaultImage(product ? product.image : null); // Reset lại ảnh mặc định
-                setImages([]); // Xóa danh sách ảnh đã chọn
-                setCurrentSlide(0); // Reset vị trí slide
+                setDefaultImage(product ? product.image : null);
+                setImages([]);
+                setCurrentSlide(0);
             }
         }
     };
 
+    // Xử lý số lượng sản phẩm
     const handleQuantityChange = (e) => {
         let newQuantity = Math.max(1, Number(e.target.value));
         if (isNaN(newQuantity)) {
@@ -206,6 +207,7 @@ function ProductDetail() {
         setQuantity((prevQuantity) => Math.max(1, prevQuantity - 1));
     };
 
+    // Thêm vào giỏ hàng
     const handleAddToCart = async (e) => {
         e.preventDefault();
         const token_type = localStorage.getItem("token_type");
@@ -296,6 +298,12 @@ function ProductDetail() {
                         src={`http://127.0.0.1:8000/uploads/product/${defaultImage}`}
                         alt="Default Product Image"
                     />
+                    {!product.discount ||
+                        (product.discount !== 0 && (
+                            <span className="discount-badge">
+                                {product.discount}% Off
+                            </span>
+                        ))}
                 </div>
             );
         } else {
@@ -403,20 +411,39 @@ function ProductDetail() {
                                     <h4 className="mtext-105 cl2 js-name-detail p-b-14">
                                         {product.product_name}
                                     </h4>
-                                    <span
-                                        className="mtext-106 cl2"
-                                        style={{ color: "red" }}
-                                    >
-                                        {product.price
-                                            ? product.price.toLocaleString(
-                                                  "vi-VN",
-                                                  {
-                                                      style: "currency",
-                                                      currency: "VND",
-                                                  }
-                                              )
-                                            : "N/A"}
-                                    </span>
+                                    {!product.discount ? (
+                                        <span className="discounted-price">
+                                            {product.price.toLocaleString(
+                                                "vi-VN",
+                                                {
+                                                    style: "currency",
+                                                    currency: "VND",
+                                                }
+                                            )}
+                                        </span>
+                                    ) : (
+                                        <div className="price-container">
+                                            <span className="original-price">
+                                                {product.price.toLocaleString(
+                                                    "vi-VN",
+                                                    {
+                                                        style: "currency",
+                                                        currency: "VND",
+                                                    }
+                                                )}
+                                            </span>
+                                            <span className="arrow">→</span>
+                                            <span className="discounted-price">
+                                                {(
+                                                    product.price *
+                                                    (1 - product.discount / 100)
+                                                ).toLocaleString("vi-VN", {
+                                                    style: "currency",
+                                                    currency: "VND",
+                                                })}
+                                            </span>
+                                        </div>
+                                    )}
                                     <p className="stext-102 cl3 p-t-23">
                                         <strong>- Thương hiệu: </strong>
                                         {product.brand.brand_name}
@@ -424,10 +451,6 @@ function ProductDetail() {
                                     <p className="stext-102 cl3 p-t-23">
                                         <strong>- Danh mục: </strong>
                                         {product.category.category_name}
-                                    </p>
-                                    <p className="stext-102 cl3 p-t-23">
-                                        <strong>- Mô tả: </strong>
-                                        {product.description}
                                     </p>
                                     {/* Product options */}
                                     <div className="p-t-33">
@@ -581,13 +604,6 @@ function ProductDetail() {
                                         <a
                                             href="#"
                                             className="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 tooltip100"
-                                            data-tooltip="Twitter"
-                                        >
-                                            <i className="fa fa-twitter" />
-                                        </a>
-                                        <a
-                                            href="#"
-                                            className="fs-14 cl3 hov-cl1 trans-04 lh-10 p-lr-5 p-tb-2 tooltip100"
                                             data-tooltip="Google Plus"
                                         >
                                             <i className="fa fa-google-plus" />
@@ -596,22 +612,9 @@ function ProductDetail() {
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </section>
-                {/* Related Products */}
-                <section className="sec-relate-product bg0 p-t-45 p-b-105">
-                    <div className="container">
-                        <div className="p-b-45">
-                            <h3 className="ltext-106 cl5 txt-center">
-                                Sản phẩm có liên quan
-                            </h3>
-                        </div>
-                        {/* Placeholder for related products */}
-                        <div className="wrap-slick2">
-                            <div className="slick2">
-                                {/* Add your related products here */}
-                            </div>
-                        </div>
+                        {/* Mô tả / Đánh giá  */}
+                        <ProductDescriptionReviews productId={productId} product={product} />
+                        {/* Mô tả / Đánh giá */}
                     </div>
                 </section>
             </>

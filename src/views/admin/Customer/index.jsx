@@ -19,6 +19,8 @@ function CustomerAdmin() {
     const [showViewModal, setShowViewModal] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredCustomer, setFilteredCustomer] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 5;
@@ -29,6 +31,7 @@ function CustomerAdmin() {
             const allUsers = response.data.data;
             const customerUsers = allUsers.filter((user) => user.role === 0);
             setCustomers(customerUsers);
+            setFilteredCustomer(customerUsers);
             setTotalPages(Math.ceil(customerUsers.length / itemsPerPage));
         } catch (error) {
             let errorMessage = "Hiển thị khách hàng thất bại: ";
@@ -47,6 +50,11 @@ function CustomerAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterCustomer(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleEditButtonClick = (user_id) => {
         setSelectedCustomerId(user_id);
@@ -87,9 +95,27 @@ function CustomerAdmin() {
         }
     };
 
-    const filteredCustomers = customers.filter((customer) =>
-        customer.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Lọc và tìm kiếm
+    const filterCustomer = (query, status) => {
+        let filtered = customers;
+        if (query) {
+            filtered = filtered.filter((customer) =>
+                customer.name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter((customer) => customer.status.toString() === status);
+        }
+        setFilteredCustomer(filtered);
+    };
+
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
 
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
@@ -115,7 +141,7 @@ function CustomerAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const paginatedCustomers = filteredCustomers.slice(
+    const paginatedCustomers = filteredCustomer.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
@@ -228,17 +254,28 @@ function CustomerAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Quản trị khách hàng
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Tìm kiếm khách hàng..."
-                                                    value={searchTerm}
-                                                    onChange={(e) =>
-                                                        setSearchTerm(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
+                                            <div className="col-10">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo tên khách hàng..."
+                                                            value={searchTerm}
+                                                            onChange={handleSearchTermChange}
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                    <Form.Control 
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={handleStatusFilterChange}
+                                                        >
+                                                            <option value="">Tất cả trạng thái</option>
+                                                            <option value="1">Sử dụng</option>
+                                                            <option value="0">Không sử dụng</option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <div className="col-1"></div>
                                         </div>

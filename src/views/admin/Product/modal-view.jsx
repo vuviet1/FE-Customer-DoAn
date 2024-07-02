@@ -11,6 +11,7 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
         product_name: "",
         quantity: "",
         price: "",
+        discount: "",
         brand: { brand_name: "" },
         category: { category_name: ""},
         description: "",
@@ -33,6 +34,7 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
                         product_name: data.product_name || "",
                         quantity: data.quantity || "",
                         price: data.price || "",
+                        discount: data.discount || "",
                         brand_name: data.brand ? data.brand.brand_name : "",
                         category_name: data.category ? data.category.category_name : "",
                         description: data.description || "",
@@ -141,6 +143,15 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
                                     type="number"
                                     placeholder="Giá sản phẩm"
                                     value={product.price}
+                                    readOnly
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="discountEdit">
+                                <Form.Label>% giảm giá</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    placeholder="% giảm giá"
+                                    value={product.discount}
                                     readOnly
                                 />
                             </Form.Group>

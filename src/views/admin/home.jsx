@@ -7,18 +7,19 @@ import Topbar from "./components/topbar";
 import Footer from "./components/footer";
 import request from "../../utils/request";
 import { getErrorMessage } from "../../utils/errorMessages";
-import loadLineChart from "./chart-line.js";  // Import the function to load the line chart
+import loadLineChart from "./chart-line.js"; // Import the function to load the line chart
 
 function HomeAdmin() {
-    const [profit, setProfit] = useState([]);
+    const [report, setReport] = useState([]);
+    // const [profit, setProfit] = useState([]);
 
-    const fetchProfit = async () => {
+    const fetchReport = async () => {
         try {
-            const response = await request.get("get-profit");
+            const response = await request.get("report");
             console.log(response.data.data);
-            setProfit(response.data.data);
+            setReport(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị doanh thu thất bại: ";
+            let errorMessage = "Hiển thị báo cáo thất bại: ";
             if (error.response && error.response.status) {
                 errorMessage += getErrorMessage(error.response.status);
             } else {
@@ -30,8 +31,27 @@ function HomeAdmin() {
         }
     };
 
+    // const fetchProfit = async () => {
+    //     try {
+    //         const response = await request.get("get-profit");
+    //         console.log(response.data.data);
+    //         setProfit(response.data.data);
+    //     } catch (error) {
+    //         let errorMessage = "Hiển thị doanh thu thất bại: ";
+    //         if (error.response && error.response.status) {
+    //             errorMessage += getErrorMessage(error.response.status);
+    //         } else {
+    //             errorMessage += error.message;
+    //         }
+    //         toast.error(errorMessage, {
+    //             position: "top-right",
+    //         });
+    //     }
+    // };
+
     useEffect(() => {
-        fetchProfit();
+        fetchReport()
+        // fetchProfit();
         loadLineChart();
     }, []);
 
@@ -68,7 +88,7 @@ function HomeAdmin() {
                                 </ol>
                             </div>
                             <div className="row mb-3">
-                                {/* Earnings (Monthly) Card Example */}
+                                {/* Doanh thu theo tháng */}
                                 <div className="col-xl-3 col-md-6 mb-4">
                                     <div className="card h-100">
                                         <div className="card-body">
@@ -78,16 +98,17 @@ function HomeAdmin() {
                                                         Doanh thu (Tháng)
                                                     </div>
                                                     <div className="h5 mb-0 font-weight-bold text-gray-800">
-                                                        $40,000
-                                                    </div>
-                                                    <div className="mt-2 mb-0 text-muted text-xs">
-                                                        <span className="text-success mr-2">
-                                                            <i className="fa fa-arrow-up" />{" "}
-                                                            3.48%
-                                                        </span>
-                                                        <span>
-                                                            Since last month
-                                                        </span>
+                                                        {typeof report.monthly_profit ===
+                                                        "number"
+                                                            ? report.monthly_profit.toLocaleString(
+                                                                  "vi-VN",
+                                                                  {
+                                                                      style: "currency",
+                                                                      currency:
+                                                                          "VND",
+                                                                  }
+                                                              )
+                                                            : "Invalid profit value"}
                                                     </div>
                                                 </div>
                                                 <div className="col-auto">
@@ -97,7 +118,7 @@ function HomeAdmin() {
                                         </div>
                                     </div>
                                 </div>
-                                {/* Earnings (Annual) Card Example */}
+                                {/* Số hóa đơn trong tháng */}
                                 <div className="col-xl-3 col-md-6 mb-4">
                                     <div className="card h-100">
                                         <div className="card-body">
@@ -107,7 +128,7 @@ function HomeAdmin() {
                                                         Hóa đơn (Tháng)
                                                     </div>
                                                     <div className="h5 mb-0 font-weight-bold text-gray-800">
-                                                        650
+                                                        {report.orders_count}
                                                     </div>
                                                     <div className="mt-2 mb-0 text-muted text-xs"></div>
                                                 </div>
@@ -118,7 +139,7 @@ function HomeAdmin() {
                                         </div>
                                     </div>
                                 </div>
-                                {/* New User Card Example */}
+                                {/* Người dùng mới của tháng */}
                                 <div className="col-xl-3 col-md-6 mb-4">
                                     <div className="card h-100">
                                         <div className="card-body">
@@ -128,7 +149,7 @@ function HomeAdmin() {
                                                         Người dùng mới (Tháng)
                                                     </div>
                                                     <div className="h5 mb-0 mr-3 font-weight-bold text-gray-800">
-                                                        366
+                                                        {report.new_users_count}
                                                     </div>
                                                     <div className="mt-2 mb-0 text-muted text-xs"></div>
                                                 </div>
@@ -139,7 +160,7 @@ function HomeAdmin() {
                                         </div>
                                     </div>
                                 </div>
-                                {/* Pending Requests Card Example */}
+                                {/* Số hóa đơn chờ duyệt */}
                                 <div className="col-xl-3 col-md-6 mb-4">
                                     <div className="card h-100">
                                         <div className="card-body">
@@ -149,7 +170,7 @@ function HomeAdmin() {
                                                         Hóa đơn đang chờ duyệt
                                                     </div>
                                                     <div className="h5 mb-0 font-weight-bold text-gray-800">
-                                                        18
+                                                        {report.pending_invoices_count}
                                                     </div>
                                                     <div className="mt-2 mb-0 text-muted text-xs"></div>
                                                 </div>
@@ -170,7 +191,11 @@ function HomeAdmin() {
                                         </div>
                                         <div className="card-body">
                                             <div className="chart-line">
-                                                <canvas id="myLineChart" width="500" height="500"/>
+                                                <canvas
+                                                    id="myLineChart"
+                                                    width="500"
+                                                    height="500"
+                                                />
                                             </div>
                                         </div>
                                     </div>

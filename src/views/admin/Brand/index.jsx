@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -18,12 +19,15 @@ function BrandAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredBrand, setFilteredBrand] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("brand");
             setBrands(response.data.data);
+            setFilteredBrand(response.data.data)
         } catch (error) {
             let errorMessage = "Hiển thị thương hiệu thất bại: ";
             if (error.response && error.response.status) {
@@ -41,6 +45,11 @@ function BrandAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterBrand(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleEditButtonClick = (brand_id) => {
         setSelectedBrandId(brand_id);
@@ -101,16 +110,31 @@ function BrandAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
+    // Lọc và tìm kiếm
+    const filterBrand = (query, status) => {
+        let filtered = brands;
+        if (query) {
+            filtered = filtered.filter((brand) =>
+                brand.brand_name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter((brand) => brand.status.toString() === status);
+        }
+        setFilteredBrand(filtered);
     };
 
-    const filteredBrands = brands.filter((brand) =>
-        brand.brand_name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
+
     const offset = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredBrands.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(filteredBrands.length / itemsPerPage);
+    const currentItems = filteredBrand.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredBrand.length / itemsPerPage);
 
     const BrandTableBody = ({ brands, handleEditButtonClick, deleteBrand }) => {
         if (!brands || brands.length === 0) {
@@ -183,15 +207,28 @@ function BrandAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Danh sách thương hiệu
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Group controlId="search">
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Tìm kiếm..."
-                                                        value={searchTerm}
-                                                        onChange={handleSearchChange}
-                                                    />
-                                                </Form.Group>
+                                            <div className="col-9">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo tên thương hiệu..."
+                                                            value={searchTerm}
+                                                            onChange={handleSearchTermChange}
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                    <Form.Control 
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={handleStatusFilterChange}
+                                                        >
+                                                            <option value="">Tất cả trạng thái</option>
+                                                            <option value="1">Sử dụng</option>
+                                                            <option value="0">Không sử dụng</option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Button
                                                 variant="primary"

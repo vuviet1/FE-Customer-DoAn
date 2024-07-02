@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
@@ -18,12 +19,15 @@ function SizeAdmin() {
     const [showEditModal, setShowEditModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredSize, setFilteredSize] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
 
     const fetchData = async () => {
         try {
             const response = await request.get("size");
             setSizes(response.data.data);
+            setFilteredSize(response.data.data);
         } catch (error) {
             let errorMessage = "Hiển thị kích cỡ thất bại: ";
             if (error.response && error.response.status) {
@@ -41,6 +45,11 @@ function SizeAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterSize(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleEditButtonClick = (size_id) => {
         setSelectedSizeId(size_id);
@@ -101,16 +110,31 @@ function SizeAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
+    // Lọc và tìm kiếm
+    const filterSize = (query, status) => {
+        let filtered = sizes;
+        if (query) {
+            filtered = filtered.filter((size) =>
+                size.size.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter((size) => size.status.toString() === status);
+        }
+        setFilteredSize(filtered);
     };
 
-    const filteredSizes = sizes.filter((size) =>
-        size.size.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
+
     const offset = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredSizes.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(filteredSizes.length / itemsPerPage);
+    const currentItems = filteredSize.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredSize.length / itemsPerPage);
 
     const SizeTableBody = ({ sizes, handleEditButtonClick, deleteSize }) => {
         if (!sizes || sizes.length === 0) {
@@ -183,15 +207,28 @@ function SizeAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Kích thước
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Group controlId="search">
-                                                    <Form.Control
-                                                        type="text"
-                                                        placeholder="Tìm kiếm..."
-                                                        value={searchTerm}
-                                                        onChange={handleSearchChange}
-                                                    />
-                                                </Form.Group>
+                                            <div className="col-9">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo kích thước..."
+                                                            value={searchTerm}
+                                                            onChange={handleSearchTermChange}
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                    <Form.Control 
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={handleStatusFilterChange}
+                                                        >
+                                                            <option value="">Tất cả trạng thái</option>
+                                                            <option value="1">Sử dụng</option>
+                                                            <option value="0">Không sử dụng</option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Button
                                                 variant="primary"

@@ -1,5 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment } from "react";
+import { Link } from "react-router-dom";
 
 function Footer() {
     return (
@@ -8,14 +9,22 @@ function Footer() {
                 <div className="container">
                     <div className="row">
                         <div className="col-sm-6 col-lg-3 p-b-50">
-                            <h4 className="stext-301 cl0 p-b-30">Categories</h4>
+                            <h4 className="stext-301 cl0 p-b-30">Thông tin chung</h4>
                             <ul>
                                 <li className="p-b-10">
+                                    <Link 
+                                        to={"/about"}
+                                        className="stext-107 cl7 hov-cl1 trans-04"
+                                    >
+                                        Giới thiệu
+                                    </Link>
+                                </li>
+                                <li className="p-b-10">
                                     <a
                                         href="#"
                                         className="stext-107 cl7 hov-cl1 trans-04"
                                     >
-                                        Women
+                                        Chính sách bảo mật
                                     </a>
                                 </li>
                                 <li className="p-b-10">
@@ -23,36 +32,20 @@ function Footer() {
                                         href="#"
                                         className="stext-107 cl7 hov-cl1 trans-04"
                                     >
-                                        Men
-                                    </a>
-                                </li>
-                                <li className="p-b-10">
-                                    <a
-                                        href="#"
-                                        className="stext-107 cl7 hov-cl1 trans-04"
-                                    >
-                                        Shoes
-                                    </a>
-                                </li>
-                                <li className="p-b-10">
-                                    <a
-                                        href="#"
-                                        className="stext-107 cl7 hov-cl1 trans-04"
-                                    >
-                                        Watches
+                                        Chính sách giao hàng
                                     </a>
                                 </li>
                             </ul>
                         </div>
                         <div className="col-sm-6 col-lg-3 p-b-50">
-                            <h4 className="stext-301 cl0 p-b-30">Help</h4>
+                            <h4 className="stext-301 cl0 p-b-30">Hỗ trợ</h4>
                             <ul>
                                 <li className="p-b-10">
                                     <a
                                         href="#"
                                         className="stext-107 cl7 hov-cl1 trans-04"
                                     >
-                                        Track Order
+                                        Chương trình khuyến mãi
                                     </a>
                                 </li>
                                 <li className="p-b-10">
@@ -60,51 +53,38 @@ function Footer() {
                                         href="#"
                                         className="stext-107 cl7 hov-cl1 trans-04"
                                     >
-                                        Returns
+                                        Hướng dẫn đặt hàng
                                     </a>
                                 </li>
                                 <li className="p-b-10">
-                                    <a
-                                        href="#"
+                                    <Link
+                                        to={"/contact"}
                                         className="stext-107 cl7 hov-cl1 trans-04"
                                     >
-                                        Shipping
-                                    </a>
-                                </li>
-                                <li className="p-b-10">
-                                    <a
-                                        href="#"
-                                        className="stext-107 cl7 hov-cl1 trans-04"
-                                    >
-                                        FAQs
-                                    </a>
+                                        Liên hệ
+                                    </Link>
                                 </li>
                             </ul>
                         </div>
                         <div className="col-sm-6 col-lg-3 p-b-50">
                             <h4 className="stext-301 cl0 p-b-30">
-                                GET IN TOUCH
+                                Kết nối với chúng tôi
                             </h4>
-                            <p className="stext-107 cl7 size-201">
-                                Any questions? Let us know in store at 8th
-                                floor, 379 Hudson St, New York, NY 10018 or call
-                                us on (+1) 96 716 6879
-                            </p>
                             <div className="p-t-27">
                                 <a
-                                    href="#"
+                                    href="https://www.facebook.com/"
                                     className="fs-18 cl7 hov-cl1 trans-04 m-r-16"
                                 >
                                     <i className="fa fa-facebook" />
                                 </a>
                                 <a
-                                    href="#"
+                                    href="https://www.instagram.com/"
                                     className="fs-18 cl7 hov-cl1 trans-04 m-r-16"
                                 >
                                     <i className="fa fa-instagram" />
                                 </a>
                                 <a
-                                    href="#"
+                                    href="https://www.pinterest.com/"
                                     className="fs-18 cl7 hov-cl1 trans-04 m-r-16"
                                 >
                                     <i className="fa fa-pinterest-p" />
@@ -112,7 +92,7 @@ function Footer() {
                             </div>
                         </div>
                         <div className="col-sm-6 col-lg-3 p-b-50">
-                            <h4 className="stext-301 cl0 p-b-30">Newsletter</h4>
+                            <h4 className="stext-301 cl0 p-b-30">Nhận thông tin mới nhất</h4>
                             <form>
                                 <div className="wrap-input1 w-full p-b-4">
                                     <input
@@ -124,7 +104,9 @@ function Footer() {
                                     <div className="focus-input1 trans-04" />
                                 </div>
                                 <div className="p-t-18">
-                                    <button className="flex-c-m stext-101 cl0 size-103 bg1 bor1 hov-btn2 p-lr-15 trans-04">
+                                    <button 
+                                    type="button"
+                                    className="flex-c-m stext-101 cl0 size-103 bg1 bor1 hov-btn2 p-lr-15 trans-04">
                                         Đăng ký
                                     </button>
                                 </div>

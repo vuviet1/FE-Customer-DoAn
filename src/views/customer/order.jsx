@@ -20,6 +20,7 @@ function Orders() {
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage] = useState(5);
     const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState(""); //
     const [showRemoveModal, setShowRemoveModal] = useState(false);
     const [orderToRemove, setOrderToRemove] = useState(null);
     const [showProductModal, setShowProductModal] = useState(false);
@@ -28,9 +29,7 @@ function Orders() {
     const fetchOrders = async () => {
         const access_token = localStorage.getItem("access_token");
         if (!access_token) return;
-        request.defaults.headers.common[
-            "Token"
-        ] = `${access_token}`;
+        request.defaults.headers.common["Token"] = `${access_token}`;
 
         try {
             const response = await request.post("order/display-by-user");
@@ -51,6 +50,7 @@ function Orders() {
         setCurrentPage(data.selected);
     };
 
+    // Lọc và tìm kiếm
     const handleSearch = (event) => {
         const query = event.target.value.toLowerCase();
         setSearchQuery(query);
@@ -59,6 +59,28 @@ function Orders() {
         );
         setFilteredOrders(filtered);
         setCurrentPage(0);
+    };
+
+    const handleStatusFilterChange = (event) => {
+        const status = event.target.value;
+        setStatusFilter(status);
+        filterOrders(searchQuery, status);
+        setCurrentPage(0);
+    };
+
+    const filterOrders = (query, status) => {
+        let filtered = orders;
+        if (query) {
+            filtered = filtered.filter((order) =>
+                order.name.toLowerCase().includes(query)
+            );
+        }
+        if (status) {
+            filtered = filtered.filter(
+                (order) => order.status.toString() === status
+            );
+        }
+        setFilteredOrders(filtered);
     };
 
     const handleRemoveOrder = async (orderId) => {
@@ -133,15 +155,54 @@ function Orders() {
                     <div className="row">
                         <div className="col-12 m-lr-auto m-b-50">
                             <div className="m-l-25 m-r--38 m-lr-0-xl">
-                                <Form.Group controlId="searchQuery">
-                                    <Form.Control
-                                        type="text"
-                                        placeholder="Tìm kiếm hóa đơn..."
-                                        value={searchQuery}
-                                        onChange={handleSearch}
-                                        style={{ marginBottom: "20px" }}
-                                    />
-                                </Form.Group>
+                                <div className="row">
+                                    <div className="col-8">
+                                        <Form.Group controlId="searchQuery">
+                                            <Form.Label>Tìm kiếm</Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Tìm kiếm hóa đơn theo tên người nhận..."
+                                                value={searchQuery}
+                                                onChange={handleSearch}
+                                                style={{ marginBottom: "20px" }}
+                                            />
+                                        </Form.Group>
+                                    </div>
+                                    <div className="col-4">
+                                        <Form.Group controlId="statusFilter">
+                                            <Form.Label>
+                                                Lọc trạng thái đơn hàng
+                                            </Form.Label>
+                                            <Form.Control
+                                                as="select"
+                                                value={statusFilter}
+                                                onChange={
+                                                    handleStatusFilterChange
+                                                }
+                                                style={{ marginBottom: "20px" }}
+                                            >
+                                                <option value="">
+                                                    Tất cả trạng thái
+                                                </option>
+                                                <option value="1">
+                                                    Chờ duyệt
+                                                </option>
+                                                <option value="2">
+                                                    Chờ lấy hàng
+                                                </option>
+                                                <option value="3">
+                                                    Đang giao hàng
+                                                </option>
+                                                <option value="4">
+                                                    Hoàn thành
+                                                </option>
+                                                <option value="0">
+                                                    Đã hủy
+                                                </option>
+                                            </Form.Control>
+                                        </Form.Group>
+                                    </div>
+                                </div>
                                 <div className="wrap-table-shopping-cart">
                                     <Table responsive="sm">
                                         <thead>
@@ -171,15 +232,19 @@ function Orders() {
                                                             <td>
                                                                 {order.address}
                                                             </td>
-                                                            <td style={{ color: "red" }}>
+                                                            <td
+                                                                style={{
+                                                                    color: "red",
+                                                                }}
+                                                            >
                                                                 {order.total.toLocaleString(
-                                                                        "vi-VN",
-                                                                        {
-                                                                            style: "currency",
-                                                                            currency:
-                                                                                "VND",
-                                                                        }
-                                                                    )}
+                                                                    "vi-VN",
+                                                                    {
+                                                                        style: "currency",
+                                                                        currency:
+                                                                            "VND",
+                                                                    }
+                                                                )}
                                                             </td>
                                                             <td>
                                                                 {order.status ===
@@ -227,23 +292,32 @@ function Orders() {
                                                             <td>
                                                                 <Button
                                                                     variant="info"
-                                                                    onClick={() => handleShowProductModal(
-                                                                        order.order_id
-                                                                    )}
-                                                                    style={{ marginRight:"10px" }}
-                                                                >
-                                                                    Xem sản phẩm
-                                                                </Button>
-                                                                <Button
-                                                                    variant="danger"
                                                                     onClick={() =>
-                                                                        confirmRemoveOrder(
+                                                                        handleShowProductModal(
                                                                             order.order_id
                                                                         )
                                                                     }
+                                                                    style={{
+                                                                        marginRight:
+                                                                            "10px",
+                                                                    }}
                                                                 >
-                                                                    Hủy hóa đơn
+                                                                    Xem sản phẩm
                                                                 </Button>
+                                                                {order.status ===
+                                                                    1 && (
+                                                                    <Button
+                                                                        variant="danger"
+                                                                        onClick={() =>
+                                                                            confirmRemoveOrder(
+                                                                                order.order_id
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        Hủy hóa
+                                                                        đơn
+                                                                    </Button>
+                                                                )}
                                                             </td>
                                                         </tr>
                                                     )

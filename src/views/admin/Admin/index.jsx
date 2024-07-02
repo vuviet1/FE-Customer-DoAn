@@ -22,6 +22,8 @@ function AdminAdmin() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
+    const [filteredAdmin, setFilteredAdmin] = useState([]);
+    const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
 
     const fetchData = async () => {
@@ -30,6 +32,7 @@ function AdminAdmin() {
             const allAdmins = response.data.data;
             const adminUsers = allAdmins.filter((admin) => admin.role === 1);
             setAdmins(adminUsers);
+            setFilteredAdmin(adminUsers);
         } catch (error) {
             let errorMessage = "Hiển thị nhân viên thất bại: ";
             if (error.response && error.response.status) {
@@ -47,6 +50,11 @@ function AdminAdmin() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    useEffect(() => {
+        filterAdmin(searchTerm, statusFilter);
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleEditButtonClick = (user_id) => {
         setSelectedAdminId(user_id);
@@ -111,16 +119,31 @@ function AdminAdmin() {
         setCurrentPage(totalPages);
     };
 
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
+    // Lọc và tìm kiếm
+    const filterAdmin = (query, status) => {
+        let filtered = admins;
+        if (query) {
+            filtered = filtered.filter((admin) =>
+                admin.name.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+        if (status) {
+            filtered = filtered.filter((admin) => admin.status.toString() === status);
+        }
+        setFilteredAdmin(filtered);
     };
 
-    const filteredAdmins = admins.filter((admin) =>
-        admin.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSearchTermChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const handleStatusFilterChange = (e) => {
+        setStatusFilter(e.target.value);
+    };
+
     const offset = (currentPage - 1) * itemsPerPage;
-    const currentItems = filteredAdmins.slice(offset, offset + itemsPerPage);
-    const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
+    const currentItems = filteredAdmin.slice(offset, offset + itemsPerPage);
+    const totalPages = Math.ceil(filteredAdmin.length / itemsPerPage);
 
     const AdminTableBody = ({ admins, handleEditButtonClick, deleteAdmin }) => {
         if (!admins || admins.length === 0) {
@@ -228,13 +251,28 @@ function AdminAdmin() {
                                             <h6 className="m-0 font-weight-bold text-primary">
                                                 Quản trị viên
                                             </h6>
-                                            <div className="col-6">
-                                                <Form.Control
-                                                    type="text"
-                                                    placeholder="Tìm kiếm quản trị viên..."
-                                                    value={searchTerm}
-                                                    onChange={handleSearchChange}
-                                                />
+                                            <div className="col-10">
+                                                <div className="row">
+                                                    <div className="col-8">
+                                                        <Form.Control
+                                                            type="text"
+                                                            placeholder="Tìm kiếm theo tên quản trị viên..."
+                                                            value={searchTerm}
+                                                            onChange={handleSearchTermChange}
+                                                        />
+                                                    </div>
+                                                    <div className="col-4">
+                                                    <Form.Control 
+                                                            as="select"
+                                                            value={statusFilter}
+                                                            onChange={handleStatusFilterChange}
+                                                        >
+                                                            <option value="">Tất cả trạng thái</option>
+                                                            <option value="1">Sử dụng</option>
+                                                            <option value="0">Không sử dụng</option>
+                                                        </Form.Control>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Button
                                                 variant="primary"

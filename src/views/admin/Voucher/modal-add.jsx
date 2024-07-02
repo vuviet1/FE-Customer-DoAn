@@ -8,6 +8,7 @@ import { getErrorMessage } from "../../../utils/errorMessages";
 function AddVoucherModal({ show, handleClose, onAddVoucher }) {
     const [voucher, setVoucher] = useState({
         voucher: "",
+        voucher_code: "",
         quantity: 0,
         start_day: "",
         end_day: "",
@@ -30,7 +31,7 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
             }
 
             await request.post("voucher", {
-                voucher_code: "",
+                voucher_code: voucher.voucher_code,
                 voucher: voucher.voucher,
                 quantity: voucher.quantity,
                 start_day: voucher.start_day,
@@ -66,11 +67,25 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
                 </Modal.Header>
                 <Form onSubmit={addVoucher}>
                     <Modal.Body>
-                        <Form.Group controlId="voucher">
+                        <Form.Group controlId="voucherCode">
                             <Form.Label>Tên mã giảm giá</Form.Label>
                             <Form.Control
                                 type="text"
                                 placeholder="Tên mã giảm giá ..."
+                                value={voucher.voucher_code}
+                                onChange={(e) =>
+                                    setVoucher({
+                                        ...voucher,
+                                        voucher_code: e.target.value,
+                                    })
+                                }
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="voucher">
+                            <Form.Label>Mức giảm giá</Form.Label>
+                            <Form.Control
+                                type="text"
+                                placeholder="% giảm giá ..."
                                 value={voucher.voucher}
                                 onChange={(e) =>
                                     setVoucher({

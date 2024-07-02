@@ -23,6 +23,17 @@ const ProductModal = ({ showModal, handleClose, product }) => {
     const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
+        const resetState = () => {
+            setSelectedColor(null);
+            setSelectedSize(null);
+            setAvailableColors([]);
+            setAvailableSizes([]);
+            setQuantity(1);
+            setImages([]);
+            setDefaultImage(null);
+            setCurrentSlide(0);
+        };
+
         const fetchProductDetails = async () => {
             try {
                 const response = await request.get(
@@ -51,6 +62,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
         };
 
         if (product && showModal) {
+            resetState();
             fetchProductDetails();
         }
     }, [product, showModal]);
@@ -224,11 +236,11 @@ const ProductModal = ({ showModal, handleClose, product }) => {
             });
             handleClose();
         } catch (error) {
-            if(!access_token){
+            if (!access_token) {
                 toast.warning("Hãy đăng nhập để sử dụng chức năng này", {
                     position: "top-right",
                 });
-            } else{
+            } else {
                 toast.error("Thêm sản phẩm vào giỏ hàng thất bại", {
                     position: "top-right",
                 });
@@ -250,6 +262,12 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                         src={`http://127.0.0.1:8000/uploads/product/${defaultImage}`}
                         alt="Default Product Image"
                     />
+                    {!product.discount ||
+                        (product.discount !== 0 && (
+                            <span className="discount-badge">
+                                {product.discount}% Off
+                            </span>
+                        ))}
                 </div>
             );
         } else {
@@ -354,21 +372,47 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                                 <div className="col-8">
                                     <div className="product-detail-info">
                                         <div>
-                                            Giá tiền: {" "}
-                                            <span
-                                                className="stext-105 cl3"
-                                                style={{ color: "red" }}
-                                            >
-                                                {product.price
-                                                    ? product.price.toLocaleString(
-                                                          "vi-VN",
-                                                          {
-                                                              style: "currency",
-                                                              currency: "VND",
-                                                          }
-                                                      )
-                                                    : "N/A"}
-                                            </span>
+                                            Giá tiền:{" "}
+                                            {!product.discount ? (
+                                                <span className="discounted-price">
+                                                    {product.price.toLocaleString(
+                                                        "vi-VN",
+                                                        {
+                                                            style: "currency",
+                                                            currency: "VND",
+                                                        }
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <span className="price-container">
+                                                    <span className="original-price">
+                                                        {product.price.toLocaleString(
+                                                            "vi-VN",
+                                                            {
+                                                                style: "currency",
+                                                                currency: "VND",
+                                                            }
+                                                        )}
+                                                    </span>
+                                                    <span className="arrow">
+                                                        →
+                                                    </span>
+                                                    <span className="discounted-price">
+                                                        {(
+                                                            product.price *
+                                                            (1 -
+                                                                product.discount /
+                                                                    100)
+                                                        ).toLocaleString(
+                                                            "vi-VN",
+                                                            {
+                                                                style: "currency",
+                                                                currency: "VND",
+                                                            }
+                                                        )}
+                                                    </span>
+                                                </span>
+                                            )}
                                         </div>
 
                                         <p>Mô tả: {product.description}</p>

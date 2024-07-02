@@ -101,6 +101,12 @@ function Home() {
                                             }}
                                             alt="IMG-PRODUCT"
                                         />
+                                        {!product.discount ||
+                                            (product.discount !== 0 && (
+                                                <span className="discount-badge">
+                                                    {product.discount}% Off
+                                                </span>
+                                            ))}
                                         <Link
                                             className="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 js-show-modal1"
                                             onClick={() =>
@@ -123,17 +129,44 @@ function Home() {
                                             >
                                                 {product.product_name}
                                             </Link>
-                                            <span className="stext-105 cl3" style={{ color:"red" }}>
-                                                {product.price
-                                                    ? product.price.toLocaleString(
-                                                          "vi-VN",
-                                                          {
-                                                              style: "currency",
-                                                              currency: "VND",
-                                                          }
-                                                      )
-                                                    : "N/A"}
-                                            </span>
+                                            {!product.discount ? (
+                                                <span className="discounted-price">
+                                                    {product.price.toLocaleString(
+                                                        "vi-VN",
+                                                        {
+                                                            style: "currency",
+                                                            currency: "VND",
+                                                        }
+                                                    )}
+                                                </span>
+                                            ) : (
+                                                <div className="price-container">
+                                                    <span className="original-price">
+                                                        {product.price.toLocaleString(
+                                                            "vi-VN",
+                                                            {
+                                                                style: "currency",
+                                                                currency: "VND",
+                                                            }
+                                                        )}
+                                                    </span>
+                                                    <span className="arrow">→</span>
+                                                    <span className="discounted-price">
+                                                        {(
+                                                            product.price *
+                                                            (1 -
+                                                                product.discount /
+                                                                    100)
+                                                        ).toLocaleString(
+                                                            "vi-VN",
+                                                            {
+                                                                style: "currency",
+                                                                currency: "VND",
+                                                            }
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="block2-txt-child2 flex-r p-t-3">
                                             <FavoriteButton
