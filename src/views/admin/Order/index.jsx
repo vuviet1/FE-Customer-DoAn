@@ -3,12 +3,11 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddOrderModal from "./add/modal-add";
 import StatusOrderModal from "./edit/modal-edit";
@@ -26,6 +25,7 @@ function OrderAdmin() {
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
@@ -39,14 +39,7 @@ function OrderAdmin() {
             setOrders(response.data.data);
             setFilteredOrders(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị hóa đơn thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, { position: "top-right" });
-            console.error("Error fetching data:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -136,19 +129,10 @@ function OrderAdmin() {
                 await request.post(`order/${order_id}?_method=PUT`, {
                     status: 0,
                 });
-                toast.success("Hủy hóa đơn thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Hủy hóa đơn thành công!');
                 fetchData();
             } catch (error) {
-                let errorMessage = "Hủy hóa đơn thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, { position: "top-right" });
-                console.error("Xóa hóa đơn thất bại:", error);
+                showErrorAlert('Lỗi!', 'Hủy hóa đơn thất bại');
             }
         }
     };
@@ -271,7 +255,6 @@ function OrderAdmin() {
 
     return (
         <Fragment>
-            <ToastContainer />
             <div id="wrapper">
                 <div id="content-wrapper" className="d-flex flex-column">
                     <div id="content">

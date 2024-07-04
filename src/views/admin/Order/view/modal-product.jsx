@@ -3,10 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Table, FormControl, InputGroup } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
-import { toast } from "react-toastify"
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../../utils/request";
-import { getErrorMessage } from "../../../../utils/errorMessages"
 
 function ProductModal({ show, handleClose, selectedOrderId }) {
     const [productItems, setProductItems] = useState([]);
@@ -14,6 +13,7 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage] = useState(5); // Number of items per page
     const [searchQuery, setSearchQuery] = useState("");
+    const { showErrorAlert } = useAlert();
 
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
@@ -36,16 +36,7 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
         } catch (error) {
             setProductItems([]);
             setFilteredItems([]);
-            let errorMessage = "Hiển thị sản phẩm thất bại: "
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status)
-            } else {
-                errorMessage += error.message
-            }
-            toast.error(errorMessage, {
-                position: "top-right"
-            })
-            console.error("Error fetching data:", error)
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 

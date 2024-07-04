@@ -1,11 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect, Fragment } from "react";
 import { Modal, Button, Table, Form, Collapse } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../../utils/request";
-import { getErrorMessage } from "../../../../utils/errorMessages";
 
 function ProductSelectionModal({ show, handleClose, onAddProduct }) {
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -15,6 +15,7 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
     const [currentPage, setCurrentPage] = useState(0);
     const [productsPerPage] = useState(5);
     const [expandedProductId, setExpandedProductId] = useState(null);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchProducts = async () => {
         try {
@@ -23,16 +24,7 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
             setProducts(data);
             setFilteredProducts(data);
         } catch (error) {
-            let errorMessage = "Lấy dữ liệu thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Lấy dữ liệu thất bại:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -104,29 +96,17 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
 
         try {
             await request.post("add-to-cart", selectedProducts);
-            toast.success("Thêm sản phẩm vào giỏ hàng thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Thêm sản phẩm vào giỏ hàng thành công!');
             onAddProduct();
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm sản phẩm thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Thêm sản phẩm thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm sản phẩm thất bại');
             handleClose();
         }
     };
 
     return (
         <Fragment>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} size="lg" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Danh sách sản phẩm</Modal.Title>

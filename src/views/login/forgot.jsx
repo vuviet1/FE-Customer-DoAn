@@ -2,29 +2,24 @@ import React, { useState } from "react";
 import { Form, Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import request from "../../utils/request";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 function Forgot() {
     const [email, setEmail] = useState("");
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await request.post("auth/me", email);
             console.log(response.data);
-            toast.success("Kiểm tra người dùng thành công. Hãy kiểm tra email!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Kiểm tra người dùng thành công!', 'Hãy kiểm tra email.');
         } catch (error) {
-            toast.error("Kiểm tra người dùng thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Kiểm tra người dùng thất bại.');
         }
     };
 
     return (
-        <>
-        <ToastContainer />
         <div className="login">
             <link
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
@@ -71,7 +66,6 @@ function Forgot() {
                 </p>
             </Form>
         </div>
-        </>
     );
 }
 export default Forgot;

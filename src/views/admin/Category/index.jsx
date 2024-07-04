@@ -3,13 +3,12 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import Table from "react-bootstrap/Table";
-import { toast } from "react-toastify";
 import { Pagination, Form, Button } from "react-bootstrap";
 
+import { useAlert } from '@utils/AlertContext';
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddCategoryModal from "./modal-add";
 import EditCategoryModal from "./modal-edit";
@@ -24,6 +23,7 @@ function CategoryAdmin() {
     const [filteredCategory, setFilteredCategory] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -31,16 +31,7 @@ function CategoryAdmin() {
             setCategories(response.data.data);
             setFilteredCategory(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị danh mục thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Error fetching data:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -72,21 +63,10 @@ function CategoryAdmin() {
         if (window.confirm("Bạn có chắc muốn xóa danh mục này không?")) {
             try {
                 await request.delete(`category/${category_id}`);
-                toast.success("Xóa danh mục thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa danh mục thành công!');
                 fetchData();
             } catch (error) {
-                let errorMessage = "Xóa danh mục thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Xóa danh mục thất bại:", error);
+                showErrorAlert('Lỗi!', 'Xóa danh mục thất bại');
             }
         }
     };

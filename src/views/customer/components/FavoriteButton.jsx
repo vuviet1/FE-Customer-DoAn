@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button, Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 import request from "../../../utils/request";
 
-const FavoriteButton = ({ productId, onFavoriteChange  }) => {
+const FavoriteButton = ({ productId }) => {
     const [isFavorite, setIsFavorite] = useState(false);
+    const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
 
     useEffect(() => {
         const checkIfFavorite = async () => {
@@ -32,9 +33,7 @@ const FavoriteButton = ({ productId, onFavoriteChange  }) => {
     const handleAddToFavorites = async () => {
         const access_token = localStorage.getItem("access_token");
         if (!access_token) {
-            toast.warning("Chưa đăng nhập. Vui lòng đăng nhập để thêm sản phẩm yêu thích.", {
-                position: "top-right",
-            });
+            showWarningAlert('Chưa đăng nhập', 'Vui lòng đăng nhập để thêm sản phẩm yêu thích');
             return;
         }
 
@@ -46,13 +45,9 @@ const FavoriteButton = ({ productId, onFavoriteChange  }) => {
                     },
                 });
                 setIsFavorite(false);
-                toast.success("Xóa sản phẩm yêu thích thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa sản phẩm yêu thích thành công!');
             } catch (error) {
-                toast.error("Xóa sản phẩm yêu thích thất bại.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Xóa sản phẩm yêu thích thất bại');
             }
         } else {
             try {
@@ -61,13 +56,9 @@ const FavoriteButton = ({ productId, onFavoriteChange  }) => {
                     token: access_token,
                 });
                 setIsFavorite(true);
-                toast.success("Thêm sản phẩm yêu thích thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Thêm sản phẩm yêu thích thành công!');
             } catch (error) {
-                toast.error("Thêm sản phẩm yêu thích thất bại.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Thêm sản phẩm yêu thích thất bại');
             }
         }
     };

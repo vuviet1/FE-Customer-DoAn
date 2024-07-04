@@ -4,12 +4,11 @@ import React, { useEffect, useState, Fragment } from "react";
 import { Link } from "react-router-dom";
 import Table from "react-bootstrap/Table";
 import { Button, Form, Pagination } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddColorModal from "./modal-add";
 import EditColorModal from "./modal-edit";
@@ -24,6 +23,7 @@ function ColorAdmin() {
     const [filteredColor, setFilteredColor] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -31,16 +31,7 @@ function ColorAdmin() {
             setColors(response.data.data);
             setFilteredColor(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị màu thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Error fetching data:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -72,21 +63,10 @@ function ColorAdmin() {
         if (window.confirm("Bạn có chắc muốn xóa màu này không?")) {
             try {
                 await request.delete(`color/${color_id}`);
-                toast.success("Xóa màu thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa màu thành công!');
                 fetchData();
             } catch (error) {
-                let errorMessage = "Xóa màu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Xóa màu thất bại:", error);
+                showErrorAlert('Lỗi!', 'Xóa màu thất bại');
             }
         }
     };

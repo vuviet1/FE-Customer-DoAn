@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, Button, Image } from "react-bootstrap";
 
-function ViewImageModal({ show, handleClose, images, detail }) {
+function ViewImageModal({ show, handleClose, images }) {
     return (
         <Modal show={show} onHide={handleClose} size="xl" centered>
             <Modal.Header closeButton>

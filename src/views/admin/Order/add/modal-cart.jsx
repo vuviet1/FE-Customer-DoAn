@@ -1,11 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Table, FormControl, InputGroup } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../../utils/request";
-import { getErrorMessage } from "../../../../utils/errorMessages";
 import ProductSelectionModal from "./modal-add-product";
 
 function CartModal({ show, handleClose }) {
@@ -15,6 +15,7 @@ function CartModal({ show, handleClose }) {
     const [itemsPerPage] = useState(5); // Number of items per page
     const [searchQuery, setSearchQuery] = useState("");
     const [productModalShow, setProductModalShow] = useState(false);
+    const { showErrorAlert } = useAlert();
 
     useEffect(() => {
         if (show) {
@@ -34,16 +35,7 @@ function CartModal({ show, handleClose }) {
             setCartItems(cartData);
             setFilteredItems(cartData);
         } catch (error) {
-            let errorMessage = "Lấy dữ liệu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lấy dữ liệu thất bại:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -77,16 +69,7 @@ function CartModal({ show, handleClose }) {
             setCartItems(updatedCartItems);
             setFilteredItems(updatedCartItems);
         } catch (error) {
-            let errorMessage = "Xóa dữ liệu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Xóa dữ liệu thất bại:", error);
+                showErrorAlert('Lỗi!', 'Xóa dữ liệu thất bại');
         }
     };
 

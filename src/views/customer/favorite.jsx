@@ -5,7 +5,7 @@ import React, { Fragment, useState, useEffect } from "react";
 import { CSSTransition } from "react-transition-group";
 import { Image, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -24,6 +24,8 @@ function Favorite() {
     const toggleSearch = () => setSearchOpen(!isSearchOpen);
     const [searchTerm, setSearchTerm] = useState("");
 
+    const { showErrorAlert } = useAlert();
+
     const handleProductClick = (productId) => {
         sessionStorage.setItem("productId", productId);
         window.location.href = `/product-detail`;
@@ -36,9 +38,7 @@ function Favorite() {
             setProducts(productsData);
             setFilteredProducts(productsData);
         } catch (error) {
-            toast.error("Lấy dữ liệu thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
     };
 
@@ -99,7 +99,6 @@ function Favorite() {
 
     return (
         <Fragment>
-            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />

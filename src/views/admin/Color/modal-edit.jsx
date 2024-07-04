@@ -1,15 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditColorModal({ show, handleClose, selectedColorId, onUpdateColor }) {
     const [color, setColor] = useState({
         color: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchColor = async () => {
@@ -23,54 +24,25 @@ function EditColorModal({ show, handleClose, selectedColorId, onUpdateColor }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị màu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         };
 
-        if (selectedColorId) {
             fetchColor();
-        }
-    }, [selectedColorId]);
+    }, []);
 
     const updateColor = async (e) => {
         e.preventDefault();
         try {
-            if (!color.color) {
-                toast.error("Trường tên màu là bắt buộc.", {
-                    position: "top-right",
-                });
-                return;
-            }
-
             await request.put(`color/${selectedColorId}`, {
                 color: color.color,
                 status: color.status,
             });
             onUpdateColor();
             handleClose();
-            toast.success("Cập nhật màu thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật màu thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật màu thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật màu thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật màu thất bại');
             handleClose();
         }
     };

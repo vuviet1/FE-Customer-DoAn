@@ -26,11 +26,11 @@ function Header() {
                                     <li>
                                         <Link to={"/product"}>SẢN PHẨM</Link>
                                     </li>
-                                    <li 
+                                    {/* <li 
                                     // className="label1" data-label1="hot"
                                     >
                                         <Link to={"/shopping-cart"}>GIỎ HÀNG</Link>
-                                    </li>
+                                    </li> */}
                                     <li>
                                         <Link to={"/about"}>GIỚI THIỆU</Link>
                                     </li>

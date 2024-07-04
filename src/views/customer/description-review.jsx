@@ -3,10 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button, Image, Modal } from "react-bootstrap";
 import ReactQuill from "react-quill";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../utils/request";
-import { getErrorMessage } from "../../utils/errorMessages";
 import ModalEditReview from "./edit-review";
 
 const ProductDescriptionReviews = ({ productId, product }) => {
@@ -20,6 +19,7 @@ const ProductDescriptionReviews = ({ productId, product }) => {
     const reviewsPerPage = 5;
     const [showDeleteModal, setShowDeleteModal] = useState(false); 
     const [showEditModal, setShowEditModal] = useState(false);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     // Fetch reviews
     const fetchReview = async () => {
@@ -33,7 +33,7 @@ const ProductDescriptionReviews = ({ productId, product }) => {
             const data = response.data.data;
             setReviews(data);
         } catch (error) {
-            toast.error("Lấy dữ liệu thất bại.", { position: "top-right" });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
     };
 
@@ -60,7 +60,7 @@ const ProductDescriptionReviews = ({ productId, product }) => {
             );
             setCheckReview(canReview);
         } catch (error) {
-            toast.error("Lấy dữ liệu thất bại.", { position: "top-right" });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
     };
 
@@ -82,25 +82,15 @@ const ProductDescriptionReviews = ({ productId, product }) => {
             });
 
             if (response.status === 200) {
-                toast.success("Gửi đánh giá sản phẩm thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Gửi đánh giá sản phẩm thành công!');
                 setReview(0);
                 setEvaluation("");
                 fetchReview();
             } else {
-                toast.error("Lỗi khi gửi đánh giá sản phẩm.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Lỗi khi gửi đánh giá sản phẩm.');
             }
         } catch (error) {
-            let errorMessage = "Failed to submit review: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, { position: "top-right" });
+            showErrorAlert('Lỗi!', 'Lỗi khi gửi đánh giá sản phẩm.');
         }
     };
 
@@ -133,25 +123,15 @@ const ProductDescriptionReviews = ({ productId, product }) => {
             const response = await request.delete(`review/${editingReview}`);
 
             if (response.status === 200) {
-                toast.success("Xóa đánh giá sản phẩm thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa đánh giá sản phẩm thành công.');
                 setEditingReview(null);
                 setShowDeleteModal(false);
                 fetchReview();
             } else {
-                toast.error("Lỗi khi xóa đánh giá sản phẩm.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Lỗi khi xóa đánh giá sản phẩm.');
             }
         } catch (error) {
-            let errorMessage = "Failed to delete review: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, { position: "top-right" });
+            showErrorAlert('Lỗi!', 'Lỗi khi xóa đánh giá sản phẩm.');
         }
     };
 

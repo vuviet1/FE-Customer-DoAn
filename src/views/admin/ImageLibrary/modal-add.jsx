@@ -23,7 +23,6 @@ function AddImageModal({ show, handleClose, productDetailId, handleAddImage }) {
             product_detail_id: productDetailId,
         };
 
-        console.log(data);
         try {
             const response = await request.post("library", data, {
                 headers: {

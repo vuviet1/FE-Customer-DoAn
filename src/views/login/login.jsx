@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { Image, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../utils/request";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    // const [remember, setRemember] = useState(true);
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -35,16 +35,14 @@ function Login() {
             localStorage.setItem("user_data", JSON.stringify(userData));
 
             if (userData.role === 1) {
-                window.location.reload();
+                showSuccessAlert('Thành công!', 'Chuyển hướng đến trang quản trị viên');
                 window.location.href = '/admin-home';
             } else if (userData.role === 0) {
-                window.location.reload();
+                showSuccessAlert('Thành công!', 'Chuyển hướng đến trang chủ');
                 window.location.href = '/';
             }
         } catch (error) {
-            toast.error("Đăng nhập thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Đăng nhập thất bại');
         }
     };
 
@@ -53,8 +51,6 @@ function Login() {
     };
 
     return (
-        <>
-        <ToastContainer />
         <div className="login">
             <link
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
@@ -141,7 +137,6 @@ function Login() {
                 </p>
             </Form>
         </div>
-        </>
     );
 }
 

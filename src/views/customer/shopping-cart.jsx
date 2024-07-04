@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment, useState, useEffect } from "react";
@@ -5,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Table, Button, Form, Modal, Image } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -29,25 +30,48 @@ function ShoppingCart() {
     const [shippingMethodId, setShippingMethodId] = useState("");
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [shippingMethods, setShippingMethods] = useState([]);
+    const [voucherCode, setVoucherCode] = useState("");
+    const [vouchers, setVouchers] = useState([]);
+    const [isVoucherValid, setIsVoucherValid] = useState(false);
+    const [discountedTotal, setDiscountedTotal] = useState(null);
+
+    const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
+
+    const handleProductClick = (productId) => {
+        sessionStorage.setItem("productId", productId);
+        window.location.href = `/product-detail`;
+    };
 
     useEffect(() => {
+        const fetchAllData = async () => {
+            try {
+                const token_type = localStorage.getItem("token_type");
+                const access_token = localStorage.getItem("access_token");
+                request.defaults.headers.common[
+                    "Authorization"
+                ] = `${token_type} ${access_token}`;
+                const [paymentResponse, shippingResponse, voucherResponse] = await Promise.all([
+                    request.get("payment"),
+                    request.get("shipping"),
+                    request.get("voucher"),
+                    // request.get("cart"),
+                ]);
+
+                setPaymentMethods(paymentResponse.data.data);
+                setShippingMethods(shippingResponse.data.data);
+                setVouchers(voucherResponse.data.data);
+                // setCartItems(cartResponse.data.data);
+                // setFilteredItems(cartResponse.data.data);
+            } catch (error) {
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+            }
+        };
+
+        fetchAllData();
+
         fetchCartItems();
-        fetchData();
     }, []);
 
-    const fetchData = async () => {
-        try {
-            const paymentResponse = await request.get("payment");
-            setPaymentMethods(paymentResponse.data.data);
-
-            const shippingResponse = await request.get("shipping");
-            setShippingMethods(shippingResponse.data.data);
-        } catch (error) {
-            toast.error("Lấy dữ liệu thất bại.", {
-                position: "top-right",
-            });
-        }
-    };
 
     const fetchCartItems = async () => {
         const token_type = localStorage.getItem("token_type");
@@ -62,9 +86,7 @@ function ShoppingCart() {
             setCartItems(cartData);
             setFilteredItems(cartData);
         } catch (error) {
-            toast.error("Lấy dữ liệu thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
     };
 
@@ -73,12 +95,13 @@ function ShoppingCart() {
 
         const orderData = {
             shipping_code: "",
-            voucher_code: "",
+            voucher_code: voucherCode,
             name,
             address,
             phone_number: phoneNumber,
-            payment_method_id: paymentMethodId,
-            shipping_method_id: shippingMethodId,
+            payment_method_id: Number(paymentMethodId),
+            shipping_method_id: Number(shippingMethodId),
+            // payment_status: Number(paymentStatus),
         };
 
         const token_type = localStorage.getItem("token_type");
@@ -89,31 +112,30 @@ function ShoppingCart() {
 
         try {
             const response = await request.post("order", orderData);
-            const paymentUrl = response.data;
-            console.log(paymentUrl);
+            const paymentURL = response.data;
+            alert(paymentURL);
             onAddOrder();
             fetchCartItems();
-            if (paymentUrl) {
-                toast.success("Thêm hóa đơn thành công.", {
-                    position: "top-right",
-                });
-                window.location.href = paymentUrl;
+            if (paymentURL) {
+                if (paymentURL === "/") {
+                    showWarningAlert('Điều hướng!', 'Chuyển hướng về trang chủ');
+                    window.location.href = paymentURL;
+                } else {
+                    showWarningAlert('Điều hướng!', 'Chuyển hướng đến trang thanh toán');
+                    window.location.href = paymentURL;
+                }
             } else {
-                toast.error("Không nhận được URL thanh toán.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Không nhận được URL thanh toán');
             }
         } catch (error) {
-            toast.error("Thêm hóa đơn thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Thêm hóa đơn thất bại');
+            fetchCartItems();
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
     const onAddOrder = () => {
-        toast.success("Đã tạo hóa đơn thành công!", {
-            position: "top-right",
-        });
+        showSuccessAlert('Thành công!', 'Đã tạo hóa đơn thành công!');
     };
 
     const handlePageClick = (data) => {
@@ -165,13 +187,9 @@ function ShoppingCart() {
             setCartItems(updatedCartItems);
             setFilteredItems(updatedCartItems);
             setShowModal(false);
-            toast.success("Xóa sản phẩm khỏi giỏ hàng thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Xóa sản phẩm khỏi giỏ hàng thành công!');
         } catch (error) {
-            toast.error("Xóa sản phẩm khỏi giỏ hàng thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Xóa sản phẩm khỏi giỏ hàng thất bại');
         }
     };
 
@@ -183,7 +201,33 @@ function ShoppingCart() {
     const offset = currentPage * itemsPerPage;
     const currentPageItems = filteredItems.slice(offset, offset + itemsPerPage);
 
-    const calculateTotalPrice = () => {
+    // Voucher và tổng tiền
+    const handleVoucherApply = () => {
+        const voucher = vouchers.find((v) => v.voucher_code === voucherCode);
+        if (voucher) {
+            setIsVoucherValid(true);
+            const originalTotal = calculateTotalPrice(false);
+            const discountAmount = originalTotal * (voucher.voucher / 100);
+            const newTotal = originalTotal - discountAmount;
+            setDiscountedTotal({
+                original: originalTotal.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                }),
+                discounted: newTotal.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                }),
+            });
+            showSuccessAlert('Thành công!', 'Áp dụng mã giảm giá thành công!');
+        } else {
+            setIsVoucherValid(false);
+            setDiscountedTotal(null);
+            showErrorAlert('Lỗi!', 'Mã giảm giá không hợp lệ');
+        }
+    };
+
+    const calculateTotalPrice = (applyDiscount = true) => {
         const total = filteredItems.reduce((total, item) => {
             const discountPrice =
                 item.product_detail.product.price *
@@ -191,20 +235,26 @@ function ShoppingCart() {
             return total + item.quantity * discountPrice;
         }, 0);
 
-        return total.toLocaleString("vi-VN", {
-            style: "currency",
-            currency: "VND",
-        });
-    };
+        if (!applyDiscount || !isVoucherValid) {
+            return total;
+        }
 
-    const handleProductClick = (productId) => {
-        sessionStorage.setItem("productId", productId);
-        window.location.href = `/product-detail`;
+        const voucher = vouchers.find((v) => v.voucher_code === voucherCode);
+        if (voucher) {
+            const discountAmount = total * (voucher.voucher / 100);
+            const newTotal = total - discountAmount;
+
+            return {
+                originalTotal: total,
+                newTotal: newTotal,
+            };
+        }
+
+        return total;
     };
 
     return (
         <Fragment>
-            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />
@@ -339,16 +389,16 @@ function ShoppingCart() {
                                                                     {
                                                                         item
                                                                             .product_detail
-                                                                            .color
-                                                                            .color
+                                                                            .size
+                                                                            .size
                                                                     }
                                                                 </td>
                                                                 <td>
                                                                     {
                                                                         item
                                                                             .product_detail
-                                                                            .size
-                                                                            .size
+                                                                            .color
+                                                                            .color
                                                                     }
                                                                 </td>
                                                                 <td>
@@ -500,11 +550,38 @@ function ShoppingCart() {
                                     className="size-209 mtext-110 cl2"
                                     style={{ color: "red" }}
                                 >
-                                    {calculateTotalPrice()}
+                                    <div className="total-price">
+                                        {isVoucherValid && discountedTotal ? (
+                                            <>
+                                                <span
+                                                    className="original-price"
+                                                    style={{
+                                                        textDecoration:
+                                                            "line-through",
+                                                    }}
+                                                >
+                                                    {discountedTotal.original}
+                                                </span>
+                                                <span className="arrow">→</span>
+                                                <span className="discounted-price">
+                                                    {discountedTotal.discounted}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <span className="total">
+                                                {calculateTotalPrice(
+                                                    false
+                                                ).toLocaleString("vi-VN", {
+                                                    style: "currency",
+                                                    currency: "VND",
+                                                })}
+                                            </span>
+                                        )}
+                                    </div>
                                 </Form.Label>
                             </Form.Group>
                             <div className="row">
-                                <div className="col-12">
+                                <div className="col-6">
                                     <Form.Group>
                                         <Form.Label className="size-208 w-full-ssm stext-110 cl2">
                                             Tên người nhận:
@@ -521,25 +598,22 @@ function ShoppingCart() {
                                             required
                                         />
                                     </Form.Group>
-                                </div>
-                                <div className="col-6">
                                     <Form.Group>
                                         <Form.Label className="size-208 w-full-ssm stext-110 cl2">
-                                            Địa chỉ giao hàng:
+                                            Số điện thoại
                                         </Form.Label>
                                         <Form.Control
                                             className="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9"
                                             type="text"
-                                            name="address"
-                                            value={address}
+                                            name="phone_number"
+                                            value={phoneNumber}
                                             onChange={(e) =>
-                                                setAddress(e.target.value)
+                                                setPhoneNumber(e.target.value)
                                             }
-                                            placeholder="Địa chỉ giao hàng"
+                                            placeholder="Số điện thoại"
                                             required
                                         />
                                     </Form.Group>
-
                                     <Form.Group>
                                         <Form.Label className="size-208 w-full-ssm stext-110 cl2">
                                             Phương thức thanh toán:
@@ -575,21 +649,52 @@ function ShoppingCart() {
                                     </Form.Group>
                                 </div>
                                 <div className="col-6">
-                                    <Form.Label className="size-208 w-full-ssm stext-110 cl2">
-                                        Số điện thoại:
-                                    </Form.Label>
-                                    <Form.Control
-                                        className="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9"
-                                        type="text"
-                                        name="phone_number"
-                                        value={phoneNumber}
-                                        onChange={(e) =>
-                                            setPhoneNumber(e.target.value)
-                                        }
-                                        placeholder="Số điện thoại"
-                                        required
-                                    />
-
+                                    <Form.Group>
+                                        <Form.Label className="size-208 w-full-ssm stext-110 cl2">
+                                            Mã giảm giá:
+                                        </Form.Label>
+                                        <div className="row">
+                                            <div className="col-8">
+                                                <Form.Control
+                                                    className="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9"
+                                                    type="text"
+                                                    name="voucherCode"
+                                                    value={voucherCode}
+                                                    onChange={(e) =>
+                                                        setVoucherCode(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    placeholder="Mã giảm giá"
+                                                />
+                                            </div>
+                                            <div className="col-4">
+                                                <Button
+                                                    type="button"
+                                                    className="flex-c-m stext-101 cl0 size-102 bg3 bor2 hov-btn3 p-lr-15 trans-04"
+                                                    onClick={handleVoucherApply}
+                                                >
+                                                    Áp dụng
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Form.Group>
+                                    <Form.Group>
+                                        <Form.Label className="size-208 w-full-ssm stext-110 cl2">
+                                            Địa chỉ giao hàng:
+                                        </Form.Label>
+                                        <Form.Control
+                                            className="rs1-select2 rs2-select2 bor8 bg0 m-b-12 m-t-9"
+                                            type="text"
+                                            name="address"
+                                            value={address}
+                                            onChange={(e) =>
+                                                setAddress(e.target.value)
+                                            }
+                                            placeholder="Địa chỉ giao hàng"
+                                            required
+                                        />
+                                    </Form.Group>
                                     <Form.Label className="size-208 w-full-ssm stext-110 cl2">
                                         Phương thức vận chuyển:
                                     </Form.Label>
@@ -619,7 +724,6 @@ function ShoppingCart() {
                                     </Form.Control>
                                 </div>
                             </div>
-
                             <Form.Group className="flex-w flex-t bor12 p-t-15 p-b-30">
                                 <Button
                                     type="submit"

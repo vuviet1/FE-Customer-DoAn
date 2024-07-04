@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Table, FormControl, InputGroup } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../utils/request";
 
@@ -13,6 +13,7 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage] = useState(5);
     const [searchQuery, setSearchQuery] = useState("");
+    const { showErrorAlert } = useAlert();
 
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
@@ -38,9 +39,7 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
             console.error("Error fetching data:", error);
             setProductItems([]);
             setFilteredItems([]);
-            toast.error("Hiển thị sản phẩm thất bại", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Hiển thị sản phẩm thất bại');
         }
     };
 

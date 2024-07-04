@@ -1,53 +1,33 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddPaymentModal({ show, handleClose, onAddPayment }) {
     const [payment, setPayment] = useState({
         payment_method: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const addPayment = async (e) => {
         e.preventDefault();
         try {
-            if (!payment.payment_method) {
-                toast.error("Trường phương thức thanh toán là bắt buộc.", {
-                    position: "top-right"
-                });
-                return;
-            }
-
             await request.post("payment", {
                 payment_method: payment.payment_method,
                 status: payment.status,
             });
-            toast.success("Thêm phương thức thanh toán thành công!", {
-                position: "top-right"
-            });
+            showSuccessAlert('Thành công!', 'Thêm phương thức thanh toán thành công!');
             onAddPayment();
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm phương thức thanh toán thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right"
-            });
-            console.error("Thêm phương thức thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm phương thức thất bại');
             handleClose();
         }
     };
 
     return (
-        <>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm phương thức thanh toán</Modal.Title>
@@ -66,6 +46,7 @@ function AddPaymentModal({ show, handleClose, onAddPayment }) {
                                         payment_method: e.target.value,
                                     })
                                 }
+                                required
                             />
                         </Form.Group>
                         <Form.Group controlId="statusAdd">
@@ -95,7 +76,6 @@ function AddPaymentModal({ show, handleClose, onAddPayment }) {
                     </Modal.Footer>
                 </Form>
             </Modal>
-        </>
     );
 }
 

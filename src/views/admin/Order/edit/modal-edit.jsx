@@ -1,8 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, Fragment } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { ToastContainer, toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 import request from "../../../../utils/request";
-import { getErrorMessage } from "../../../../utils/errorMessages";
 
 function StatusOrderModal({
     show,
@@ -11,6 +11,7 @@ function StatusOrderModal({
     selectedOrderId,
 }) {
     const [order, setOrder] = useState({ status: 1 });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
 
@@ -29,19 +30,12 @@ function StatusOrderModal({
                         setOrder({ status: orderData.status });
                     }
                 } catch (error) {
-                    let errorMessage = "Lấy dữ liệu thất bại: ";
-                    if (error.response && error.response.status) {
-                        errorMessage += getErrorMessage(error.response.status);
-                    } else {
-                        errorMessage += error.message;
-                    }
-                    toast.error(errorMessage, { position: "top-right" });
-                    console.error("Lấy dữ liệu thất bại:", error);
+                    showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
                 }
             }
         };
         fetchOrder();
-    }, [selectedOrderId, token_type, access_token]);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -52,20 +46,11 @@ function StatusOrderModal({
 
         try {
             await request.put(`order/${selectedOrderId}`, orderData);
-            toast.success("Cập nhật hóa đơn thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật hóa đơn thành công!');
             onUpdateStatus();
             handleClose();
         } catch (error) {
-            let errorMessage = "Cập nhật hóa đơn thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, { position: "top-right" });
-            console.error("Cập nhật hóa đơn thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật hóa đơn thất bại');
         }
     };
 
@@ -75,7 +60,6 @@ function StatusOrderModal({
 
     return (
         <Fragment>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} size="md" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Chỉnh sửa trạng thái đơn hàng</Modal.Title>

@@ -1,53 +1,33 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddCategoryModal({ show, handleClose, onAddCategory }) {
     const [category, setCategory] = useState({
         category_name: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const addCategory = async (e) => {
         e.preventDefault();
         try {
-            if (!category.category_name) {
-                toast.error("Trường danh mục là bắt buộc.", {
-                    position: "top-right",
-                });
-                return;
-            }
-
             await request.post("category", {
                 category_name: category.category_name,
                 status: category.status,
             });
-            toast.success("Thêm danh mục thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Thêm danh mục thành công!');
             onAddCategory();
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm danh mục thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Thêm danh mục thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm danh mục thất bại');
             handleClose();
         }
     };
 
     return (
-        <>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới danh mục</Modal.Title>
@@ -95,7 +75,6 @@ function AddCategoryModal({ show, handleClose, onAddCategory }) {
                     </Modal.Footer>
                 </Form>
             </Modal>
-        </>
     );
 }
 

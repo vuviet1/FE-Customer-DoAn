@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditPaymentModal({
     show,
@@ -15,6 +15,7 @@ function EditPaymentModal({
         payment_method: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchPayment = async () => {
@@ -28,33 +29,16 @@ function EditPaymentModal({
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị phương thức thanh toán thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
             }
         };
 
-        if (selectedPaymentId) {
             fetchPayment();
-        }
-    }, [selectedPaymentId]);
+    }, []);
 
     const updatePayment = async (e) => {
         e.preventDefault();
         try {
-            if (!payment.payment_method) {
-                toast.error("Trường tên phương thức là bắt buộc.", {
-                    position: "top-right",
-                });
-                return;
-            }
 
             await request.post(`payment/${selectedPaymentId}?_method=PUT`, {
                 payment_method: payment.payment_method,
@@ -62,20 +46,9 @@ function EditPaymentModal({
             });
             onUpdatePayment();
             handleClose();
-            toast.success("Cập nhật phương thức thanh toán thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật phương thức thanh toán thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật phương thức thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật phương thức thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật phương thức thất bại');
             handleClose();
         }
     };
@@ -100,6 +73,7 @@ function EditPaymentModal({
                                         payment_method: e.target.value,
                                     })
                                 }
+                                required
                             />
                         </Form.Group>
                         <Form.Group controlId="statusEdit">

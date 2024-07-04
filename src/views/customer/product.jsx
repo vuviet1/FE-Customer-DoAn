@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-mixed-operators */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
@@ -5,7 +6,7 @@ import React, { Fragment, useState, useEffect } from "react";
 import { CSSTransition } from "react-transition-group";
 import { Image, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -14,6 +15,10 @@ import Footer from "./components/footer";
 import ProductModal from "./components/modal";
 import FavoriteButton from "./components/FavoriteButton";
 import request from "../../utils/request";
+
+import StyleManager from "../../utils/StyleManager";
+import ScriptManager from "../../utils/ScriptManager";
+import { customerStyles, customerScripts } from "../../App";
 
 function Product() {
     const [products, setProducts] = useState([]);
@@ -32,9 +37,12 @@ function Product() {
     // Lọc
     const [brands, setBrands] = useState([]);
     const [category, setCategory] = useState([]);
-
     const [selectedBrand, setSelectedBrand] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
+    const { showErrorAlert } = useAlert();
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     const handleProductClick = (productId) => {
         sessionStorage.setItem("productId", productId);
@@ -48,48 +56,59 @@ function Product() {
     };
 
     useEffect(() => {
-        const fetchProduct = async () => {
+        const fetchAllData = async () => {
             try {
-                const response = await request.get("product");
-                setProducts(response.data.data);
-                setFilteredProducts(response.data.data);
+                const [productResponse, brandResponse, categoryResponse] = await Promise.all([
+                    request.get("product"),
+                    request.get("brand"),
+                    request.get("category"),
+                ]);
+
+                setProducts(productResponse.data.data);
+                setFilteredProducts(productResponse.data.data);
+                setBrands(brandResponse.data.data);
+                setCategory(categoryResponse.data.data);
+                setLoading(false);
             } catch (error) {
-                toast.error("Lấy dữ liệu thất bại.", {
-                    position: "top-right",
-                });
-                console.log(error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+                setError("Lỗi khi lấy dữ liệu");
+                setLoading(false);
             }
         };
 
-        fetchProduct();
+        fetchAllData();
     }, []);
 
+    // Lọc
     useEffect(() => {
-        const fetchBrands = async () => {
-            try {
-                const response = await request.get("brand");
-                setBrands(response.data.data);
-            } catch (error) {
-                toast.error("Lấy dữ liệu thất bại.", {
-                    position: "top-right",
-                });
-            }
-        };
+        let updatedProducts = products;
 
-        const fetchColors = async () => {
-            try {
-                const response = await request.get("category");
-                setCategory(response.data.data);
-            } catch (error) {
-                toast.error("Lấy dữ liệu thất bại.", {
-                    position: "top-right",
-                });
-            }
-        };
+        if (selectedBrand) {
+            updatedProducts = updatedProducts.filter(
+                (product) => product.brand.brand_id === selectedBrand
+            );
+        }
 
-        fetchBrands();
-        fetchColors();
-    }, []);
+        if (selectedCategory) {
+            updatedProducts = updatedProducts.filter(
+                (product) => product.category.category_id === selectedCategory
+            );
+        }
+
+        if (searchTerm) {
+            updatedProducts = updatedProducts.filter((product) =>
+                product.product_name
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase())
+            );
+        }
+
+        setFilteredProducts(updatedProducts);
+        setCurrentPage(1);
+    }, [products, selectedBrand, selectedCategory, searchTerm]);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
 
     const indexOfLastProduct = currentPage * itemsPerPage;
     const indexOfFirstProduct = indexOfLastProduct - itemsPerPage;
@@ -126,34 +145,6 @@ function Product() {
         setSearchTerm(e.target.value);
     };
 
-    // Lọc
-    useEffect(() => {
-        let updatedProducts = products;
-
-        if (selectedBrand) {
-            updatedProducts = updatedProducts.filter(
-                (product) => product.brand.brand_id === selectedBrand
-            );
-        }
-
-        if (selectedCategory) {
-            updatedProducts = updatedProducts.filter(
-                (product) => product.category.category_id === selectedCategory
-            );
-        }
-
-        if (searchTerm) {
-            updatedProducts = updatedProducts.filter((product) =>
-                product.product_name
-                    .toLowerCase()
-                    .includes(searchTerm.toLowerCase())
-            );
-        }
-
-        setFilteredProducts(updatedProducts);
-        setCurrentPage(1);
-    }, [products, selectedBrand, selectedCategory, searchTerm]);
-
     // Filter
     const splitArray = (array, size) => {
         const result = [];
@@ -168,7 +159,6 @@ function Product() {
 
     return (
         <Fragment>
-            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />
@@ -456,7 +446,9 @@ function Product() {
                                                             }
                                                         )}
                                                     </span>
-                                                    <span className="arrow">→</span>
+                                                    <span className="arrow">
+                                                        →
+                                                    </span>
                                                     <span className="discounted-price">
                                                         {(
                                                             product.price *
@@ -514,6 +506,8 @@ function Product() {
                     product={selectedProduct}
                 />
             )}
+            <ScriptManager urls={customerScripts} idPrefix="customer" />
+            <StyleManager urls={customerStyles} idPrefix="customer" />
         </Fragment>
     );
 }

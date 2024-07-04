@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import ImageUploader from "../components/ImageUploader";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddAdminModal({ show, handleClose, onAddAdmin }) {
     const [admin, setAdmin] = useState({
@@ -19,6 +18,7 @@ function AddAdminModal({ show, handleClose, onAddAdmin }) {
         status: 1,
     });
     const [images, setImages] = useState([]);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -42,31 +42,17 @@ function AddAdminModal({ show, handleClose, onAddAdmin }) {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            toast.success("Thêm nhân viên thành công!", {
-                position: "top-right",
-            });
-
+            showSuccessAlert('Thành công!', 'Thêm nhân viên thành công!');
             onAddAdmin();
             setImages([]);
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm nhân viên thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Thêm nhân viên thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm nhân viên thất bại');
             handleClose();
         }
     };
 
     return (
-        <>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} size="lg" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới Admin</Modal.Title>
@@ -170,7 +156,6 @@ function AddAdminModal({ show, handleClose, onAddAdmin }) {
                                         }
                                     >
                                         <option value="1">Quản trị viên</option>
-                                        <option value="0">Khách hàng</option>
                                     </Form.Control>
                                 </Form.Group>
                             </div>
@@ -221,7 +206,6 @@ function AddAdminModal({ show, handleClose, onAddAdmin }) {
                     </Form>
                 </Modal.Body>
             </Modal>
-        </>
     );
 }
 

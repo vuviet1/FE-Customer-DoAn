@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function ViewAdminModal({ show, handleClose, selectedAdminId }) {
     const [admin, setAdmin] = useState({
@@ -17,6 +17,7 @@ function ViewAdminModal({ show, handleClose, selectedAdminId }) {
         address: "",
         status: 1,
     });
+    const { showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchAdmin = async () => {
@@ -28,23 +29,12 @@ function ViewAdminModal({ show, handleClose, selectedAdminId }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị nhân viên thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         };
 
-        if (selectedAdminId) {
             fetchAdmin();
-        }
-    }, [selectedAdminId]);
+    }, []);
 
     return (
         <>

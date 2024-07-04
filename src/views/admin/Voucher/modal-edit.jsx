@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditVoucherModal({
     show,
@@ -19,6 +19,7 @@ function EditVoucherModal({
         end_day: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchVoucher = async () => {
@@ -41,16 +42,7 @@ function EditVoucherModal({
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị mã giảm giá thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Hiển thị mã giảm giá thất bại');
             }
         };
 
@@ -68,9 +60,7 @@ function EditVoucherModal({
 
         try {
             if (!voucher.voucher) {
-                toast.error("Trường mã giảm giá là bắt buộc.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Trường mã giảm giá là bắt buộc');
                 return;
             }
 
@@ -84,20 +74,9 @@ function EditVoucherModal({
             });
             onUpdateVoucher();
             handleClose();
-            toast.success("Cập nhật mã giảm giá thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật mã giảm giá thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật mã giảm giá thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật mã giảm giá thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật mã giảm giá thất bại');
             handleClose();
         }
     };

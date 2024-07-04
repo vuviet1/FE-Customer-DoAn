@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment, useState, useEffect } from "react";
 import { Image } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
 
+import { useAlert } from '@utils/AlertContext';
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
@@ -20,6 +21,8 @@ function Home() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
+    const { showErrorAlert } = useAlert();
+
     const fetchData = async () => {
         try {
             // Sản phẩm mới nhất
@@ -27,9 +30,7 @@ function Home() {
             const latestProducts = response.data.data.slice(0, 4);
             setProducts(latestProducts);
         } catch (error) {
-            toast.error("Lấy dữ liệu thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -50,7 +51,6 @@ function Home() {
 
     return (
         <Fragment>
-            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />

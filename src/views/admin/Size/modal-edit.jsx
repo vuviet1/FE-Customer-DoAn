@@ -1,15 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditSizeModal({ show, handleClose, selectedSizeId, onUpdateSize }) {
     const [size, setSize] = useState({
         size: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchSize = async () => {
@@ -21,16 +22,7 @@ function EditSizeModal({ show, handleClose, selectedSizeId, onUpdateSize }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị kích cỡ thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Hiển thị kích cỡ thất bại');
             }
         };
 
@@ -43,9 +35,7 @@ function EditSizeModal({ show, handleClose, selectedSizeId, onUpdateSize }) {
         e.preventDefault();
         try {
             if (!size.size) {
-                toast.error("Trường kích cỡ là bắt buộc.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Trường kích cỡ là bắt buộc');
                 return;
             }
 
@@ -55,20 +45,9 @@ function EditSizeModal({ show, handleClose, selectedSizeId, onUpdateSize }) {
             });
             onUpdateSize();
             handleClose();
-            toast.success("Cập nhật kích cỡ thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật kích cỡ thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật kích cỡ thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật kích cỡ thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật kích cỡ thất bại');
             handleClose();
         }
     };

@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable jsx-a11y/anchor-has-content */
 import React, { Fragment, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
 
@@ -19,6 +20,8 @@ function Sidebar() {
         status: 1,
     });
 
+    const { showErrorAlert } = useAlert();
+
     const fetchData = async () => {
         const access_token = localStorage.getItem("access_token");
         if (!access_token) return;
@@ -31,9 +34,7 @@ function Sidebar() {
                 );
                 setCustomer(response.data.data);
             } catch (error) {
-                toast.error("Lấy dữ liệu thất bại", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
             }
         }
     };

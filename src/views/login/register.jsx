@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Image, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../utils/request";
 
@@ -12,6 +12,7 @@ function Register() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,9 +30,7 @@ function Register() {
 
         try {
             await request.post("auth/register", dataRegis);
-            toast.success("Đăng ký thành công.", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Đăng ký thành công.');
             // 
             const response = await request.post("auth/login", dataLogin);
             const { access_token, token_type } = response.data;
@@ -50,18 +49,16 @@ function Register() {
             localStorage.setItem("user_data", JSON.stringify(userData));
 
             if (userData.role === 1) {
-                window.location.reload();
+                showSuccessAlert('Thành công!', 'Chuyển hướng đến trang quản trị viên.');
                 window.location.href = '/admin-home';
             } else if (userData.role === 0) {
-                window.location.reload();
+                showSuccessAlert('Thành công!', 'Chuyển hướng đến trang chủ.');
                 window.location.href = '/';
             }
             
             // window.location.href='/login'
         } catch (error) {
-            toast.error("Đăng ký thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Đăng ký thất bại.');
         }
     };
 
@@ -76,8 +73,6 @@ function Register() {
 
 
     return (
-        <>
-        <ToastContainer />
         <div className="login">
             <link
                 href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css"
@@ -197,7 +192,6 @@ function Register() {
                 </p>
             </Form>
         </div>
-        </>
     );
 }
 export default Register;

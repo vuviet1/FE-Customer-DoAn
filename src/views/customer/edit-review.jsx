@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 import request from "../../utils/request";
 
 const EditReviewModal = ({ show, handleClose, review, productId }) => {
@@ -10,6 +11,7 @@ const EditReviewModal = ({ show, handleClose, review, productId }) => {
         evaluation: "",
     });
     const [hoverRating, setHoverRating] = useState(0);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         if (show && review) {
@@ -31,9 +33,7 @@ const EditReviewModal = ({ show, handleClose, review, productId }) => {
                         evaluation: evaluation || "",
                     });
                 } catch (error) {
-                    toast.error("Lỗi khi lấy dữ liệu: ", {
-                        position: "top-right",
-                    });
+                    showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
                 }
             };
 
@@ -72,14 +72,10 @@ const EditReviewModal = ({ show, handleClose, review, productId }) => {
                 product_id: Number(productId),
             });
 
-            toast.success("Sửa đánh giá sản phẩm thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Sửa đánh giá sản phẩm thành công.');
             handleClose()
         } catch (error) {
-            toast.error("Lỗi khi cập nhật đánh giá sản phẩm", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Lỗi khi cập nhật đánh giá sản phẩm.');
         }
     };
 

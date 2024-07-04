@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment, useState, useEffect } from "react";
@@ -5,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -26,6 +27,8 @@ function Orders() {
     const [showProductModal, setShowProductModal] = useState(false);
     const [selectedOrderId, setSelectedOrderId] = useState(null);
 
+    const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
+
     const fetchOrders = async () => {
         const access_token = localStorage.getItem("access_token");
         if (!access_token) return;
@@ -36,9 +39,7 @@ function Orders() {
             setOrders(response.data.data);
             setFilteredOrders(response.data.data);
         } catch (error) {
-            toast.error("Lấy dữ liệu thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
     };
 
@@ -83,6 +84,7 @@ function Orders() {
         setFilteredOrders(filtered);
     };
 
+    // Hủy hóa đơn
     const handleRemoveOrder = async (orderId) => {
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
@@ -98,13 +100,9 @@ function Orders() {
             setOrders(updatedOrders);
             setFilteredOrders(updatedOrders);
             setShowRemoveModal(false);
-            toast.success("Hủy hóa đơn thành công.", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Hủy hóa đơn thành công!');
         } catch (error) {
-            toast.error("Hủy hóa đơn thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Hủy hóa đơn thất bại');
         }
     };
 
@@ -118,6 +116,23 @@ function Orders() {
         setShowProductModal(true);
     };
 
+    // Chuyển hướng đến trang thanh toán
+    const handlePayment = async (orderId) => {
+        try {
+            const response = await request.post(`/payment_status/${orderId}`);
+            const paymentURL = response.data
+            if(paymentURL) {
+                showWarningAlert('Điều hướng!', 'Chuyển hướng đến trang thanh toán hóa đơn');
+                window.location.href = paymentURL;
+            } else {
+                showErrorAlert('Lỗi!', 'Không nhận được URL của trang thanh toán');
+            }
+        } catch (error) {
+            showErrorAlert('Lỗi!', 'Điều hướng thất bại');
+            
+        }
+    }
+
     const offset = currentPage * itemsPerPage;
     const currentPageItems = filteredOrders.slice(
         offset,
@@ -126,7 +141,6 @@ function Orders() {
 
     return (
         <Fragment>
-            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />
@@ -212,6 +226,7 @@ function Orders() {
                                                 <th>Địa chỉ</th>
                                                 <th>Tổng tiền</th>
                                                 <th>Trạng thái đơn hàng</th>
+                                                <th>Trạng thái thanh toán</th>
                                                 <th>Thời gian tạo</th>
                                                 <th>Hành động</th>
                                             </tr>
@@ -285,11 +300,45 @@ function Orders() {
                                                                 )}
                                                             </td>
                                                             <td>
+                                                                {order.payment_status ===
+                                                                1 ? (
+                                                                    <span className="badge badge-success">
+                                                                        Đã thanh
+                                                                        toán
+                                                                    </span>
+                                                                ) : order.payment_status ===
+                                                                  0 ? (
+                                                                    <span className="badge badge-warning">
+                                                                        Chưa thanh toán
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="badge badge-danger">
+                                                                        Không xác định
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td>
                                                                 {new Date(
                                                                     order.created_at
                                                                 ).toLocaleString()}
                                                             </td>
                                                             <td>
+                                                                {order.payment_status !== 1 && (
+                                                                    <Button
+                                                                    variant="success"
+                                                                    onClick={() =>
+                                                                        handlePayment(
+                                                                            order.order_id
+                                                                        )
+                                                                    }
+                                                                    style={{
+                                                                        marginRight:
+                                                                            "5px",
+                                                                    }}
+                                                                >
+                                                                    Thanh toán
+                                                                </Button>
+                                                                )}
                                                                 <Button
                                                                     variant="info"
                                                                     onClick={() =>
@@ -299,10 +348,10 @@ function Orders() {
                                                                     }
                                                                     style={{
                                                                         marginRight:
-                                                                            "10px",
+                                                                            "5px",
                                                                     }}
                                                                 >
-                                                                    Xem sản phẩm
+                                                                    Sản phẩm
                                                                 </Button>
                                                                 {order.status ===
                                                                     1 && (
@@ -314,8 +363,7 @@ function Orders() {
                                                                             )
                                                                         }
                                                                     >
-                                                                        Hủy hóa
-                                                                        đơn
+                                                                        Hủy
                                                                     </Button>
                                                                 )}
                                                             </td>

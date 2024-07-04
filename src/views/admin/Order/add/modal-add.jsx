@@ -1,52 +1,85 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../../utils/request";
-import { getErrorMessage } from "../../../../utils/errorMessages";
 import CartModal from "./modal-cart";
 
 function AddOrderModal({ show, handleClose, onAddOrder }) {
     const [paymentMethods, setPaymentMethods] = useState([]);
     const [shippingMethods, setShippingMethods] = useState([]);
     const [address, setAddress] = useState("");
+    const [vouchers, setVouchers] = useState("");
+    const [voucherCode, setVoucherCode] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [paymentMethodId, setPaymentMethodId] = useState("");
     const [shippingMethodId, setShippingMethodId] = useState("");
     const [name, setName] = useState("");
 
+    const [isVoucherValid, setIsVoucherValid] = useState(false);
     const [showCartModal, setShowCartModal] = useState(false);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
+    
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
     const user_data = JSON.parse(localStorage.getItem("user_data"));
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAllData = async () => {
             try {
-                const paymentResponse = await request.get("payment");
-                setPaymentMethods(paymentResponse.data.data);
-
-                const shippingResponse = await request.get("shipping");
-                setShippingMethods(shippingResponse.data.data);
+                const [paymentResponse, shippingResponse, voucherResponse] = await Promise.all([
+                    request.get("payment"),
+                    request.get("shipping"),
+                    request.get("voucher"),
+                ]);
+                const activePayments = paymentResponse.data.data.filter(
+                    (payment) => payment.status === 1
+                );
+                const activeShippings = shippingResponse.data.data.filter(
+                    (shipping) => shipping.status === 1
+                );
+                const activeVouchers = voucherResponse.data.data.filter(
+                    (voucher) => voucher.status === 1
+                );
+                setPaymentMethods(activePayments);
+                setShippingMethods(activeShippings);
+                setVouchers(activeVouchers);
             } catch (error) {
-                let errorMessage = "Lấy dữ liệu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lấy dữ liệu thất bại:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
             }
         };
 
-        fetchData();
+        fetchAllData();
     }, []);
 
+    // Kiểm tra voucher
+    const handleCheckVoucher = async () => {
+        try {
+            // if(vouchers.filter(vouchers => vouchers.voucher_code === voucherCode)){
+
+            // }
+            if (vouchers.filter(vouchers => vouchers.voucher_code === voucherCode && vouchers.status === 1)){
+                setIsVoucherValid(true);
+                showSuccessAlert('Thành công!', 'Mã giảm giá sử dụng được!');
+            } else {
+                setIsVoucherValid(false);
+                showErrorAlert('Lỗi!', 'Mã giảm giá không hợp lệ hoặc đã hết hạn');
+            }
+        } catch (error) {
+            setIsVoucherValid(false);
+            showErrorAlert('Lỗi!', 'Kiểm tra mã giảm giá thất bại');
+        }
+    };
+
+    // Tạo hóa đơn
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!isVoucherValid && voucherCode) {
+            showErrorAlert('Lỗi!', 'Mã giảm giá không hợp lệ hoặc đã hết hạn');
+            return;
+        }
 
         const orderData = {
             address,
@@ -54,8 +87,8 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
             phone_number: phoneNumber,
             payment_method_id: paymentMethodId,
             shipping_method_id: shippingMethodId,
-            voucher_code: "",
-            shipping_code:"",
+            voucher_code: voucherCode,
+            shipping_code: "",
         };
 
         request.defaults.headers.common[
@@ -64,22 +97,11 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
 
         try {
             await request.post("order", orderData);
-            toast.success("Thêm hóa đơn thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Đã tạo hóa đơn thành công!');
             onAddOrder();
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm hóa đơn thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Thêm hóa đơn thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm hóa đơn thất bại');
             handleClose();
         }
     };
@@ -88,7 +110,6 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
 
     return (
         <>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} size="xl" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới đơn hàng</Modal.Title>
@@ -174,6 +195,43 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
                                 </Form.Group>
                             </div>
                             <div className="col-12">
+                                <div className="row">
+                                    <div className="col-8">
+                                        <Form.Group controlId="inputVoucher">
+                                            <Form.Label>
+                                                Mã giảm giá(nếu có)
+                                            </Form.Label>
+                                            <Form.Control
+                                                type="text"
+                                                placeholder="Mã giảm giá ..."
+                                                value={voucherCode}
+                                                onChange={(e) =>
+                                                    setVoucherCode(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            />
+                                        </Form.Group>
+                                    </div>
+                                    <div
+                                        className="col-4"
+                                        style={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <Button
+                                            onClick={handleCheckVoucher}
+                                            className="col-6"
+                                            style={{
+                                                justifyContent: "center",
+                                                margin: "0 auto",
+                                            }}
+                                        >
+                                            Kiểm tra mã giảm giá
+                                        </Button>
+                                    </div>
+                                </div>
                                 <Form.Group controlId="inputAddress">
                                     <Form.Label>Địa chỉ</Form.Label>
                                     <Form.Control
@@ -203,7 +261,7 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
                                     margin: "0 auto",
                                 }}
                             >
-                                <i class="fas fa-shopping-cart"></i>
+                                <i className="fas fa-shopping-cart"></i>
                                 <span> Giỏ hàng</span>
                             </Button>
                         </div>

@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditProductDetailModal({
     show,
@@ -19,46 +19,25 @@ function EditProductDetailModal({
     const [sizeId, setSizeId] = useState("");
     const [quantity, setQuantity] = useState("");
     const [status, setStatus] = useState(1);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
-        const fetchColors = async () => {
+        const fetchAllData = async () => {
             try {
-                const response = await request.get("color");
-                setColors(response.data.data);
+                const [colorResponse, sizeResponse] = await Promise.all([
+                    request.get("color"),
+                    request.get("size"),
+                ]);
+                const activeColors = colorResponse.data.data.filter(color => color.status === 1);
+                const activeSizes = sizeResponse.data.data.filter(size => size.status === 1);
+                setColors(activeColors);
+                setSizes(activeSizes);
             } catch (error) {
-                let errorMessage = "Hiển thị danh sách màu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
             }
         };
 
-        const fetchSizes = async () => {
-            try {
-                const response = await request.get("size");
-                setSizes(response.data.data);
-            } catch (error) {
-                let errorMessage = "Hiển thị danh sách kích cỡ thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
-            }
-        };
-
-        fetchColors();
-        fetchSizes();
+        fetchAllData();
     }, []);
 
     useEffect(() => {
@@ -73,9 +52,7 @@ function EditProductDetailModal({
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!productDetail) {
-            toast.error("Không tồn tại phân loại sản phẩm này.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Không tồn tại phân loại sản phẩm này');
             return;
         }
         try {
@@ -94,20 +71,9 @@ function EditProductDetailModal({
 
             onEditProductDetail();
             handleClose();
-            toast.success("Cập nhật phân loại sản phẩm thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật phân loại sản phẩm thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật phân loại sản phẩm thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật phân loại sản phẩm thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật phân loại sản phẩm thất bại');
             handleClose();
         }
     };

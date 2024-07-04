@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddVoucherModal({ show, handleClose, onAddVoucher }) {
     const [voucher, setVoucher] = useState({
@@ -14,6 +13,7 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
         end_day: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const addVoucher = async (e) => {
         e.preventDefault();
@@ -24,43 +24,28 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
 
         try {
             if (!voucher.voucher) {
-                toast.error("Trường mã giảm giá là bắt buộc.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Trường mã giảm giá là bắt buộc');
                 return;
             }
 
             await request.post("voucher", {
                 voucher_code: voucher.voucher_code,
-                voucher: voucher.voucher,
-                quantity: voucher.quantity,
+                voucher: Number(voucher.voucher),
+                quantity: Number(voucher.quantity),
                 start_day: voucher.start_day,
                 end_day: voucher.end_day,
                 status: voucher.status,
             });
-            toast.success("Thêm mã giảm giá thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Thêm mã giảm giá thành công!');
             onAddVoucher();
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm mã giảm giá thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Thêm mã giảm giá thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm mã giảm giá thất bại');
             handleClose();
         }
     };
 
     return (
-        <>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới voucher</Modal.Title>
@@ -162,7 +147,6 @@ function AddVoucherModal({ show, handleClose, onAddVoucher }) {
                     </Modal.Footer>
                 </Form>
             </Modal>
-        </>
     );
 }
 

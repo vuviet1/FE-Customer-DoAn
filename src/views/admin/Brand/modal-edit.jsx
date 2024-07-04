@@ -1,15 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditBrandModal({ show, handleClose, selectedBrandId, onUpdateBrand }) {
     const [brand, setBrand] = useState({
         brand_name: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchBrand = async () => {
@@ -21,54 +22,25 @@ function EditBrandModal({ show, handleClose, selectedBrandId, onUpdateBrand }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị thương hiệu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         };
 
-        if (selectedBrandId) {
             fetchBrand();
-        }
-    }, [selectedBrandId]);
+    }, []);
 
     const updateBrand = async (e) => {
         e.preventDefault();
         try {
-            if (!brand.brand_name) {
-                toast.error("Trường tên thương hiệu là bắt buộc.", {
-                    position: "top-right",
-                });
-                return;
-            }
-
             await request.put(`brand/${selectedBrandId}?_method=PUT`, {
                 brand_name: brand.brand_name,
                 status: brand.status,
             });
             onUpdateBrand();
             handleClose();
-            toast.success("Cập nhật thương hiệu thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật thương hiệu thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật thương hiệu thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật thương hiệu thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật thương hiệu thất bại');
             handleClose();
         }
     };

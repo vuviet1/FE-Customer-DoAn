@@ -3,20 +3,18 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Image, Spinner } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
 
+import { useAlert } from '@utils/AlertContext';
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Footer from "./components/footer";
 import request from "../../utils/request";
-import { getErrorMessage } from "../../utils/errorMessages";
 import FavoriteButton from "./components/FavoriteButton";
 import ProductDescriptionReviews from './description-review';
 
-import ScriptManager from "../../utils/ScriptManager";
-import { customerScripts } from "../../App";
-
+import StyleManager from "../../utils/StyleManager";
+import { customerStyles } from "../../App";
 
 function ProductDetail() {
     const navigate = useNavigate();
@@ -35,6 +33,8 @@ function ProductDetail() {
     const [images, setImages] = useState([]);
     const [defaultImage, setDefaultImage] = useState(null);
     const [currentSlide, setCurrentSlide] = useState(0);
+
+    const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
 
     useEffect(() => {
         if (!productId) {
@@ -61,13 +61,7 @@ function ProductDetail() {
                 setDefaultImage(fetchedProduct.image);
                 setLoading(false);
             } catch (error) {
-                let errorMessage = "Lỗi khi lấy dữ liệu sản phẩm: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, { position: "top-right" });
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
                 setError("Lỗi khi lấy dữ liệu sản phẩm");
                 setLoading(false);
             }
@@ -99,14 +93,7 @@ function ProductDetail() {
             const response = await request.get(`library/${productDetailId}`);
             setImages(response.data.data);
         } catch (error) {
-            let errorMessage = "Lỗi khi lấy dữ liệu: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, { position: "top-right" });
-            console.error("Lỗi khi lấy dữ liệu:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
     };
 
@@ -214,9 +201,7 @@ function ProductDetail() {
         const access_token = localStorage.getItem("access_token");
 
         if (!selectedColor || !selectedSize || quantity < 1) {
-            toast.error("Hãy chọn phân loại của sản phẩm và số lượng.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Hãy chọn phân loại của sản phẩm và số lượng.');
             return;
         }
 
@@ -227,9 +212,7 @@ function ProductDetail() {
         );
 
         if (!selectedDetail) {
-            toast.error("Lỗi dữ liệu.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
             return;
         }
 
@@ -243,27 +226,12 @@ function ProductDetail() {
                     quantity: quantity,
                 },
             ]);
-            toast.success("Sản phẩm thêm vào giỏ hàng thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Sản phẩm thêm vào giỏ hàng thành công!');
         } catch (error) {
             if (!access_token) {
-                toast.warning(
-                    "Chưa đăng nhập. Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.",
-                    {
-                        position: "top-right",
-                    }
-                );
+                showWarningAlert('Chưa đăng nhập!', 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
             } else {
-                let errorMessage = "Sản phẩm thêm vào giỏ hàng thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Sản phẩm thêm vào giỏ hàng thất bại');
             }
         }
     };
@@ -332,7 +300,7 @@ function ProductDetail() {
 
     return (
         <Fragment>
-            <ToastContainer />
+            <StyleManager urls={customerStyles} idPrefix="customer" />
             <Header />
             <Sidebar />
             <Cart />
@@ -625,7 +593,6 @@ function ProductDetail() {
                     <i className="zmdi zmdi-chevron-up" />
                 </span>
             </div>
-            <ScriptManager urls={customerScripts} idPrefix="customer" />
         </Fragment>
     );
 }

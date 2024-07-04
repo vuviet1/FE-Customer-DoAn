@@ -1,10 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Table, Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
 import ViewImageModal from "./modal-view-image";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function ViewProductModal({ show, handleClose, selectedProductId }) {
     const [product, setProduct] = useState({
@@ -23,12 +23,12 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
     const [selectedDetail, setSelectedDetail] = useState(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [images, setImages] = useState([]);
+    const { showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const response = await request.get(`product/${selectedProductId}`);
-                if (response.data.data ) {
                     const data = response.data.data;
                     setProduct({
                         product_name: data.product_name || "",
@@ -47,20 +47,8 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
                             quantity: detail.quantity,
                         })),
                     });
-                } else {
-                    console.error("No data returned from the API");
-                }
             } catch (error) {
-                let errorMessage = "Hiển thị sản phẩm thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
             }
         };
 
@@ -74,16 +62,7 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
             const response = await request.get(`library/${productDetailId}`);
             setImages(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị ảnh thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+            showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
         }
     };
 

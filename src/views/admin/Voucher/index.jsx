@@ -2,12 +2,11 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddVoucherModal from "./modal-add";
 import EditVoucherModal from "./modal-edit";
@@ -22,6 +21,7 @@ function VoucherAdmin() {
     const [filteredVoucher, setFilteredVoucher] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -29,16 +29,7 @@ function VoucherAdmin() {
             setVouchers(response.data.data);
             setFilteredVoucher(response.data.data)
         } catch (error) {
-            let errorMessage = "Hiển thị mã giảm giá thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Error fetching data:", error);
+            showErrorAlert('Lỗi!', 'Hiển thị mã giảm giá thất bại');
         }
     };
 
@@ -71,21 +62,10 @@ function VoucherAdmin() {
         if (window.confirm("Bạn có chắc muốn xóa voucher này không?")) {
             try {
                 await request.delete(`voucher/${voucher_id}`);
-                toast.success("Xóa mã giảm giá thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa mã giảm giá thành công!');
                 fetchData();
             } catch (error) {
-                let errorMessage = "Xóa mã giảm giá thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Xóa mã giảm giá thất bại:", error);
+                showErrorAlert('Lỗi!', 'Xóa mã giảm giá thất bại');
             }
         }
     };

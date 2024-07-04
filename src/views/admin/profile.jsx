@@ -1,8 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import { Form, Image, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "./components/topbar";
 import Footer from "./components/footer";
@@ -22,6 +23,7 @@ function ProfileAdmin() {
         address: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         const userData = JSON.parse(localStorage.getItem("user_data"));
@@ -33,9 +35,7 @@ function ProfileAdmin() {
                 );
                 setAdmin(response.data.data);
             } catch (error) {
-                toast.error("Lấy dữ liệu thất bại", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         }
     };
@@ -70,14 +70,10 @@ function ProfileAdmin() {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            toast.success("Cập nhật thông tin thành công", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật thông tin thành công!');
             fetchData()
         } catch (error) {
-            toast.error("Cập nhật thông tin thất bại", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Cập nhật thông tin thất bại');
         }
     };
 
@@ -95,8 +91,6 @@ function ProfileAdmin() {
     };
 
     return (
-        <>
-            <ToastContainer />
             <div id="wrapper">
                 <div id="content-wrapper" className="d-flex flex-column">
                     <div id="content">
@@ -290,7 +284,6 @@ function ProfileAdmin() {
                     <i className="fas fa-angle-up" />
                 </a>
             </div>
-        </>
     );
 }
 

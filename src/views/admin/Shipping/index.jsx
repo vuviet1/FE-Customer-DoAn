@@ -2,12 +2,11 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddShippingModal from "./modal-add";
 import EditShippingModal from "./modal-edit";
@@ -22,6 +21,7 @@ function ShippingAdmin() {
     const [filteredShipping, setFilteredShipping] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -29,16 +29,7 @@ function ShippingAdmin() {
             setShippings(response.data.data);
             setFilteredShipping(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị phương thức vận chuyển thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Error fetching data:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -75,21 +66,10 @@ function ShippingAdmin() {
         ) {
             try {
                 await request.delete(`shipping/${shipping_method_id}`);
-                toast.success("Xóa phương thức vận chuyển thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa phương thức vận chuyển thành công!');
                 fetchData();
             } catch (error) {
-                let errorMessage = "Xóa phương thức thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Xóa phương thức thất bại:", error);
+                showErrorAlert('Lỗi!', 'Xóa phương thức thất bại');
             }
         }
     };

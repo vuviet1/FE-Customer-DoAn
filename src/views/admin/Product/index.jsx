@@ -2,11 +2,10 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddProductModal from "./modal-add";
 import EditProductModal from "./modal-edit";
@@ -26,6 +25,7 @@ function ProductAdmin() {
     const [statusFilter, setStatusFilter] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -33,16 +33,7 @@ function ProductAdmin() {
             setProducts(response.data.data);
             setFilteredProduct(response.data.data);
         } catch (error) {
-            let errorMessage = "Hiển thị sản phẩm thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Error fetching data:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -116,21 +107,10 @@ function ProductAdmin() {
         if (window.confirm("Bạn có chắc muốn xóa sản phẩm này không?")) {
             try {
                 await request.delete(`product/${product_id}`);
-                toast.success("Xóa sản phẩm thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa sản phẩm thành công!');
                 fetchData();
             } catch (error) {
-                let errorMessage = "Xóa sản phẩm thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Xóa sản phẩm thất bại:", error);
+                showErrorAlert('Lỗi!', 'Xóa sản phẩm thất bại');
             }
         }
     };

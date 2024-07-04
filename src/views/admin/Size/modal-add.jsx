@@ -1,23 +1,21 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddSizeModal({ show, handleClose, onAddSize }) {
     const [size, setSize] = useState({
         size: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const addSize = async (e) => {
         e.preventDefault();
         try {
             if (!size.size) {
-                toast.error("Trường kích cỡ là bắt buộc.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Trường kích cỡ là bắt buộc');
                 return;
             }
 
@@ -25,29 +23,16 @@ function AddSizeModal({ show, handleClose, onAddSize }) {
                 size: size.size,
                 status: size.status,
             });
-            toast.success("Thêm kích cỡ thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Thêm kích cỡ thành công!');
             onAddSize();
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm kích cỡ thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Thêm kích cỡ thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm kích cỡ thất bại');
             handleClose();
         }
     };
 
     return (
-        <>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới kích thước</Modal.Title>
@@ -97,7 +82,6 @@ function AddSizeModal({ show, handleClose, onAddSize }) {
                     </Modal.Footer>
                 </Form>
             </Modal>
-        </>
     );
 }
 

@@ -1,23 +1,21 @@
 import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddShippingModal({ show, handleClose, onAddShipping }) {
     const [shipping, setShipping] = useState({
         shipping_method: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const addShipping = async (e) => {
         e.preventDefault();
         try {
             if (!shipping.shipping_method) {
-                toast.error("Trường tên phương thức vận chuyển là bắt buộc.", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Trường tên phương thức vận chuyển là bắt buộc');
                 return;
             }
 
@@ -25,29 +23,16 @@ function AddShippingModal({ show, handleClose, onAddShipping }) {
                 shipping_method: shipping.shipping_method,
                 status: shipping.status,
             });
-            toast.success("Thêm phương thức vận chuyển thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Thêm phương thức vận chuyển thành công!');
             onAddShipping();
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm phương thức thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Thêm phương thức thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm phương thức thất bại');
             handleClose();
         }
     };
 
     return (
-        <>
-            <ToastContainer />
             <Modal show={show} onHide={handleClose} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới phương thức vận chuyển</Modal.Title>
@@ -97,7 +82,6 @@ function AddShippingModal({ show, handleClose, onAddShipping }) {
                     </Modal.Footer>
                 </Form>
             </Modal>
-        </>
     );
 }
 

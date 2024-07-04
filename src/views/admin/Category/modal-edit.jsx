@@ -1,15 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditCategoryModal({ show, handleClose, selectedCategoryId, onUpdateCategory }) {
     const [category, setCategory] = useState({
         category_name: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchCategory = async () => {
@@ -21,54 +22,25 @@ function EditCategoryModal({ show, handleClose, selectedCategoryId, onUpdateCate
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị danh mục thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         };
 
-        if (selectedCategoryId) {
             fetchCategory();
-        }
-    }, [selectedCategoryId]);
+    }, []);
 
     const updateCategory = async (e) => {
         e.preventDefault();
         try {
-            if (!category.category_name) {
-                toast.error("Trường tên phương thức là bắt buộc.", {
-                    position: "top-right",
-                });
-                return;
-            }
-
             await request.put(`category/${selectedCategoryId}?_method=PUT`, {
                 category_name: category.category_name,
                 status: category.status,
             });
             onUpdateCategory();
             handleClose();
-            toast.success("Cập nhật danh mục thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật danh mục thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật danh mục thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật danh mục thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật danh mục thất bại');
             handleClose();
         }
     };

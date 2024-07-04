@@ -1,10 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useEffect, useState, Fragment } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Button, Image } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
 
+import { useAlert } from '@utils/AlertContext';
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 const ProductModal = ({ showModal, handleClose, product }) => {
     const [productDetails, setProductDetails] = useState([]);
@@ -21,6 +21,8 @@ const ProductModal = ({ showModal, handleClose, product }) => {
     const [images, setImages] = useState([]);
     const [defaultImage, setDefaultImage] = useState(null);
     const [currentSlide, setCurrentSlide] = useState(0);
+
+    const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
 
     useEffect(() => {
         const resetState = () => {
@@ -53,9 +55,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                 setDefaultImage(product.image);
                 setLoading(false);
             } catch (error) {
-                toast.error("Lỗi khi lấy dữ liệu", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
                 setError("Failed to load product details");
                 setLoading(false);
             }
@@ -90,14 +90,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
             const response = await request.get(`library/${productDetailId}`);
             setImages(response.data.data);
         } catch (error) {
-            let errorMessage = "Lỗi khi lấy dữ liệu: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, { position: "top-right" });
-            console.error("Lỗi khi lấy dữ liệu:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
     };
 
@@ -201,9 +194,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
         const access_token = localStorage.getItem("access_token");
 
         if (!selectedColor || !selectedSize || quantity < 1) {
-            toast.error("Hãy chọn phân loại của sản phẩm và số lượng.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Hãy chọn phân loại của sản phẩm và số lượng.');
             return;
         }
 
@@ -214,9 +205,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
         );
 
         if (!selectedDetail) {
-            toast.error("Lỗi dữ liệu.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
             return;
         }
 
@@ -231,19 +220,13 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                     quantity: quantity,
                 },
             ]);
-            toast.success("Thêm sản phẩm vào giỏ hàng thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Thêm sản phẩm vào giỏ hàng thành công!');
             handleClose();
         } catch (error) {
             if (!access_token) {
-                toast.warning("Hãy đăng nhập để sử dụng chức năng này", {
-                    position: "top-right",
-                });
+                showWarningAlert('Chưa đăng nhập!', 'Hãy đăng nhập để sử dụng chức năng này');
             } else {
-                toast.error("Thêm sản phẩm vào giỏ hàng thất bại", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Thêm sản phẩm vào giỏ hàng thất bại.');
             }
         }
     };
@@ -297,9 +280,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
 
     return (
         <>
-            <ToastContainer />
             <Modal show={showModal} onHide={handleClose} size="lg" centered>
-                <ToastContainer />
                 <Modal.Header closeButton>
                     <Modal.Title>{product.name}</Modal.Title>
                 </Modal.Header>

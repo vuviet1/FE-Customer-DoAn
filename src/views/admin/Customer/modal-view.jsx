@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from "react";
 import { Form, Modal, Button, Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function ViewCustomerModal({ show, handleClose, selectedCustomerId }) {
     const [customer, setCustomer] = useState({
@@ -17,6 +17,7 @@ function ViewCustomerModal({ show, handleClose, selectedCustomerId }) {
         address: "",
         status: 1,
     });
+    const { showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchCustomer = async () => {
@@ -28,23 +29,12 @@ function ViewCustomerModal({ show, handleClose, selectedCustomerId }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị khách hàng thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         };
 
-        if (selectedCustomerId) {
             fetchCustomer();
-        }
-    }, [selectedCustomerId]);
+    }, []);
 
     return (
         <>

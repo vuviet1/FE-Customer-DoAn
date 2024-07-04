@@ -1,13 +1,13 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Table, Image } from "react-bootstrap";
 import ReactQuill from "react-quill";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
 import EditProductDetailModal from "./modal-edit-detail";
 import ImageLibraryModal from "../ImageLibrary";
 import ImageUploader from "../components/ImageUploader";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduct }) {
     const [product, setProduct] = useState({
@@ -30,12 +30,12 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
     const [selectedProductDetail, setSelectedProductDetail] = useState(null);
     const [imageLibraryModalShow, setImageLibraryModalShow] = useState(false);
     const [selectedProductDetailId, setSelectedProductDetailId] = useState(null);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const response = await request.get(`product/${selectedProductId}`);
-                if (response.data.data) {
                     const data = response.data.data;
                     setProduct({
                         product_name: data.product_name || "",
@@ -56,56 +56,28 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
                             quantity: detail.quantity,
                         })) : [],
                     });
-                } else {
-                    console.error("No data returned from the API");
-                }
             } catch (error) {
-                let errorMessage = "Hiển thị sản phẩm thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
             }
         };
 
         const fetchBrands = async () => {
             try {
                 const response = await request.get("brand");
-                setBrands(response.data.data);
+                const activeBrands = response.data.data.filter(brand => brand.status === 1);
+                setBrands(activeBrands);
             } catch (error) {
-                let errorMessage = "Hiển thị danh sách thương hiệu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
             }
         };
 
         const fetchCategories = async () => {
             try {
                 const response = await request.get("category");
-                setCategories(response.data.data);
+                const activeCategories = response.data.data.filter(categories => categories.status === 1);
+                setCategories(activeCategories);
             } catch (error) {
-                let errorMessage = "Hiển thị danh sách danh mục thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
             }
         };
 
@@ -139,20 +111,9 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
             });
             onUpdateProduct();
             handleClose();
-            toast.success("Cập nhật sản phẩm thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật sản phẩm thành công!');
         } catch (error) {
-            let errorMessage = "Cập nhật sản phẩm thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật sản phẩm thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật sản phẩm thất bại');
             handleClose();
         }
     };
@@ -167,19 +128,9 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
                         (detail) => detail.product_detail_id !== detailId
                     ),
                 }));
-                toast.success("Xóa phân loại sản phẩm thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa phân loại sản phẩm thành công!');
             } catch (error) {
-                let errorMessage = "Xóa phân loại sản phẩm thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
+                showErrorAlert('Lỗi!', 'Xóa phân loại sản phẩm thất bại');
             }
         }
     };

@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment, useEffect, useState } from "react";
 import { Form, Button, Image } from "react-bootstrap";
-import { toast, ToastContainer } from "react-toastify";
-
+import { useAlert } from '@utils/AlertContext';
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
@@ -24,6 +24,7 @@ function Account() {
         address: "",
         status: 1,
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         const userData = JSON.parse(localStorage.getItem("user_data"));
@@ -35,9 +36,7 @@ function Account() {
                 );
                 setCustomer(response.data.data);
             } catch (error) {
-                toast.error("Lấy dữ liệu thất bại", {
-                    position: "top-right",
-                });
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         }
     };
@@ -73,14 +72,10 @@ function Account() {
             };
             localStorage.setItem("user_data", JSON.stringify(updatedCustomer));
             
-            toast.success("Cập nhật thông tin thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật thông tin thành công!');
             window.location.reload();
         } catch (error) {
-            toast.error("Cập nhật thông tin thất bại.", {
-                position: "top-right",
-            });
+            showErrorAlert('Lỗi!', 'Cập nhật thông tin thất bại');
         }
     };
 
@@ -91,7 +86,6 @@ function Account() {
 
     return (
         <Fragment>
-            <ToastContainer />
             <Header />
             <Sidebar />
             <Cart />

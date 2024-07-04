@@ -1,10 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Image } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
 import ImageUploader from "../components/ImageUploader";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
     const [admin, setAdmin] = useState({
@@ -18,6 +18,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
         status: 1,
         google_id: "",
     });
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const [images, setImages] = useState([]);
 
@@ -31,34 +32,16 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị nhân viên thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         };
 
-        if (selectedAdminId) {
             fetchAdmin();
-        }
-    }, [selectedAdminId]);
+    }, []);
 
     const updateAdmin = async (e) => {
         e.preventDefault();
         try {
-            if (!admin.name) {
-                toast.error("Trường tên nhân viên là bắt buộc.", {
-                    position: "top-right",
-                });
-                return;
-            }
-
             const formData = {
                 name: admin.name,
                 email: admin.email,
@@ -79,22 +62,11 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                 },
                 mode: "no-cors",
             });
-            toast.success("Cập nhật nhân viên thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Cập nhật nhân viên thành công!');
             onUpdateAdmin();
             handleClose();
         } catch (error) {
-            let errorMessage = "Cập nhật nhân viên thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Cập nhật nhân viên thất bại:", error);
+            showErrorAlert('Lỗi!', 'Cập nhật nhân viên thất bại');
             handleClose();
         }
     };
@@ -190,9 +162,6 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                         }
                                     >
                                         <option value="1">Quản trị viên</option>
-                                        <option value="0">
-                                            Khách hàng
-                                        </option>
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="adminStatusEdit">
@@ -207,9 +176,9 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                             })
                                         }
                                     >
-                                        <option value="1">Hoạt động</option>
+                                        <option value="1">Sử dụng</option>
                                         <option value="0">
-                                            Không hoạt động
+                                            Không sử dụng
                                         </option>
                                     </Form.Control>
                                 </Form.Group>

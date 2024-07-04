@@ -2,12 +2,11 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Image, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "../../../utils/request";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 import AddAdminModal from "./modal-add";
 import EditAdminModal from "./modal-edit";
@@ -25,6 +24,7 @@ function AdminAdmin() {
     const [filteredAdmin, setFilteredAdmin] = useState([]);
     const [statusFilter, setStatusFilter] = useState("");
     const itemsPerPage = 5;
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -34,16 +34,7 @@ function AdminAdmin() {
             setAdmins(adminUsers);
             setFilteredAdmin(adminUsers);
         } catch (error) {
-            let errorMessage = "Hiển thị nhân viên thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-            console.error("Error fetching data:", error);
+            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
@@ -80,21 +71,10 @@ function AdminAdmin() {
         if (window.confirm("Bạn có chắc muốn xóa quản trị viên này không?")) {
             try {
                 await request.delete(`user/${user_id}`);
-                toast.success("Xóa quản trị viên thành công!", {
-                    position: "top-right",
-                });
+                showSuccessAlert('Thành công!', 'Xóa quản trị viên thành công!');
                 fetchData();
             } catch (error) {
-                let errorMessage = "Xóa quản trị viên thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Error deleting admin:", error);
+                showErrorAlert('Lỗi!', 'Xóa quản trị viên thất bại');
             }
         }
     };

@@ -1,12 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import sanitizeHtml from 'sanitize-html';
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../utils/request";
 import ImageUploader from "../components/ImageUploader";
-import { getErrorMessage } from "../../../utils/errorMessages";
 
 function AddProductModal({ show, handleClose, onAddProduct }) {
     const [brands, setBrands] = useState([]);
@@ -21,46 +21,25 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
     const [status, setStatus] = useState(1);
 
     const [images, setImages] = useState([]);
+    const { showSuccessAlert, showErrorAlert } = useAlert();
 
     useEffect(() => {
-        const fetchBrands = async () => {
+        const fetchAllData = async () => {
             try {
-                const response = await request.get("brand");
-                setBrands(response.data.data);
+                const [brandResponse, categoriesResponse] = await Promise.all([
+                    request.get("brand"),
+                    request.get("category"),
+                ]);
+                const activeBrands = brandResponse.data.data.filter(brand => brand.status === 1);
+                const activeCategories = categoriesResponse.data.data.filter(categories => categories.status === 1);
+                setBrands(activeBrands);
+                setCategories(activeCategories);
             } catch (error) {
-                let errorMessage = "Hiển thị danh sách thương hiệu thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
             }
         };
 
-        const fetchCategories = async () => {
-            try {
-                const response = await request.get("category");
-                setCategories(response.data.data);
-            } catch (error) {
-                let errorMessage = "Hiển thị danh sách danh mục thất bại: ";
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status);
-                } else {
-                    errorMessage += error.message;
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                });
-                console.error("Lỗi khi lấy dữ liệu:", error);
-            }
-        };
-
-        fetchBrands();
-        fetchCategories();
+        fetchAllData();
     }, []);
 
     const sanitizeContent = (content) => {
@@ -99,23 +78,12 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            toast.success("Thêm sản phẩm thành công!", {
-                position: "top-right",
-            });
+            showSuccessAlert('Thành công!', 'Thêm sản phẩm thành công!');
             onAddProduct();
             setImages([]);
             handleClose();
         } catch (error) {
-            let errorMessage = "Thêm sản phẩm thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right"
-            });
-            console.error("Thêm sản phẩm thất bại:", error);
+            showErrorAlert('Lỗi!', 'Thêm sản phẩm thất bại');
             handleClose();
         }
     };
@@ -125,8 +93,6 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
     };
 
     return (
-        <>
-        <ToastContainer />
             <Modal show={show} onHide={handleClose} size="xl" centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Thêm mới sản phẩm</Modal.Title>
@@ -263,7 +229,6 @@ function AddProductModal({ show, handleClose, onAddProduct }) {
                     </Form>
                 </Modal.Body>
             </Modal>
-        </>
     );
 }
 

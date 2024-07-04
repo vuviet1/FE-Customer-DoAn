@@ -5,15 +5,15 @@ import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import "react-quill/dist/quill.snow.css";
-import 'react-toastify/dist/ReactToastify.css';
-import { ToastContainer } from "react-toastify";
+import { AlertProvider } from '@utils/AlertContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <ToastContainer />
+  // <React.StrictMode>
+  <AlertProvider>
     <App />
-  </React.StrictMode>
+  </AlertProvider>
+  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

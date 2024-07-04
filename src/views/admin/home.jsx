@@ -1,58 +1,34 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "./components/topbar";
 import Footer from "./components/footer";
 import request from "../../utils/request";
-import { getErrorMessage } from "../../utils/errorMessages";
 import loadLineChart from "./chart-line.js"; // Import the function to load the line chart
 
 function HomeAdmin() {
     const [report, setReport] = useState([]);
-    // const [profit, setProfit] = useState([]);
-
-    const fetchReport = async () => {
-        try {
-            const response = await request.get("report");
-            console.log(response.data.data);
-            setReport(response.data.data);
-        } catch (error) {
-            let errorMessage = "Hiển thị báo cáo thất bại: ";
-            if (error.response && error.response.status) {
-                errorMessage += getErrorMessage(error.response.status);
-            } else {
-                errorMessage += error.message;
-            }
-            toast.error(errorMessage, {
-                position: "top-right",
-            });
-        }
-    };
-
-    // const fetchProfit = async () => {
-    //     try {
-    //         const response = await request.get("get-profit");
-    //         console.log(response.data.data);
-    //         setProfit(response.data.data);
-    //     } catch (error) {
-    //         let errorMessage = "Hiển thị doanh thu thất bại: ";
-    //         if (error.response && error.response.status) {
-    //             errorMessage += getErrorMessage(error.response.status);
-    //         } else {
-    //             errorMessage += error.message;
-    //         }
-    //         toast.error(errorMessage, {
-    //             position: "top-right",
-    //         });
-    //     }
-    // };
+    const [profit, setProfit] = useState([]);
+    const { showErrorAlert } = useAlert();
 
     useEffect(() => {
-        fetchReport()
-        // fetchProfit();
-        loadLineChart();
+        const fetchAllData = async () => {
+            try {
+                const [profitResponse, reportResponse] = await Promise.all([
+                    request.get("get-profit"),
+                    request.get("report"),
+                ]);
+                setProfit(profitResponse.data.data);
+                setReport(reportResponse.data.data);
+            } catch (error) {
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+            }
+        };
+
+        fetchAllData();
     }, []);
 
     const handleScrollToTop = (e) => {
@@ -64,8 +40,6 @@ function HomeAdmin() {
     };
 
     return (
-        <>
-            <ToastContainer />
             <div id="wrapper">
                 <div id="content-wrapper" className="d-flex flex-column">
                     <div id="content">
@@ -213,7 +187,6 @@ function HomeAdmin() {
                     <i className="fas fa-angle-up" />
                 </a>
             </div>
-        </>
     );
 }
 

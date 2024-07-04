@@ -1,11 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button, InputGroup } from "react-bootstrap";
-import { toast } from "react-toastify"
+import { useAlert } from '@utils/AlertContext';
 
 import request from "../../../../utils/request";
 import ProductModal from "./modal-product";
-import { getErrorMessage } from "../../../../utils/errorMessages"
 
 function ViewOrderModal({ show, handleClose, selectedOrderId }) {
     const [orders, setOrders] = useState({
@@ -21,6 +20,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
     const [showProductModal, setShowProductModal] = useState(false);
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
+    const { showErrorAlert } = useAlert();
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -45,16 +45,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                     }
                 }
             } catch (error) {
-                let errorMessage = "Hiển thị hóa đơn thất bại: "
-                if (error.response && error.response.status) {
-                    errorMessage += getErrorMessage(error.response.status)
-                } else {
-                    errorMessage += error.message
-                }
-                toast.error(errorMessage, {
-                    position: "top-right",
-                })
-                console.error("Lấy dữ liệu thất bại:", error)
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
         };
 
