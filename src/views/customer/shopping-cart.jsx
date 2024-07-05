@@ -135,16 +135,15 @@ function ShoppingCart() {
         try {
             const response = await request.post("order", orderData);
             const paymentURL = response.data;
-            alert(paymentURL);
             onAddOrder();
             fetchCartItems();
             if (paymentURL) {
-                if (paymentURL === "/") {
+                if (paymentURL === "Success") {
                     showWarningAlert(
                         "Điều hướng!",
-                        "Chuyển hướng về trang chủ"
+                        "Chuyển hướng về trang hóa đơn"
                     );
-                    window.location.href = paymentURL;
+                    window.location.href = "/order";
                 } else {
                     showWarningAlert(
                         "Điều hướng!",
