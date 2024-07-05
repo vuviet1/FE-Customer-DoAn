@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Image } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function ViewAdminModal({ show, handleClose, selectedAdminId }) {
     const [admin, setAdmin] = useState({

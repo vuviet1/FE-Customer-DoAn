@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function EditBrandModal({ show, handleClose, selectedBrandId, onUpdateBrand }) {
     const [brand, setBrand] = useState({

@@ -4,7 +4,7 @@ import { Modal, Button, Form, Table, Image } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 import EditProductDetailModal from "./modal-edit-detail";
 import ImageLibraryModal from "../ImageLibrary";
 import ImageUploader from "../components/ImageUploader";
@@ -61,32 +61,26 @@ function EditProductModal({ show, handleClose, selectedProductId, onUpdateProduc
             }
         };
 
-        const fetchBrands = async () => {
+        const fetchAllData = async () => {
             try {
-                const response = await request.get("brand");
-                const activeBrands = response.data.data.filter(brand => brand.status === 1);
+                const [brandResponse, categoriesResponse] = await Promise.all([
+                    request.get("brand"),
+                    request.get("category"),
+                ]);
+                const activeBrands = brandResponse.data.data.filter(brand => brand.status === 1);
+                const activeCategories = categoriesResponse.data.data.filter(categories => categories.status === 1);
                 setBrands(activeBrands);
+                setCategories(activeCategories);
             } catch (error) {
-                showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
+                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
             }
         };
 
-        const fetchCategories = async () => {
-            try {
-                const response = await request.get("category");
-                const activeCategories = response.data.data.filter(categories => categories.status === 1);
-                setCategories(activeCategories);
-            } catch (error) {
-                showErrorAlert('Lỗi!', 'Lỗi khi lấy dữ liệu');
-            }
-        };
+        fetchAllData();
 
         if (selectedProductId) {
             fetchProduct();
         }
-
-        fetchBrands();
-        fetchCategories();
     }, [selectedProductId]);
 
     const updateProduct = async (e) => {

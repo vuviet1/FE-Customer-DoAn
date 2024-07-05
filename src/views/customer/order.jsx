@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-operators */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
@@ -6,14 +7,14 @@ import { Link } from "react-router-dom";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Footer from "./components/footer";
 import Cart from "./components/cart";
 import ProductModal from "./modal-product";
-import request from "../../utils/request";
+import request from "@utils/request";
 
 function Orders() {
     const [orders, setOrders] = useState([]);
@@ -39,7 +40,7 @@ function Orders() {
             setOrders(response.data.data);
             setFilteredOrders(response.data.data);
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
         }
     };
 
@@ -100,9 +101,9 @@ function Orders() {
             setOrders(updatedOrders);
             setFilteredOrders(updatedOrders);
             setShowRemoveModal(false);
-            showSuccessAlert('Thành công!', 'Hủy hóa đơn thành công!');
+            showSuccessAlert("Thành công!", "Hủy hóa đơn thành công!");
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Hủy hóa đơn thất bại');
+            showErrorAlert("Lỗi!", "Hủy hóa đơn thất bại");
         }
     };
 
@@ -120,18 +121,23 @@ function Orders() {
     const handlePayment = async (orderId) => {
         try {
             const response = await request.post(`/payment_status/${orderId}`);
-            const paymentURL = response.data
-            if(paymentURL) {
-                showWarningAlert('Điều hướng!', 'Chuyển hướng đến trang thanh toán hóa đơn');
+            const paymentURL = response.data;
+            if (paymentURL) {
+                showWarningAlert(
+                    "Điều hướng!",
+                    "Chuyển hướng đến trang thanh toán hóa đơn"
+                );
                 window.location.href = paymentURL;
             } else {
-                showErrorAlert('Lỗi!', 'Không nhận được URL của trang thanh toán');
+                showErrorAlert(
+                    "Lỗi!",
+                    "Không nhận được URL của trang thanh toán"
+                );
             }
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Điều hướng thất bại');
-            
+            showErrorAlert("Lỗi!", "Điều hướng thất bại");
         }
-    }
+    };
 
     const offset = currentPage * itemsPerPage;
     const currentPageItems = filteredOrders.slice(
@@ -252,7 +258,9 @@ function Orders() {
                                                                     color: "red",
                                                                 }}
                                                             >
-                                                                {order.total.toLocaleString(
+                                                                {Number(
+                                                                    order.total
+                                                                ).toLocaleString(
                                                                     "vi-VN",
                                                                     {
                                                                         style: "currency",
@@ -309,11 +317,14 @@ function Orders() {
                                                                 ) : order.payment_status ===
                                                                   0 ? (
                                                                     <span className="badge badge-warning">
-                                                                        Chưa thanh toán
+                                                                        Chưa
+                                                                        thanh
+                                                                        toán
                                                                     </span>
                                                                 ) : (
                                                                     <span className="badge badge-danger">
-                                                                        Không xác định
+                                                                        Không
+                                                                        xác định
                                                                     </span>
                                                                 )}
                                                             </td>
@@ -323,22 +334,27 @@ function Orders() {
                                                                 ).toLocaleString()}
                                                             </td>
                                                             <td>
-                                                                {order.payment_status !== 1 && (
-                                                                    <Button
-                                                                    variant="success"
-                                                                    onClick={() =>
-                                                                        handlePayment(
-                                                                            order.order_id
-                                                                        )
-                                                                    }
-                                                                    style={{
-                                                                        marginRight:
-                                                                            "5px",
-                                                                    }}
-                                                                >
-                                                                    Thanh toán
-                                                                </Button>
-                                                                )}
+                                                                {order.payment
+                                                                    .payment_method !==
+                                                                    "COD" &&
+                                                                    order.payment_status !==
+                                                                        1 && (
+                                                                        <Button
+                                                                            variant="success"
+                                                                            onClick={() =>
+                                                                                handlePayment(
+                                                                                    order.order_id
+                                                                                )
+                                                                            }
+                                                                            style={{
+                                                                                marginRight:
+                                                                                    "5px",
+                                                                            }}
+                                                                        >
+                                                                            Thanh
+                                                                            toán
+                                                                        </Button>
+                                                                    )}
                                                                 <Button
                                                                     variant="info"
                                                                     onClick={() =>
@@ -351,21 +367,23 @@ function Orders() {
                                                                             "5px",
                                                                     }}
                                                                 >
-                                                                    Sản phẩm
+                                                                    Chi tiết
                                                                 </Button>
                                                                 {order.status ===
-                                                                    1 && (
-                                                                    <Button
-                                                                        variant="danger"
-                                                                        onClick={() =>
-                                                                            confirmRemoveOrder(
-                                                                                order.order_id
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        Hủy
-                                                                    </Button>
-                                                                )}
+                                                                    1 &&
+                                                                    order.payment_status ===
+                                                                        0 && (
+                                                                        <Button
+                                                                            variant="danger"
+                                                                            onClick={() =>
+                                                                                confirmRemoveOrder(
+                                                                                    order.order_id
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Hủy
+                                                                        </Button>
+                                                                    )}
                                                             </td>
                                                         </tr>
                                                     )

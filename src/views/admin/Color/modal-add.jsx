@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function AddColorModal({ show, handleClose, onAddColor }) {
     const [color, setColor] = useState({

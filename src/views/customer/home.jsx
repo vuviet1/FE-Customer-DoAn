@@ -13,7 +13,7 @@ import Slider from "./components/slider";
 import Banner from "./components/banner";
 import Footer from "./components/footer";
 import ProductModal from "./components/modal";
-import request from "../../utils/request";
+import request from "@utils/request";
 import FavoriteButton from "./components/FavoriteButton";
 
 function Home() {
@@ -131,7 +131,7 @@ function Home() {
                                             </Link>
                                             {!product.discount ? (
                                                 <span className="discounted-price">
-                                                    {product.price.toLocaleString(
+                                                    {Number(product.price).toLocaleString(
                                                         "vi-VN",
                                                         {
                                                             style: "currency",
@@ -142,7 +142,7 @@ function Home() {
                                             ) : (
                                                 <div className="price-container">
                                                     <span className="original-price">
-                                                        {product.price.toLocaleString(
+                                                        {Number(product.price).toLocaleString(
                                                             "vi-VN",
                                                             {
                                                                 style: "currency",

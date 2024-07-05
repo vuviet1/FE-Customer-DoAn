@@ -8,7 +8,7 @@ import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 import AddColorModal from "./modal-add";
 import EditColorModal from "./modal-edit";

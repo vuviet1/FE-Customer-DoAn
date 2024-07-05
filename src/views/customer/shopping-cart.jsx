@@ -6,13 +6,13 @@ import { Link } from "react-router-dom";
 import { Table, Button, Form, Modal, Image } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Footer from "./components/footer";
-import request from "../../utils/request";
+import request from "@utils/request";
 
 function ShoppingCart() {
     const [cartItems, setCartItems] = useState([]);
@@ -50,12 +50,13 @@ function ShoppingCart() {
                 request.defaults.headers.common[
                     "Authorization"
                 ] = `${token_type} ${access_token}`;
-                const [paymentResponse, shippingResponse, voucherResponse] = await Promise.all([
-                    request.get("payment"),
-                    request.get("shipping"),
-                    request.get("voucher"),
-                    // request.get("cart"),
-                ]);
+                const [paymentResponse, shippingResponse, voucherResponse] =
+                    await Promise.all([
+                        request.get("payment"),
+                        request.get("shipping"),
+                        request.get("voucher"),
+                        // request.get("cart"),
+                    ]);
 
                 setPaymentMethods(paymentResponse.data.data);
                 setShippingMethods(shippingResponse.data.data);
@@ -63,7 +64,7 @@ function ShoppingCart() {
                 // setCartItems(cartResponse.data.data);
                 // setFilteredItems(cartResponse.data.data);
             } catch (error) {
-                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
             }
         };
 
@@ -71,7 +72,6 @@ function ShoppingCart() {
 
         fetchCartItems();
     }, []);
-
 
     const fetchCartItems = async () => {
         const token_type = localStorage.getItem("token_type");
@@ -86,12 +86,35 @@ function ShoppingCart() {
             setCartItems(cartData);
             setFilteredItems(cartData);
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Kiểm tra sản phẩm trước khi tạo hóa đơn
+        const outOfStockItems = cartItems
+            .filter((item) => item.product_detail.quantity < 1)
+            .map((item) => item.product_detail.product.product_name);
+
+        if (outOfStockItems.length > 0) {
+            showErrorAlert(
+                "Lỗi!",
+                `Sản phẩm ${outOfStockItems.join(", ")} đã hết hàng.`
+            );
+            return;
+        }
+
+        for (const item of cartItems) {
+            if (item.quantity > item.product_detail.quantity) {
+                showErrorAlert(
+                    "Lỗi!",
+                    `Sản phẩm ${item.product_detail.product.product_name} đã quá số lượng sản phẩm còn lại.`
+                );
+                return;
+            }
+        }
 
         const orderData = {
             shipping_code: "",
@@ -101,7 +124,6 @@ function ShoppingCart() {
             phone_number: phoneNumber,
             payment_method_id: Number(paymentMethodId),
             shipping_method_id: Number(shippingMethodId),
-            // payment_status: Number(paymentStatus),
         };
 
         const token_type = localStorage.getItem("token_type");
@@ -118,24 +140,29 @@ function ShoppingCart() {
             fetchCartItems();
             if (paymentURL) {
                 if (paymentURL === "/") {
-                    showWarningAlert('Điều hướng!', 'Chuyển hướng về trang chủ');
+                    showWarningAlert(
+                        "Điều hướng!",
+                        "Chuyển hướng về trang chủ"
+                    );
                     window.location.href = paymentURL;
                 } else {
-                    showWarningAlert('Điều hướng!', 'Chuyển hướng đến trang thanh toán');
+                    showWarningAlert(
+                        "Điều hướng!",
+                        "Chuyển hướng đến trang thanh toán"
+                    );
                     window.location.href = paymentURL;
                 }
             } else {
-                showErrorAlert('Lỗi!', 'Không nhận được URL thanh toán');
+                showErrorAlert("Lỗi!", "Không nhận được URL thanh toán");
             }
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Thêm hóa đơn thất bại');
+            showErrorAlert("Lỗi!", "Thêm hóa đơn thất bại");
             fetchCartItems();
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
 
     const onAddOrder = () => {
-        showSuccessAlert('Thành công!', 'Đã tạo hóa đơn thành công!');
+        showSuccessAlert("Thành công!", "Đã tạo hóa đơn thành công!");
     };
 
     const handlePageClick = (data) => {
@@ -187,9 +214,12 @@ function ShoppingCart() {
             setCartItems(updatedCartItems);
             setFilteredItems(updatedCartItems);
             setShowModal(false);
-            showSuccessAlert('Thành công!', 'Xóa sản phẩm khỏi giỏ hàng thành công!');
+            showSuccessAlert(
+                "Thành công!",
+                "Xóa sản phẩm khỏi giỏ hàng thành công!"
+            );
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Xóa sản phẩm khỏi giỏ hàng thất bại');
+            showErrorAlert("Lỗi!", "Xóa sản phẩm khỏi giỏ hàng thất bại");
         }
     };
 
@@ -203,27 +233,48 @@ function ShoppingCart() {
 
     // Voucher và tổng tiền
     const handleVoucherApply = () => {
-        const voucher = vouchers.find((v) => v.voucher_code === voucherCode);
-        if (voucher) {
-            setIsVoucherValid(true);
-            const originalTotal = calculateTotalPrice(false);
-            const discountAmount = originalTotal * (voucher.voucher / 100);
-            const newTotal = originalTotal - discountAmount;
-            setDiscountedTotal({
-                original: originalTotal.toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                }),
-                discounted: newTotal.toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                }),
-            });
-            showSuccessAlert('Thành công!', 'Áp dụng mã giảm giá thành công!');
-        } else {
+        try {
+            const voucher = vouchers.find(
+                (v) => v.voucher_code === voucherCode
+            );
+            if (voucher && voucher.status === 1) {
+                const currentDate = new Date();
+                const startDate = new Date(voucher.start_day);
+                const endDate = new Date(voucher.end_day);
+                const quantity = voucher.quantity;
+                if (
+                    currentDate >= startDate &&
+                    currentDate <= endDate &&
+                    quantity > 0
+                ) {
+                    setIsVoucherValid(true);
+                    const originalTotal = calculateTotalPrice(false);
+                    const discountAmount =
+                        originalTotal * (voucher.voucher / 100);
+                    const newTotal = originalTotal - discountAmount;
+                    setDiscountedTotal({
+                        original: originalTotal.toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                        }),
+                        discounted: newTotal.toLocaleString("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                        }),
+                    });
+                    showSuccessAlert(
+                        "Thành công!",
+                        "Áp dụng mã giảm giá thành công!"
+                    );
+                    return;
+                }
+            }
+            setIsVoucherValid(false);
+            showErrorAlert("Lỗi!", "Mã giảm giá không hợp lệ hoặc đã hết hạn");
+        } catch (error) {
             setIsVoucherValid(false);
             setDiscountedTotal(null);
-            showErrorAlert('Lỗi!', 'Mã giảm giá không hợp lệ');
+            showErrorAlert("Lỗi!", "Mã giảm giá không hợp lệ");
         }
     };
 

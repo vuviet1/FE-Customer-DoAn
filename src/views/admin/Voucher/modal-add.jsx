@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function AddVoucherModal({ show, handleClose, onAddVoucher }) {
     const [voucher, setVoucher] = useState({

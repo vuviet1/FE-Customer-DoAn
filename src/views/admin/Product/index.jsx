@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { useAlert } from '@utils/AlertContext';
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 import AddProductModal from "./modal-add";
 import EditProductModal from "./modal-edit";
@@ -182,15 +182,15 @@ function ProductAdmin() {
                         <td style={{ textAlign: "left" }}>
                             {!product.discount ? (
                                 <span className="discounted-price">
-                                    {product.price.toLocaleString("vi-VN", {
-                                        style: "currency",
-                                        currency: "VND",
+                                    {Number(product.price).toLocaleString("vi-VN", {
+                                            style: "currency",
+                                            currency: "VND",
                                     })}
                                 </span>
                             ) : (
                                 <div className="price-container">
                                     <span className="original-price">
-                                        {product.price.toLocaleString("vi-VN", {
+                                        {Number(product.price).toLocaleString("vi-VN", {
                                             style: "currency",
                                             currency: "VND",
                                         })}

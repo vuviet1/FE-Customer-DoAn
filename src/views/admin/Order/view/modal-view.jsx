@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Form, Modal, Button, InputGroup } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../../utils/request";
+import request from "@utils/request";
 import ProductModal from "./modal-product";
 
 function ViewOrderModal({ show, handleClose, selectedOrderId }) {

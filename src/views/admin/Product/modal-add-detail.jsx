@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function AddProductDetailModal({
     show,

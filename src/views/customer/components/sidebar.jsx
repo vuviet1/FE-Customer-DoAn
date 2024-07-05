@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { Image } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function Sidebar() {
     const [customer, setCustomer] = useState({

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Image } from "react-bootstrap";
 
 import { useAlert } from '@utils/AlertContext';
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 const ProductModal = ({ showModal, handleClose, product }) => {
     const [productDetails, setProductDetails] = useState([]);
@@ -356,7 +356,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                                             Giá tiền:{" "}
                                             {!product.discount ? (
                                                 <span className="discounted-price">
-                                                    {product.price.toLocaleString(
+                                                    {Number(product.price).toLocaleString(
                                                         "vi-VN",
                                                         {
                                                             style: "currency",
@@ -367,7 +367,7 @@ const ProductModal = ({ showModal, handleClose, product }) => {
                                             ) : (
                                                 <span className="price-container">
                                                     <span className="original-price">
-                                                        {product.price.toLocaleString(
+                                                        {Number(product.price).toLocaleString(
                                                             "vi-VN",
                                                             {
                                                                 style: "currency",

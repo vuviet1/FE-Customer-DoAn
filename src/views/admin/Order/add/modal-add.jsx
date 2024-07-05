@@ -1,13 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Form, Modal, Button } from "react-bootstrap";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 
-import request from "../../../../utils/request";
+import request from "@utils/request";
 import CartModal from "./modal-cart";
 
 function AddOrderModal({ show, handleClose, onAddOrder }) {
-    const [paymentMethods, setPaymentMethods] = useState([]);
+    const [cartItems, setCartItems] = useState([]);
+    // const [paymentMethods, setPaymentMethods] = useState([]);
     const [shippingMethods, setShippingMethods] = useState([]);
     const [address, setAddress] = useState("");
     const [vouchers, setVouchers] = useState("");
@@ -20,7 +21,7 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
     const [isVoucherValid, setIsVoucherValid] = useState(false);
     const [showCartModal, setShowCartModal] = useState(false);
     const { showSuccessAlert, showErrorAlert } = useAlert();
-    
+
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
     const user_data = JSON.parse(localStorage.getItem("user_data"));
@@ -28,47 +29,74 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
     useEffect(() => {
         const fetchAllData = async () => {
             try {
-                const [paymentResponse, shippingResponse, voucherResponse] = await Promise.all([
-                    request.get("payment"),
-                    request.get("shipping"),
-                    request.get("voucher"),
-                ]);
-                const activePayments = paymentResponse.data.data.filter(
-                    (payment) => payment.status === 1
-                );
+                const [shippingResponse, voucherResponse] =
+                    await Promise.all([
+                        // request.get("payment"),
+                        request.get("shipping"),
+                        request.get("voucher"),
+                    ]);
+                // const activePayments = paymentResponse.data.data.filter(
+                //     (payment) => payment.status === 1
+                // );
                 const activeShippings = shippingResponse.data.data.filter(
                     (shipping) => shipping.status === 1
                 );
                 const activeVouchers = voucherResponse.data.data.filter(
                     (voucher) => voucher.status === 1
                 );
-                setPaymentMethods(activePayments);
+                // setPaymentMethods(activePayments);
                 setShippingMethods(activeShippings);
                 setVouchers(activeVouchers);
             } catch (error) {
-                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
             }
         };
 
         fetchAllData();
+        fetchCartItems()
     }, []);
+
+    const fetchCartItems = async () => {
+        const token_type = localStorage.getItem("token_type");
+        const access_token = localStorage.getItem("access_token");
+        request.defaults.headers.common[
+            "Authorization"
+        ] = `${token_type} ${access_token}`;
+        try {
+            if (!access_token) return;
+            const response = await request.get("cart");
+            const cartData = response.data.data;
+            setCartItems(cartData);
+        } catch (error) {
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+        }
+    };
 
     // Kiểm tra voucher
     const handleCheckVoucher = async () => {
         try {
-            // if(vouchers.filter(vouchers => vouchers.voucher_code === voucherCode)){
-
-            // }
-            if (vouchers.filter(vouchers => vouchers.voucher_code === voucherCode && vouchers.status === 1)){
-                setIsVoucherValid(true);
-                showSuccessAlert('Thành công!', 'Mã giảm giá sử dụng được!');
-            } else {
-                setIsVoucherValid(false);
-                showErrorAlert('Lỗi!', 'Mã giảm giá không hợp lệ hoặc đã hết hạn');
+            const voucher = vouchers.find(
+                (v) => v.voucher_code === voucherCode
+            );
+            if (voucher && voucher.status === 1) {
+                const currentDate = new Date();
+                const startDate = new Date(voucher.start_day);
+                const endDate = new Date(voucher.end_day);
+                const quantity = voucher.quantity
+                if (currentDate >= startDate && currentDate <= endDate && quantity > 0) {
+                    setIsVoucherValid(true);
+                    showSuccessAlert(
+                        "Thành công!",
+                        "Mã giảm giá sử dụng được!"
+                    );
+                    return;
+                }
             }
+            setIsVoucherValid(false);
+            showErrorAlert("Lỗi!", "Mã giảm giá không hợp lệ hoặc đã hết hạn");
         } catch (error) {
             setIsVoucherValid(false);
-            showErrorAlert('Lỗi!', 'Kiểm tra mã giảm giá thất bại');
+            showErrorAlert("Lỗi!", "Kiểm tra mã giảm giá thất bại");
         }
     };
 
@@ -77,8 +105,31 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
         e.preventDefault();
 
         if (!isVoucherValid && voucherCode) {
-            showErrorAlert('Lỗi!', 'Mã giảm giá không hợp lệ hoặc đã hết hạn');
+            showErrorAlert("Lỗi!", "Mã giảm giá không hợp lệ hoặc đã hết hạn");
             return;
+        }
+
+        // Kiểm tra sản phẩm trước khi tạo hóa đơn
+        const outOfStockItems = cartItems
+            .filter((item) => item.product_detail.quantity < 1)
+            .map((item) => item.product_detail.product.product_name);
+
+        if (outOfStockItems.length > 0) {
+            showErrorAlert(
+                "Lỗi!",
+                `Sản phẩm ${outOfStockItems.join(", ")} đã hết hàng.`
+            );
+            return;
+        }
+
+        for (const item of cartItems) {
+            if (item.quantity > item.product_detail.quantity) {
+                showErrorAlert(
+                    "Lỗi!",
+                    `Sản phẩm ${item.product_detail.product.product_name} đã quá số lượng sản phẩm còn lại.`
+                );
+                return;
+            }
         }
 
         const orderData = {
@@ -97,11 +148,11 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
 
         try {
             await request.post("order", orderData);
-            showSuccessAlert('Thành công!', 'Đã tạo hóa đơn thành công!');
+            showSuccessAlert("Thành công!", "Đã tạo hóa đơn thành công!");
             onAddOrder();
             handleClose();
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Thêm hóa đơn thất bại');
+            showErrorAlert("Lỗi!", "Thêm hóa đơn thất bại");
             handleClose();
         }
     };
@@ -157,14 +208,17 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
                                         <option value="">
                                             Chọn phương thức thanh toán
                                         </option>
-                                        {paymentMethods.map((method) => (
+                                        <option value="1">
+                                            COD
+                                        </option>
+                                        {/* {paymentMethods.map((method) => (
                                             <option
                                                 key={method.payment_method_id}
                                                 value={method.payment_method_id}
                                             >
                                                 {method.payment_method}
                                             </option>
-                                        ))}
+                                        ))} */}
                                     </Form.Control>
                                 </Form.Group>
                                 <Form.Group controlId="inputShippingMethod">

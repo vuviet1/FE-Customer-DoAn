@@ -6,7 +6,7 @@ import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 import AddVoucherModal from "./modal-add";
 import EditVoucherModal from "./modal-edit";

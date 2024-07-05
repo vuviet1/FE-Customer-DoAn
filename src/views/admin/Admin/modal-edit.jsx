@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Image } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 import ImageUploader from "../components/ImageUploader";
 
 function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {

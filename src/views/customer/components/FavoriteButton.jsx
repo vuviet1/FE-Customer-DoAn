@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Image } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 const FavoriteButton = ({ productId }) => {
     const [isFavorite, setIsFavorite] = useState(false);

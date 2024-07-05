@@ -5,7 +5,7 @@ import { Form, Button, Image, Modal } from "react-bootstrap";
 import ReactQuill from "react-quill";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../utils/request";
+import request from "@utils/request";
 import ModalEditReview from "./edit-review";
 
 const ProductDescriptionReviews = ({ productId, product }) => {

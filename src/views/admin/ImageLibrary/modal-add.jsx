@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Form, Modal, Alert } from "react-bootstrap";
 import ImageUploader from "../components/ImageUploader";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function AddImageModal({ show, handleClose, productDetailId, handleAddImage }) {
     const [images, setImages] = useState([]);

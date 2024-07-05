@@ -4,25 +4,20 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button, Image, Spinner } from "react-bootstrap";
 
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Footer from "./components/footer";
-import request from "../../utils/request";
+import request from "@utils/request";
 import FavoriteButton from "./components/FavoriteButton";
-import ProductDescriptionReviews from './description-review';
-
-import StyleManager from "../../utils/StyleManager";
-import { customerStyles } from "../../App";
+import ProductDescriptionReviews from "./description-review";
 
 function ProductDetail() {
     const navigate = useNavigate();
     const productId = sessionStorage.getItem("productId");
     // Load trang
     const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     // Chọn màu/kích cỡ/số lượng
     const [selectedColor, setSelectedColor] = useState(null);
     const [selectedSize, setSelectedSize] = useState(null);
@@ -43,6 +38,32 @@ function ProductDetail() {
             return;
         }
 
+        // const fetchAllData = async (productDetailId) => {
+        //     try {
+        //         const [responseImage, responseProduct] = await Promise.all([
+        //             request.get(`library/${productDetailId}`),
+        //             request.get(`/product/${productId}`),
+        //         ]);
+        //         setImages(responseImage.data.data);
+
+        //         const fetchedProduct = responseProduct.data.data;
+        //         setProduct(fetchedProduct);
+        //         setAvailableColors(
+        //             fetchedProduct.product_details.map(
+        //                 (detail) => detail.color.color
+        //             )
+        //         );
+        //         setAvailableSizes(
+        //             fetchedProduct.product_details.map(
+        //                 (detail) => detail.size.size
+        //             )
+        //         );
+        //         setDefaultImage(fetchedProduct.image);
+        //     } catch (error) {
+        //         showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+        //     }
+        // };
+
         const fetchProduct = async () => {
             try {
                 const response = await request.get(`/product/${productId}`);
@@ -59,16 +80,23 @@ function ProductDetail() {
                     )
                 );
                 setDefaultImage(fetchedProduct.image);
-                setLoading(false);
             } catch (error) {
-                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
-                setError("Lỗi khi lấy dữ liệu sản phẩm");
-                setLoading(false);
+                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
             }
         };
 
+        // fetchAllData();
         fetchProduct();
-    }, [productId, navigate]);
+    }, []);
+
+    const fetchImages = async (productDetailId) => {
+        try {
+            const response = await request.get(`library/${productDetailId}`);
+            setImages(response.data.data);
+        } catch (error) {
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+        }
+    };
 
     useEffect(() => {
         if (selectedColor && selectedSize) {
@@ -82,20 +110,10 @@ function ProductDetail() {
                 fetchImages(selectedDetail.product_detail_id);
             }
         } else {
-            // Reset to default image when no size or color selected
             setImages([]);
             setDefaultImage(product ? product.image : null);
         }
-    }, [selectedColor, selectedSize, product]);
-
-    const fetchImages = async (productDetailId) => {
-        try {
-            const response = await request.get(`library/${productDetailId}`);
-            setImages(response.data.data);
-        } catch (error) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
-        }
-    };
+    }, []);
 
     // Xử lý chọn màu sắc, kích cỡ
     const handleSelectColor = (color) => {
@@ -201,7 +219,10 @@ function ProductDetail() {
         const access_token = localStorage.getItem("access_token");
 
         if (!selectedColor || !selectedSize || quantity < 1) {
-            showErrorAlert('Lỗi!', 'Hãy chọn phân loại của sản phẩm và số lượng.');
+            showErrorAlert(
+                "Lỗi!",
+                "Hãy chọn phân loại của sản phẩm và số lượng."
+            );
             return;
         }
 
@@ -211,8 +232,24 @@ function ProductDetail() {
                 detail.size.size === selectedSize
         );
 
+        if (selectedDetail.quantity < 1 ) {
+            showErrorAlert(
+                "Lỗi!",
+                "Sản phẩm đã hết hàng."
+            );
+            return;
+        }
+
+        if (quantity>selectedDetail.quantity) {
+            showErrorAlert(
+                "Lỗi!",
+                "Số lượng sản phẩm đã chọn quá số lượng sản phẩm còn lại."
+            );
+            return;
+        }
+
         if (!selectedDetail) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
             return;
         }
 
@@ -226,31 +263,35 @@ function ProductDetail() {
                     quantity: quantity,
                 },
             ]);
-            showSuccessAlert('Thành công!', 'Sản phẩm thêm vào giỏ hàng thành công!');
+            showSuccessAlert(
+                "Thành công!",
+                "Sản phẩm thêm vào giỏ hàng thành công!"
+            );
         } catch (error) {
             if (!access_token) {
-                showWarningAlert('Chưa đăng nhập!', 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+                showWarningAlert(
+                    "Chưa đăng nhập!",
+                    "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng"
+                );
             } else {
-                showErrorAlert('Lỗi!', 'Sản phẩm thêm vào giỏ hàng thất bại');
+                showErrorAlert("Lỗi!", "Sản phẩm thêm vào giỏ hàng thất bại");
             }
         }
     };
 
-    if (loading) {
+    if (!product) {
         return (
-            <div
-                className="d-flex justify-content-center align-items-center"
-                style={{ minHeight: "200px" }}
-            >
-                <Spinner animation="border" role="status">
-                    <span className="sr-only">Loading...</span>
-                </Spinner>
-            </div>
+            <>
+                <div
+                    className="d-flex justify-content-center align-items-center"
+                    style={{ minHeight: "200px" }}
+                >
+                    <Spinner animation="border" role="status">
+                        <span className="sr-only"></span>
+                    </Spinner>
+                </div>
+            </>
         );
-    }
-
-    if (error) {
-        return <div>Error: {error}</div>;
     }
 
     // Ảnh phân loại sản phẩm
@@ -300,7 +341,6 @@ function ProductDetail() {
 
     return (
         <Fragment>
-            <StyleManager urls={customerStyles} idPrefix="customer" />
             <Header />
             <Sidebar />
             <Cart />
@@ -381,18 +421,17 @@ function ProductDetail() {
                                     </h4>
                                     {!product.discount ? (
                                         <span className="discounted-price">
-                                            {product.price.toLocaleString(
-                                                "vi-VN",
-                                                {
-                                                    style: "currency",
-                                                    currency: "VND",
-                                                }
-                                            )}
+                                            {Number(
+                                                product.price
+                                            ).toLocaleString("vi-VN", {
+                                                style: "currency",
+                                                currency: "VND",
+                                            })}
                                         </span>
                                     ) : (
                                         <div className="price-container">
                                             <span className="original-price">
-                                                {product.price.toLocaleString(
+                                                {Number(product.price).toLocaleString(
                                                     "vi-VN",
                                                     {
                                                         style: "currency",
@@ -412,6 +451,45 @@ function ProductDetail() {
                                             </span>
                                         </div>
                                     )}
+                                    <p className="stext-102 cl3 p-t-23">
+                                        {selectedColor && selectedSize ? (
+                                            <span>
+                                                <strong>
+                                                    - Số lượng sản phẩm :{" "}
+                                                </strong>
+                                                {(() => {
+                                                    const selectedDetail =
+                                                        product.product_details.find(
+                                                            (detail) =>
+                                                                detail.color
+                                                                    .color ===
+                                                                    selectedColor &&
+                                                                detail.size
+                                                                    .size ===
+                                                                    selectedSize
+                                                        );
+                                                    return selectedDetail
+                                                        ? selectedDetail.quantity >
+                                                          0
+                                                            ? selectedDetail.quantity
+                                                            : "Hết"
+                                                        : "N/A";
+                                                })()}
+                                                <span> sản phẩm</span>
+                                            </span>
+                                        ) : (
+                                            <span>
+                                                <strong>
+                                                    - Tổng số lượng sản phẩm:{" "}
+                                                </strong>
+                                                {product?.total_quantity > 0
+                                                    ? product.total_quantity
+                                                    : "Hết"}
+                                                    <span> sản phẩm</span>
+                                            </span>
+                                        )}
+                                    </p>
+
                                     <p className="stext-102 cl3 p-t-23">
                                         <strong>- Thương hiệu: </strong>
                                         {product.brand.brand_name}
@@ -580,8 +658,12 @@ function ProductDetail() {
                                 </div>
                             </div>
                         </div>
+
                         {/* Mô tả / Đánh giá  */}
-                        <ProductDescriptionReviews productId={productId} product={product} />
+                        <ProductDescriptionReviews
+                            productId={productId}
+                            product={product}
+                        />
                         {/* Mô tả / Đánh giá */}
                     </div>
                 </section>

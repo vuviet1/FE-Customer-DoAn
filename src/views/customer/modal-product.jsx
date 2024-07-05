@@ -5,7 +5,7 @@ import ReactPaginate from "react-paginate";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../utils/request";
+import request from "@utils/request";
 
 function ProductModal({ show, handleClose, selectedOrderId }) {
     const [productItems, setProductItems] = useState([]);

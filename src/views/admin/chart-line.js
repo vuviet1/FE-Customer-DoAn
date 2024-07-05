@@ -1,6 +1,5 @@
 import { Chart } from 'chart.js/auto';
 
-// Hàm định dạng số
 function number_format(number, decimals, dec_point, thousands_sep) {
   number = (number + '').replace(',', '').replace(' ', '');
   var n = !isFinite(+number) ? 0 : +number,
@@ -24,7 +23,7 @@ function number_format(number, decimals, dec_point, thousands_sep) {
 }
 
 // Hàm load biểu đồ dạng line
-function loadLineChart() {
+function loadLineChart(profitData) {
   var ctx = document.getElementById("myLineChart");
 
   // Đảm bảo ctx là một phần tử canvas hợp lệ
@@ -34,11 +33,15 @@ function loadLineChart() {
       ctx.chart.destroy();
     }
 
+    // Chuyển đổi dữ liệu thành định dạng biểu đồ
+    const labels = profitData.map(data => data.month);
+    const profits = profitData.map(data => parseFloat(data.profit));
+
     // Khởi tạo biểu đồ mới
     const chart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        labels: labels,
         datasets: [{
           label: "Earnings",
           lineTension: 0.3,
@@ -52,7 +55,7 @@ function loadLineChart() {
           pointHoverBorderColor: "rgba(78, 115, 223, 1)",
           pointHitRadius: 10,
           pointBorderWidth: 2,
-          data: [0, 10000, 5000, 15000, 10000, 20000, 15000, 25000, 20000, 30000, 25000, 40000],
+          data: profits,
         }],
       },
       options: {
@@ -83,7 +86,7 @@ function loadLineChart() {
               maxTicksLimit: 5,
               padding: 10,
               callback: function(value, index, values) {
-                return '$' + number_format(value);
+                return number_format(value) + ' VND';
               }
             },
             gridLines: {
@@ -114,7 +117,7 @@ function loadLineChart() {
           callbacks: {
             label: function(tooltipItem, chart) {
               var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
-              return datasetLabel + ': $' + number_format(tooltipItem.yLabel);
+              return datasetLabel + ': ' + number_format(tooltipItem.yLabel) + ' VND';
             }
           }
         }

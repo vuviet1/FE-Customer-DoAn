@@ -7,7 +7,7 @@ import { useAlert } from '@utils/AlertContext';
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 import AddOrderModal from "./add/modal-add";
 import StatusOrderModal from "./edit/modal-edit";
@@ -137,6 +137,17 @@ function OrderAdmin() {
         }
     };
 
+    const getStatusCounts = (orders) => {
+        const statusCounts = orders.reduce((acc, order) => {
+            acc[order.status] = (acc[order.status] || 0) + 1;
+            return acc;
+        }, {});
+
+        return statusCounts;
+    };
+
+    const statusCounts = getStatusCounts(orders);
+
     const OrderTableBody = ({ orders, deleteOrder }) => {
         if (!orders || orders.length === 0) {
             return (
@@ -223,7 +234,7 @@ function OrderAdmin() {
                                 fontWeight: "bold",
                             }}
                         >
-                            {order.total.toLocaleString("vi-VN", {
+                            {Number(order.total).toLocaleString("vi-VN", {
                                 style: "currency",
                                 currency: "VND",
                             })}
@@ -312,19 +323,19 @@ function OrderAdmin() {
                                                                 thái
                                                             </option>
                                                             <option value="0">
-                                                                Đã hủy
+                                                                Đã hủy ({statusCounts[0] || 0})
                                                             </option>
                                                             <option value="1">
-                                                                Chờ duyệt
+                                                                Chờ duyệt ({statusCounts[1] || 0})
                                                             </option>
                                                             <option value="2">
-                                                                Chờ lấy hàng
+                                                                Chờ lấy hàng ({statusCounts[2] || 0})
                                                             </option>
                                                             <option value="3">
-                                                                Đang giao hàng
+                                                                Đang giao hàng ({statusCounts[3] || 0})
                                                             </option>
                                                             <option value="4">
-                                                                Hoàn thành
+                                                                Hoàn thành ({statusCounts[4] || 0})
                                                             </option>
                                                         </Form.Control>
                                                     </div>

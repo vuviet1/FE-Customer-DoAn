@@ -3,9 +3,9 @@ import React, { useState, useEffect, Fragment } from "react";
 import { Modal, Button, Table, Form, Collapse } from "react-bootstrap";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 import ReactPaginate from "react-paginate";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 
-import request from "../../../../utils/request";
+import request from "@utils/request";
 
 function ProductSelectionModal({ show, handleClose, onAddProduct }) {
     const [selectedProducts, setSelectedProducts] = useState([]);
@@ -24,7 +24,7 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
             setProducts(data);
             setFilteredProducts(data);
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại");
         }
     };
 
@@ -90,17 +90,52 @@ function ProductSelectionModal({ show, handleClose, onAddProduct }) {
         e.preventDefault();
         const token_type = localStorage.getItem("token_type");
         const access_token = localStorage.getItem("access_token");
-        request.defaults.headers.common[
-            "Authorization"
-        ] = `${token_type} ${access_token}`;
+
+        for (const product of selectedProducts) {
+            const foundProduct = products.find((p) =>
+                p.product_details.some(
+                    (detail) =>
+                        detail.product_detail_id === product.product_detail_id
+                )
+            );
+    
+            if (foundProduct) {
+                const productDetail = foundProduct.product_details.find(
+                    (detail) =>
+                        detail.product_detail_id === product.product_detail_id
+                );
+    
+                if (productDetail.quantity < 1) {
+                    showErrorAlert(
+                        "Lỗi!",
+                        `Sản phẩm ${foundProduct.product_name} đã hết hàng.`
+                    );
+                    return;
+                }
+    
+                if (product.quantity > productDetail.quantity) {
+                    showErrorAlert(
+                        "Lỗi!",
+                        `Số lượng sản phẩm ${foundProduct.product_name} đã chọn quá số lượng sản phẩm còn lại.`
+                    );
+                    return;
+                }
+            }
+        }
 
         try {
+            request.defaults.headers.common[
+                "Authorization"
+            ] = `${token_type} ${access_token}`;
             await request.post("add-to-cart", selectedProducts);
-            showSuccessAlert('Thành công!', 'Thêm sản phẩm vào giỏ hàng thành công!');
+            showSuccessAlert(
+                "Thành công!",
+                "Thêm sản phẩm vào giỏ hàng thành công!"
+            );
             onAddProduct();
             handleClose();
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Thêm sản phẩm thất bại');
+            showErrorAlert("Lỗi!", "Thêm sản phẩm thất bại");
             handleClose();
         }
     };

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Table, Image } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 import ViewImageModal from "./modal-view-image";
 
 function ViewProductModal({ show, handleClose, selectedProductId }) {

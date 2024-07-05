@@ -10,7 +10,7 @@ import Cart from "./components/cart";
 import Footer from "./components/footer";
 
 import ImageUploader from "./components/ImageUploader";
-import request from "../../utils/request";
+import request from "@utils/request";
 
 function Account() {
     const [images, setImages] = useState([]);

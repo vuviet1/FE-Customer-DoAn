@@ -12,7 +12,7 @@ import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Footer from "./components/footer";
 import FavoriteButton from "./components/FavoriteButton";
-import request from "../../utils/request";
+import request from "@utils/request";
 
 function Favorite() {
     const [products, setProducts] = useState([]);
@@ -204,7 +204,7 @@ function Favorite() {
                                                 </Link>
                                                 {!product.discount ? (
                                                 <span className="discounted-price">
-                                                    {product.price.toLocaleString(
+                                                    {Number(product.price).toLocaleString(
                                                         "vi-VN",
                                                         {
                                                             style: "currency",
@@ -215,7 +215,7 @@ function Favorite() {
                                             ) : (
                                                 <div className="price-container">
                                                     <span className="original-price">
-                                                        {product.price.toLocaleString(
+                                                        {Number(product.price).toLocaleString(
                                                             "vi-VN",
                                                             {
                                                                 style: "currency",

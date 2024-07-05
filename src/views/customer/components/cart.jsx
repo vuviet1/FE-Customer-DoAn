@@ -1,9 +1,9 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment, useEffect, useState } from "react";
-import request from "../../../utils/request";
 import { Link } from "react-router-dom";
 import { Image } from "react-bootstrap";
+import request from "@utils/request";
 
 function Cart(props) {
     const [cartItems, setCartItems] = useState([]);
@@ -74,6 +74,9 @@ function Cart(props) {
                         <span className="mtext-103 cl2">Giỏ hàng của bạn</span>
                         <div className="fs-35 lh-10 cl2 p-lr-5 pointer hov-cl1 trans-04 js-hide-cart">
                             <i className="zmdi zmdi-close" />
+                        </div>
+                        <div>
+                            <p>Hiện tại đang có: <span style={{color:"red"}}>{cartItems.length}</span> sản phẩm</p>
                         </div>
                     </div>
                     <div className="header-cart-content flex-w js-pscroll">
@@ -165,14 +168,14 @@ function Cart(props) {
                         )}
                         <div className="w-full">
                             <div className="header-cart-total w-full p-tb-40">
-                                Tổng: {calculateTotalPrice()}
+                                Tổng: <span  style={{ color:"red" }}>{calculateTotalPrice()}</span>
                             </div>
                             <div className="header-cart-buttons flex-w w-full" style={{ display:"flex", justifyContent:"center" }}>
                                 <Link
                                     to={"/shopping-cart"}
                                     className="flex-c-m stext-101 cl0 size-107 bg3 bor2 hov-btn3 p-lr-15 trans-04 m-r-8 m-b-10"
                                 >
-                                    Xem giỏ hàng
+                                    Thanh toán
                                 </Link>
                             </div>
                         </div>

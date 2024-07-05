@@ -5,8 +5,8 @@
     position: relative;
     width: 100%;
     overflow: hidden;
-    max-width: 600px; /* Increase max-width to allow larger images */
-    height: 600px; /* Set a fixed height to center the images vertically */
+    max-width: 500px; /* Increase max-width to allow larger images */
+    height: 500px; /* Set a fixed height to center the images vertically */
 }
 
 .slides-product {

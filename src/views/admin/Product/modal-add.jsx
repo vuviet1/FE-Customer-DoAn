@@ -5,7 +5,7 @@ import ReactQuill from "react-quill";
 import sanitizeHtml from 'sanitize-html';
 import { useAlert } from '@utils/AlertContext';
 
-import request from "../../../utils/request";
+import request from "@utils/request";
 import ImageUploader from "../components/ImageUploader";
 
 function AddProductModal({ show, handleClose, onAddProduct }) {

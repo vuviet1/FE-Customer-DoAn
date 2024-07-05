@@ -4,7 +4,7 @@ import { Form, Modal, Button, Image } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
 import ImageUploader from "../components/ImageUploader";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function EditCustomerModal({ show, handleClose, selectedCustomerId, onUpdateCustomer }) {
     const [customer, setCustomer] = useState({

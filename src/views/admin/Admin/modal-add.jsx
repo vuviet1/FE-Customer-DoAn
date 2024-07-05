@@ -3,7 +3,7 @@ import { Form, Modal, Button } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 
 import ImageUploader from "../components/ImageUploader";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 function AddAdminModal({ show, handleClose, onAddAdmin }) {
     const [admin, setAdmin] = useState({

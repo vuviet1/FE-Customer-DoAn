@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Image } from "react-bootstrap";
-import request from "../../../utils/request";
+import request from "@utils/request";
 import AddImageModal from "./modal-add";
 
 function ImageLibraryModal({ show, handleClose, productDetailId }) {

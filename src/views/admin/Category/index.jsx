@@ -8,7 +8,7 @@ import { Pagination, Form, Button } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
-import request from "../../../utils/request";
+import request from "@utils/request";
 
 import AddCategoryModal from "./modal-add";
 import EditCategoryModal from "./modal-edit";
