@@ -11,6 +11,7 @@ function StatusOrderModal({
     selectedOrderId,
 }) {
     const [order, setOrder] = useState({ status: 1 });
+    const [originalStatus, setOriginalStatus] = useState(1);
     const { showSuccessAlert, showErrorAlert } = useAlert();
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
@@ -28,6 +29,7 @@ function StatusOrderModal({
                     const orderData = orderResponse.data.data;
                     if (orderData) {
                         setOrder({ status: orderData.status });
+                        setOriginalStatus(orderData.status);
                     }
                 } catch (error) {
                     showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
@@ -35,7 +37,7 @@ function StatusOrderModal({
             }
         };
         fetchOrder();
-    }, []);
+    }, [selectedOrderId]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -58,6 +60,24 @@ function StatusOrderModal({
         setOrder((prevOrder) => ({ ...prevOrder, [field]: value }));
     };
 
+    const renderStatusOptions = () => {
+        const status = Number(originalStatus); // Use originalStatus for rendering options
+        const statusOptions = [
+            { value: 1, label: "Chờ duyệt" },
+            { value: 2, label: "Chờ lấy hàng" },
+            { value: 3, label: "Đang giao hàng" },
+            { value: 4, label: "Hoàn thành" },
+        ];
+
+        return statusOptions
+            .filter(option => option.value > status)
+            .map(option => (
+                <option key={option.value} value={option.value}>
+                    {option.label}
+                </option>
+            ));
+    };
+
     return (
         <Fragment>
             <Modal show={show} onHide={handleClose} size="md" centered>
@@ -75,11 +95,7 @@ function StatusOrderModal({
                                     handleChange("status", e.target.value)
                                 }
                             >
-                                <option value="1">Chờ duyệt</option>
-                                <option value="2">Chờ lấy hàng</option>
-                                <option value="3">Đang giao hàng</option>
-                                <option value="4">Hoàn thành</option>
-                                <option value="0">Đã hủy</option>
+                                {renderStatusOptions()}
                             </Form.Control>
                         </Form.Group>
                         <Modal.Footer>

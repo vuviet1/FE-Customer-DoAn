@@ -177,6 +177,7 @@ function OrderAdmin() {
                                     onClick={() =>
                                         handleStatusButtonClick(order.order_id)
                                     }
+                                    disabled
                                 >
                                     Đã hủy
                                 </Button>
@@ -213,6 +214,7 @@ function OrderAdmin() {
                                     onClick={() =>
                                         handleStatusButtonClick(order.order_id)
                                     }
+                                    disabled
                                 >
                                     Hoàn thành
                                 </Button>
@@ -225,6 +227,17 @@ function OrderAdmin() {
                                 >
                                     Không xác định
                                 </Button>
+                            )}
+                        </td>
+                        <td style={{ textAlign: "left" }}>
+                            {order.payment_status === 1 ? (
+                                <span className="badge badge-success">
+                                    Đã thanh toán
+                                </span>
+                            ) : (
+                                <span className="badge badge-warning">
+                                    Chưa thanh toán
+                                </span>
                             )}
                         </td>
                         <td
@@ -389,6 +402,14 @@ function OrderAdmin() {
                                                             }}
                                                         >
                                                             Trạng thái đơn hàng
+                                                        </th>
+                                                        <th
+                                                            style={{
+                                                                textAlign:
+                                                                    "left",
+                                                            }}
+                                                        >
+                                                            Trạng thái thanh toán
                                                         </th>
                                                         <th
                                                             style={{

@@ -15,6 +15,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
         payment_method_id: 0,
         shipping_method_id: 0,
         voucher_id: "",
+        payment_status: 0,
     });
 
     const [showProductModal, setShowProductModal] = useState(false);
@@ -38,6 +39,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                             ...orderData,
                             status: orderData.status,
                             phoneNumber: orderData.phone_number,
+                            paymentStatus: orderData.payment_status,
                             paymentMethodName: orderData.payment.payment_method,
                             shippingMethodName:
                                 orderData.shipping.shipping_method,
@@ -71,6 +73,17 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
         }
     };
 
+    const getPaymentStatusText = (paymentStatus) => {
+        switch (paymentStatus) {
+            case 0:
+                return "Chưa thanh toán";
+            case 1:
+                return "Đã thanh toán";
+            default:
+                return "Không xác định";
+        }
+    };
+
     return (
         <>
             <Modal show={show} onHide={handleClose} size="xl" centered>
@@ -97,6 +110,15 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                                         type="text"
                                         placeholder="Số điện thoại ..."
                                         value={orders.phoneNumber}
+                                        readOnly
+                                    />
+                                </Form.Group>
+                                <Form.Group controlId="inputAddress">
+                                    <Form.Label>Địa chỉ</Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Địa chỉ ..."
+                                        value={orders.address}
                                         readOnly
                                     />
                                 </Form.Group>
@@ -145,14 +167,14 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                                         <InputGroup.Text>VNĐ</InputGroup.Text>
                                     </InputGroup>
                                 </Form.Group>
-                            </div>
-                            <div className="col-12">
-                                <Form.Group controlId="inputAddress">
-                                    <Form.Label>Địa chỉ</Form.Label>
+                                <Form.Group controlId="inputShipping">
+                                    <Form.Label>
+                                        Trạng thái thanh toán
+                                    </Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Địa chỉ ..."
-                                        value={orders.address}
+                                        placeholder="Phương thức vận chuyển ..."
+                                        value={getPaymentStatusText(orders.paymentStatus)}
                                         readOnly
                                     />
                                 </Form.Group>
