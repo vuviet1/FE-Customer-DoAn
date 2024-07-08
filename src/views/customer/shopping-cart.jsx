@@ -317,7 +317,7 @@ function ShoppingCart() {
                             'url("assets/customer/images/bg-01.jpg")',
                     }}
                 >
-                    <h2 className="ltext-105 cl0 txt-center">GIỎ HÀNG</h2>
+                    <h2 className="ltext-105 cl0 txt-center">THANH TOÁN</h2>
                 </section>
                 {/* breadcrumb */}
                 <div className="container">
@@ -326,13 +326,13 @@ function ShoppingCart() {
                             to={"/"}
                             className="stext-109 cl8 hov-cl1 trans-04"
                         >
-                            Home
+                            Trang chủ
                             <i
                                 className="fa fa-angle-right m-l-9 m-r-10"
                                 aria-hidden="true"
                             />
                         </Link>
-                        <span className="stext-109 cl4">Giỏ hàng</span>
+                        <span className="stext-109 cl4">Thanh toán</span>
                     </div>
                 </div>
                 {/* Giỏ hàng */}
@@ -589,7 +589,7 @@ function ShoppingCart() {
                 >
                     <div className="bor10 p-lr-40 p-t-30 p-b-40 m-l-63 m-r-40 m-lr-0-xl p-lr-15-sm">
                         <h4 className="mtext-109 cl2 p-b-30">
-                            Tổng quan giỏ hàng
+                            Tổng quan hóa đơn
                         </h4>
                         <Form onSubmit={handleSubmit}>
                             <Form.Group className="flex-w flex-t bor12 p-b-13">
