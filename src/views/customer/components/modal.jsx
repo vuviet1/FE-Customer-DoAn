@@ -198,16 +198,33 @@ const ProductModal = ({ showModal, handleClose, product }) => {
             return;
         }
 
-        const selectedDetail = productDetails.find(
+        const selectedDetail = product.product_details.find(
             (detail) =>
                 detail.color.color === selectedColor &&
                 detail.size.size === selectedSize
         );
 
-        if (!selectedDetail) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+        if (selectedDetail.quantity < 1 ) {
+            showErrorAlert(
+                "Lỗi!",
+                "Sản phẩm đã hết hàng."
+            );
             return;
         }
+
+        if (quantity>selectedDetail.quantity) {
+            showErrorAlert(
+                "Lỗi!",
+                "Số lượng sản phẩm đã chọn quá số lượng sản phẩm còn lại."
+            );
+            return;
+        }
+
+        if (!selectedDetail) {
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+            return;
+        }
+
 
         try {
             request.defaults.headers.common[
