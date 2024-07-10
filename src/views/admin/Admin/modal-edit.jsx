@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { Modal, Button, Form, Image } from "react-bootstrap";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 
 import request from "@utils/request";
 import ImageUploader from "../components/ImageUploader";
@@ -32,11 +32,11 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                     console.error("No data returned from the API");
                 }
             } catch (error) {
-                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
+                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại");
             }
         };
 
-            fetchAdmin();
+        fetchAdmin();
     }, []);
 
     const updateAdmin = async (e) => {
@@ -56,17 +56,21 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
 
             console.log(formData);
 
-            await request.post(`user/${selectedAdminId}?_method=PUT`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                mode: "no-cors",
-            });
-            showSuccessAlert('Thành công!', 'Cập nhật nhân viên thành công!');
+            await request.post(
+                `user/${selectedAdminId}?_method=PUT`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    mode: "no-cors",
+                }
+            );
+            showSuccessAlert("Thành công!", "Cập nhật nhân viên thành công!");
             onUpdateAdmin();
             handleClose();
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Cập nhật nhân viên thất bại');
+            showErrorAlert("Lỗi!", "Cập nhật nhân viên thất bại");
             handleClose();
         }
     };
@@ -108,10 +112,10 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                             </div>
                             <div className="col-6">
                                 <Form.Group controlId="adminNameEdit">
-                                    <Form.Label>Tên Admin</Form.Label>
+                                    <Form.Label>Tên Quản trị viên</Form.Label>
                                     <Form.Control
                                         type="text"
-                                        placeholder="Cập nhật tên Admin ..."
+                                        placeholder="Cập nhật tên Quản trị viên ..."
                                         value={admin.name}
                                         onChange={(e) =>
                                             setAdmin({
@@ -119,6 +123,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                                 name: e.target.value,
                                             })
                                         }
+                                        required
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="adminEmailEdit">
@@ -133,6 +138,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                                 email: e.target.value,
                                             })
                                         }
+                                        required
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="adminPasswordEdit">
@@ -147,6 +153,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                                 password: e.target.value,
                                             })
                                         }
+                                        required
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="adminRoleEdit">
@@ -177,27 +184,32 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                         }
                                     >
                                         <option value="1">Sử dụng</option>
-                                        <option value="0">
-                                            Không sử dụng
-                                        </option>
+                                        <option value="0">Không sử dụng</option>
                                     </Form.Control>
                                 </Form.Group>
-                            </div>
-                            <div className="col-12">
                                 <Form.Group controlId="inputPhone">
                                     <Form.Label>Số điện thoại</Form.Label>
                                     <Form.Control
-                                        type="text"
+                                        type="tel"
                                         placeholder="Cập nhật số điện thoại ..."
                                         value={admin.phone}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
+                                            const numericValue =
+                                                e.target.value.replace(
+                                                    /\D/g,
+                                                    ""
+                                                );
                                             setAdmin({
                                                 ...admin,
-                                                phone: e.target.value,
-                                            })
-                                        }
+                                                phone: numericValue,
+                                            });
+                                        }}
+                                        maxlength="10"
+                                        required
                                     />
                                 </Form.Group>
+                            </div>
+                            <div className="col-12">
                                 <Form.Group controlId="inputAddress">
                                     <Form.Label>Địa chỉ</Form.Label>
                                     <Form.Control
@@ -210,6 +222,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                                 address: e.target.value,
                                             })
                                         }
+                                        required
                                     />
                                 </Form.Group>
                                 <Form.Group controlId="inputGoogleId">

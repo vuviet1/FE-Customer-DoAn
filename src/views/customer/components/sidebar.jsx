@@ -88,7 +88,7 @@ function Sidebar() {
                                         to={"/admin-home"}
                                         className="stext-102 cl2 hov-cl1 trans-04"
                                     >
-                                        Trang Admin
+                                        Trang Quản trị viên
                                     </Link>
                                 </li>
                             )}

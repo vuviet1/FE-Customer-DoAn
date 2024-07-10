@@ -3,7 +3,7 @@
 /* eslint-disable no-script-url */
 import React, { Fragment, useEffect, useState } from "react";
 import { Form, Button, Image } from "react-bootstrap";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
@@ -31,18 +31,16 @@ function Account() {
         const userId = userData.user_id;
         if (userId) {
             try {
-                const response = await request.get(
-                    `user/${userId}`
-                );
+                const response = await request.get(`user/${userId}`);
                 setCustomer(response.data.data);
             } catch (error) {
-                showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
+                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại");
             }
         }
     };
 
     useEffect(() => {
-        fetchData()
+        fetchData();
     }, []);
 
     const updateCustomer = async (e) => {
@@ -60,28 +58,33 @@ function Account() {
                 google_id: customer.google_id,
             };
 
-            await request.post(`user/${customer.user_id}?_method=PUT`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            await request.post(
+                `user/${customer.user_id}?_method=PUT`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
 
             const updatedCustomer = {
                 ...customer,
-                avatar:images[0],
+                avatar: images[0],
             };
             localStorage.setItem("user_data", JSON.stringify(updatedCustomer));
-            
-            showSuccessAlert('Thành công!', 'Cập nhật thông tin thành công!');
+
+            showSuccessAlert("Thành công!", "Cập nhật thông tin thành công!");
             window.location.reload();
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Cập nhật thông tin thất bại');
+            showErrorAlert("Lỗi!", "Cập nhật thông tin thất bại");
         }
     };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setCustomer({ ...customer, [name]: value });
+        const numericValue = value.replace(/\D/g, '').slice(0, 10);
+        setCustomer({ ...customer, [name]: numericValue });
     };
 
     return (
@@ -177,25 +180,30 @@ function Account() {
                                                     />
                                                 </Form.Group>
 
-                                                <Form.Label>Mật khẩu</Form.Label>
+                                                <Form.Label>
+                                                    Mật khẩu
+                                                </Form.Label>
                                                 <Form.Group className="m-b-20 how-pos4-parent">
                                                     <Form.Control
                                                         className="stext-111 cl2 plh3 size-116 p-r-30"
                                                         type="password"
                                                         placeholder="Mật khẩu của bạn ..."
                                                         name="password"
-                                                        value={customer.password}
+                                                        value={
+                                                            customer.password
+                                                        }
                                                         onChange={
                                                             handleInputChange
                                                         }
                                                     />
                                                 </Form.Group>
-
-                                                <Form.Label>Số điện thoại</Form.Label>
+                                                <Form.Label>
+                                                    Số điện thoại
+                                                </Form.Label>
                                                 <Form.Group className="m-b-20 how-pos4-parent">
                                                     <Form.Control
                                                         className="stext-111 cl2 plh3 size-116 p-r-30"
-                                                        type="number"
+                                                        type="tel"
                                                         placeholder="Số điện thoại của bạn ..."
                                                         name="phone"
                                                         value={customer.phone}
@@ -203,9 +211,9 @@ function Account() {
                                                             handleInputChange
                                                         }
                                                         required
+                                                        maxlength="10"
                                                     />
                                                 </Form.Group>
-
                                                 <Form.Label>Địa chỉ</Form.Label>
                                                 <Form.Group className="m-b-20 how-pos4-parent">
                                                     <Form.Control
