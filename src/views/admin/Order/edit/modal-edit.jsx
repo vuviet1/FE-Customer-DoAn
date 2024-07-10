@@ -10,7 +10,11 @@ function StatusOrderModal({
     onUpdateStatus,
     selectedOrderId,
 }) {
-    const [order, setOrder] = useState({ status: 1 });
+    const [order, setOrder] = useState({ 
+        status: 1,
+        payment_status: 0,
+        payment_method: ""
+    });
     const [originalStatus, setOriginalStatus] = useState(1);
     const { showSuccessAlert, showErrorAlert } = useAlert();
     const token_type = localStorage.getItem("token_type");
@@ -28,7 +32,11 @@ function StatusOrderModal({
                     );
                     const orderData = orderResponse.data.data;
                     if (orderData) {
-                        setOrder({ status: orderData.status });
+                        setOrder({ 
+                            status: orderData.status,
+                            paymentStatus: orderData.payment_status,
+                            paymentMethod: orderData.payment.payment_method,
+                        });
                         setOriginalStatus(orderData.status);
                     }
                 } catch (error) {
@@ -41,7 +49,10 @@ function StatusOrderModal({
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const orderData = { status: Number(order.status) };
+        const orderData = { 
+            status: Number(order.status),
+            payment_status: 1
+        };
         request.defaults.headers.common[
             "Authorization"
         ] = `${token_type} ${access_token}`;
@@ -56,21 +67,29 @@ function StatusOrderModal({
         }
     };
 
-    const handleChange = (field, value) => {
-        setOrder((prevOrder) => ({ ...prevOrder, [field]: value }));
+    const handleChange = (e) => {
+        const value = e.target.value;
+        setOrder((prevOrder) => ({ ...prevOrder, status: value }));
     };
 
     const renderStatusOptions = () => {
-        const status = Number(originalStatus); // Use originalStatus for rendering options
-        const statusOptions = [
+        const status = Number(originalStatus);
+        let statusOptions = [
             { value: 1, label: "Chờ duyệt" },
             { value: 2, label: "Chờ lấy hàng" },
             { value: 3, label: "Đang giao hàng" },
             { value: 4, label: "Hoàn thành" },
         ];
 
+        if (order.paymentMethod === "COD") {
+            statusOptions = [
+                { value: 1, label: "Chờ duyệt" },
+                { value: 4, label: "Đã thanh toán" },
+            ];
+        }
+
         return statusOptions
-            .filter(option => option.value > status)
+            .filter(option => option.value >= status)
             .map(option => (
                 <option key={option.value} value={option.value}>
                     {option.label}
@@ -91,9 +110,7 @@ function StatusOrderModal({
                             <Form.Control
                                 as="select"
                                 value={order.status}
-                                onChange={(e) =>
-                                    handleChange("status", e.target.value)
-                                }
+                                onChange={handleChange}
                             >
                                 {renderStatusOptions()}
                             </Form.Control>

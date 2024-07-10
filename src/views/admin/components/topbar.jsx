@@ -217,149 +217,6 @@ const Topbar = () => {
                 </li>
             </ul>
             <ul className="navbar-nav ml-auto">
-                <li className="nav-item dropdown no-arrow mx-1">
-                    <Dropdown>
-                        <Dropdown.Toggle
-                            id="dropdown-alerts"
-                            className="nav-link dropdown-toggle"
-                        >
-                            <i className="fas fa-bell fa-fw" />
-                            <span className="badge badge-danger badge-counter">
-                                3+
-                            </span>
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item
-                                className="d-flex align-items-center"
-                                href="#"
-                            >
-                                <div className="mr-3">
-                                    <div className="icon-circle bg-primary">
-                                        <i className="fas fa-file-alt text-white" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="small text-gray-500">
-                                        December 12, 2019
-                                    </div>
-                                    <span className="font-weight-bold">
-                                        A new monthly report is ready to
-                                        download!
-                                    </span>
-                                </div>
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                className="d-flex align-items-center"
-                                href="#"
-                            >
-                                <div className="mr-3">
-                                    <div className="icon-circle bg-success">
-                                        <i className="fas fa-donate text-white" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="small text-gray-500">
-                                        December 7, 2019
-                                    </div>
-                                    $290.29 has been deposited into your
-                                    account!
-                                </div>
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                className="d-flex align-items-center"
-                                href="#"
-                            >
-                                <div className="mr-3">
-                                    <div className="icon-circle bg-warning">
-                                        <i className="fas fa-exclamation-triangle text-white" />
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="small text-gray-500">
-                                        December 2, 2019
-                                    </div>
-                                    Spending Alert: We've noticed unusually high
-                                    spending for your account.
-                                </div>
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                className="text-center small text-gray-500"
-                                href="#"
-                            >
-                                Show All Alerts
-                            </Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </li>
-                <li className="nav-item dropdown no-arrow mx-1">
-                    <Dropdown>
-                        <Dropdown.Toggle
-                            id="dropdown-messages"
-                            className="nav-link dropdown-toggle"
-                        >
-                            <i className="fas fa-envelope fa-fw" />
-                            <span className="badge badge-warning badge-counter">
-                                2
-                            </span>
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            <Dropdown.Item
-                                className="d-flex align-items-center"
-                                href="#"
-                            >
-                                <div className="dropdown-list-image mr-3">
-                                    <img
-                                        className="rounded-circle"
-                                        src="assets/images/man.png"
-                                        style={{ maxWidth: 60 }}
-                                        alt=""
-                                    />
-                                    <div className="status-indicator bg-success" />
-                                </div>
-                                <div className="font-weight-bold">
-                                    <div className="text-truncate">
-                                        Hi there! I am wondering if you can help
-                                        me with a problem I've been having.
-                                    </div>
-                                    <div className="small text-gray-500">
-                                        Udin Cilok · 58m
-                                    </div>
-                                </div>
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                className="d-flex align-items-center"
-                                href="#"
-                            >
-                                <div className="dropdown-list-image mr-3">
-                                    <img
-                                        className="rounded-circle"
-                                        src="assets/images/girl.png"
-                                        style={{ maxWidth: 60 }}
-                                        alt=""
-                                    />
-                                    <div className="status-indicator bg-default" />
-                                </div>
-                                <div>
-                                    <div className="text-truncate">
-                                        Am I a good boy? The reason I ask is
-                                        because someone told me that people say
-                                        this to all dogs, even if they aren't
-                                        good...
-                                    </div>
-                                    <div className="small text-gray-500">
-                                        Jaenab · 2w
-                                    </div>
-                                </div>
-                            </Dropdown.Item>
-                            <Dropdown.Item
-                                className="text-center small text-gray-500"
-                                href="#"
-                            >
-                                Read More Messages
-                            </Dropdown.Item>
-                        </Dropdown.Menu>
-                    </Dropdown>
-                </li>
                 <div className="topbar-divider d-none d-sm-block" />
                 <li className="nav-item dropdown no-arrow">
                     <Dropdown>
@@ -381,6 +238,15 @@ const Topbar = () => {
                             </span>
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
+                        <Dropdown.Item
+                                as={Link}
+                                to={"/"}
+                                className="dropdown-item"
+                            >
+                                <i className="fas fa-home fa-sm fa-fw mr-2 text-gray-400" />
+                                Trang khách hàng
+                            </Dropdown.Item>
+                            <Dropdown.Divider />
                             <Dropdown.Item
                                 as={Link}
                                 to={"/admin-profile"}
