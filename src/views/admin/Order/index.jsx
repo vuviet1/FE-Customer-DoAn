@@ -260,7 +260,7 @@ function OrderAdmin() {
                             >
                                 <i className="far fa-eye" />
                             </Button>
-                            {order.status === 1 || order.status === 2 || order.status === 3 ? (
+                            {order.status === 1 ? (
                                     <Button
                                         variant="danger"
                                         onClick={() =>
