@@ -116,7 +116,7 @@ function Login() {
                         </div>
                     </div>
                 </div>
-                <div className="login__check">
+                {/* <div className="login__check">
                     <div className="login__check-group">
                     </div>
 
@@ -124,7 +124,7 @@ function Login() {
                     <Link to={"/forgot"} className="login__forgot">
                         Quên mật khẩu?
                     </Link>
-                </div>
+                </div> */}
                 <button type="submit" className="login__button">
                     Đăng nhập
                 </button>

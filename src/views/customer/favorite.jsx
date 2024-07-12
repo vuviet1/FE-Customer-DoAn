@@ -5,7 +5,7 @@ import React, { Fragment, useState, useEffect } from "react";
 import { CSSTransition } from "react-transition-group";
 import { Image, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 
 import Header from "./components/header";
 import Sidebar from "./components/sidebar";
@@ -32,13 +32,18 @@ function Favorite() {
     };
 
     const fetchProduct = async () => {
+        const access_token = localStorage.getItem("access_token");
         try {
             const response = await request.get("favourite");
             const productsData = response.data.data.map((item) => item.product);
             setProducts(productsData);
             setFilteredProducts(productsData);
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
+            if (!access_token) {
+                showErrorAlert("Chưa đăng nhập!", "Hãy đăng nhập để sử dụng chức năng.");
+            } else{
+                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+            }
         }
     };
 
@@ -183,11 +188,11 @@ function Favorite() {
                                                 fluid
                                             />
                                             {!product.discount ||
-                                            (product.discount !== 0 && (
-                                                <span className="discount-badge">
-                                                    {product.discount}% Off
-                                                </span>
-                                            ))}
+                                                (product.discount !== 0 && (
+                                                    <span className="discount-badge">
+                                                        {product.discount}% Off
+                                                    </span>
+                                                ))}
                                         </div>
                                         <div className="block2-txt flex-w flex-t p-t-14">
                                             <div className="block2-txt-child1 flex-col-l ">
@@ -203,33 +208,9 @@ function Favorite() {
                                                     {product.product_name}
                                                 </Link>
                                                 {!product.discount ? (
-                                                <span className="discounted-price">
-                                                    {Number(product.price).toLocaleString(
-                                                        "vi-VN",
-                                                        {
-                                                            style: "currency",
-                                                            currency: "VND",
-                                                        }
-                                                    )}
-                                                </span>
-                                            ) : (
-                                                <div className="price-container">
-                                                    <span className="original-price">
-                                                        {Number(product.price).toLocaleString(
-                                                            "vi-VN",
-                                                            {
-                                                                style: "currency",
-                                                                currency: "VND",
-                                                            }
-                                                        )}
-                                                    </span>
-                                                    <span className="arrow">→</span>
                                                     <span className="discounted-price">
-                                                        {(
-                                                            product.price *
-                                                            (1 -
-                                                                product.discount /
-                                                                    100)
+                                                        {Number(
+                                                            product.price
                                                         ).toLocaleString(
                                                             "vi-VN",
                                                             {
@@ -238,8 +219,40 @@ function Favorite() {
                                                             }
                                                         )}
                                                     </span>
-                                                </div>
-                                            )}
+                                                ) : (
+                                                    <div className="price-container">
+                                                        <span className="original-price">
+                                                            {Number(
+                                                                product.price
+                                                            ).toLocaleString(
+                                                                "vi-VN",
+                                                                {
+                                                                    style: "currency",
+                                                                    currency:
+                                                                        "VND",
+                                                                }
+                                                            )}
+                                                        </span>
+                                                        <span className="arrow">
+                                                            →
+                                                        </span>
+                                                        <span className="discounted-price">
+                                                            {(
+                                                                product.price *
+                                                                (1 -
+                                                                    product.discount /
+                                                                        100)
+                                                            ).toLocaleString(
+                                                                "vi-VN",
+                                                                {
+                                                                    style: "currency",
+                                                                    currency:
+                                                                        "VND",
+                                                                }
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="block2-txt-child2 flex-r p-t-3">
                                                 <FavoriteButton

@@ -77,6 +77,18 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
         setSelectedDetail(null);
     };
 
+    function formatCurrency(value) {
+        if (value === undefined || value === null) {
+            return "";
+        }
+
+        const numberValue = Number(value);
+        return new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+        }).format(numberValue);
+    }
+
     return (
         <>
             <Modal show={show} onHide={handleClose} size="xl" centered>
@@ -119,9 +131,9 @@ function ViewProductModal({ show, handleClose, selectedProductId }) {
                             <Form.Group controlId="priceEdit">
                                 <Form.Label>Giá</Form.Label>
                                 <Form.Control
-                                    type="number"
+                                    type="text"
                                     placeholder="Giá sản phẩm"
-                                    value={product.price}
+                                    value={formatCurrency(product.price)}
                                     readOnly
                                 />
                             </Form.Group>

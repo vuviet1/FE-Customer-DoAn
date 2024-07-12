@@ -15,6 +15,7 @@ import request from "@utils/request";
 function Account() {
     const [images, setImages] = useState([]);
     const [customer, setCustomer] = useState({
+        user_id:"",
         name: "",
         email: "",
         password: "",

@@ -70,8 +70,15 @@ function ProfileAdmin() {
                     "Content-Type": "multipart/form-data",
                 },
             });
+
+            const updatedAdmin = {
+                ...admin,
+                avatar: images[0].name,
+            };
+            localStorage.setItem("user_data", JSON.stringify(updatedAdmin));
+
             showSuccessAlert('Thành công!', 'Cập nhật thông tin thành công!');
-            fetchData()
+            window.location.reload();
         } catch (error) {
             showErrorAlert('Lỗi!', 'Cập nhật thông tin thất bại');
         }

@@ -38,32 +38,6 @@ function ProductDetail() {
             return;
         }
 
-        // const fetchAllData = async (productDetailId) => {
-        //     try {
-        //         const [responseImage, responseProduct] = await Promise.all([
-        //             request.get(`library/${productDetailId}`),
-        //             request.get(`/product/${productId}`),
-        //         ]);
-        //         setImages(responseImage.data.data);
-
-        //         const fetchedProduct = responseProduct.data.data;
-        //         setProduct(fetchedProduct);
-        //         setAvailableColors(
-        //             fetchedProduct.product_details.map(
-        //                 (detail) => detail.color.color
-        //             )
-        //         );
-        //         setAvailableSizes(
-        //             fetchedProduct.product_details.map(
-        //                 (detail) => detail.size.size
-        //             )
-        //         );
-        //         setDefaultImage(fetchedProduct.image);
-        //     } catch (error) {
-        //         showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
-        //     }
-        // };
-
         const fetchProduct = async () => {
             try {
                 const response = await request.get(`/product/${productId}`);
@@ -85,7 +59,6 @@ function ProductDetail() {
             }
         };
 
-        // fetchAllData();
         fetchProduct();
     }, []);
 
@@ -232,15 +205,12 @@ function ProductDetail() {
                 detail.size.size === selectedSize
         );
 
-        if (selectedDetail.quantity < 1 ) {
-            showErrorAlert(
-                "Lỗi!",
-                "Sản phẩm đã hết hàng."
-            );
+        if (selectedDetail.quantity < 1) {
+            showErrorAlert("Lỗi!", "Sản phẩm đã hết hàng.");
             return;
         }
 
-        if (quantity>selectedDetail.quantity) {
+        if (quantity > selectedDetail.quantity) {
             showErrorAlert(
                 "Lỗi!",
                 "Số lượng sản phẩm đã chọn quá số lượng sản phẩm còn lại."
@@ -357,7 +327,10 @@ function ProductDetail() {
                 {/* breadcrumb */}
                 <div className="container">
                     <div className="bread-crumb flex-w p-l-25 p-r-15 p-t-30 p-lr-0-lg">
-                        <Link to={"/"} className="stext-109 cl8 hov-cl1 trans-04">
+                        <Link
+                            to={"/"}
+                            className="stext-109 cl8 hov-cl1 trans-04"
+                        >
                             Trang chủ
                             <i
                                 className="fa fa-angle-right m-l-9 m-r-10"
@@ -431,13 +404,12 @@ function ProductDetail() {
                                     ) : (
                                         <div className="price-container">
                                             <span className="original-price">
-                                                {Number(product.price).toLocaleString(
-                                                    "vi-VN",
-                                                    {
-                                                        style: "currency",
-                                                        currency: "VND",
-                                                    }
-                                                )}
+                                                {Number(
+                                                    product.price
+                                                ).toLocaleString("vi-VN", {
+                                                    style: "currency",
+                                                    currency: "VND",
+                                                })}
                                             </span>
                                             <span className="arrow">→</span>
                                             <span className="discounted-price">
@@ -485,7 +457,7 @@ function ProductDetail() {
                                                 {product?.total_quantity > 0
                                                     ? product.total_quantity
                                                     : "Hết"}
-                                                    <span> sản phẩm</span>
+                                                <span> sản phẩm</span>
                                             </span>
                                         )}
                                     </p>
@@ -506,7 +478,7 @@ function ProductDetail() {
                                             </div>
                                             <div
                                                 className="size-204 respon6-next"
-                                                toggle={true}
+                                                toggle={toString()}
                                             >
                                                 {Array.from(
                                                     new Set(
@@ -554,7 +526,7 @@ function ProductDetail() {
                                             </div>
                                             <div
                                                 className="size-204 respon6-next"
-                                                toggle={true}
+                                                toggle={toString()}
                                             >
                                                 {Array.from(
                                                     new Set(
@@ -597,43 +569,58 @@ function ProductDetail() {
                                         </div>
                                         {/* Quantity selection */}
                                         <div className="flex-w flex-r-m p-b-10">
-                                            <div className="size-204 flex-w flex-m respon6-next">
-                                                <div className="wrap-num-product flex-w m-r-20 m-tb-10">
-                                                    <div
-                                                        className="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
-                                                        onClick={
-                                                            decrementQuantity
-                                                        }
-                                                    >
-                                                        <i className="fs-16 zmdi zmdi-minus" />
-                                                    </div>
-                                                    <input
-                                                        className="mtext-104 cl3 txt-center num-product"
-                                                        type="number"
-                                                        name="num-product"
-                                                        value={quantity}
-                                                        onChange={
-                                                            handleQuantityChange
-                                                        }
-                                                    />
-                                                    <div
-                                                        className="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
-                                                        onClick={
-                                                            incrementQuantity
-                                                        }
-                                                    >
-                                                        <i className="fs-16 zmdi zmdi-plus" />
+                                                <div className="size-204 flex-w flex-m respon6-next">
+                                                    <div className="wrap-num-product flex-w m-r-20 m-tb-10">
+                                                        <div
+                                                            className="btn-num-product-down cl8 hov-btn3 trans-04 flex-c-m"
+                                                            onClick={
+                                                                decrementQuantity
+                                                            }
+                                                        >
+                                                            <i className="fs-16 zmdi zmdi-minus" />
+                                                        </div>
+                                                        <input
+                                                            className="mtext-104 cl3 txt-center num-product"
+                                                            type="number"
+                                                            name="num-product"
+                                                            value={quantity}
+                                                            onChange={
+                                                                handleQuantityChange
+                                                            }
+                                                        />
+                                                        <div
+                                                            className="btn-num-product-up cl8 hov-btn3 trans-04 flex-c-m"
+                                                            onClick={
+                                                                incrementQuantity
+                                                            }
+                                                        >
+                                                            <i className="fs-16 zmdi zmdi-plus" />
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <Button
-                                                    className="flex-c-m stext-101 cl2 size-101 bg8 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
-                                                    onClick={handleAddToCart}
-                                                >
-                                                    Thêm vào giỏ hàng
-                                                </Button>
                                             </div>
+
+                                        <div
+                                            className="flex-w flex-r-m p-b-10"
+                                            style={{
+                                                display: "flex",
+                                                justifyContent: "center",
+                                            }}
+                                        >
+                                            <Button
+                                                className="flex-c-m stext-101 cl2 size-101 bg8 bor1 hov-btn1 p-lr-15 trans-04 js-addcart-detail"
+                                                onClick={handleAddToCart}
+                                                disabled={
+                                                    !selectedColor ||
+                                                    !selectedSize ||
+                                                    quantity < 1
+                                                }
+                                            >
+                                                Thêm vào giỏ hàng
+                                            </Button>
                                         </div>
                                     </div>
+
                                     {/* Share icons */}
                                     <div className="flex-w flex-m p-l-100 p-t-40 respon7">
                                         <FavoriteButton

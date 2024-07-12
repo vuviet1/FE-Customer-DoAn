@@ -44,9 +44,9 @@ function ShoppingCart() {
 
     useEffect(() => {
         const fetchAllData = async () => {
+            const token_type = localStorage.getItem("token_type");
+            const access_token = localStorage.getItem("access_token");
             try {
-                const token_type = localStorage.getItem("token_type");
-                const access_token = localStorage.getItem("access_token");
                 request.defaults.headers.common[
                     "Authorization"
                 ] = `${token_type} ${access_token}`;
@@ -64,7 +64,14 @@ function ShoppingCart() {
                 // setCartItems(cartResponse.data.data);
                 // setFilteredItems(cartResponse.data.data);
             } catch (error) {
-                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+                if (!access_token) {
+                    showErrorAlert(
+                        "Chưa đăng nhập!",
+                        "Hãy đăng nhập để sử dụng chức năng."
+                    );
+                } else {
+                    showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+                }
             }
         };
 
@@ -657,9 +664,15 @@ function ShoppingCart() {
                                             type="text"
                                             name="phone_number"
                                             value={phoneNumber}
-                                            onChange={(e) =>
-                                                setPhoneNumber(e.target.value)
-                                            }
+                                            onChange={(e) => {
+                                                const numericValue =
+                                                    e.target.value.replace(
+                                                        /\D/g,
+                                                        ""
+                                                    );
+                                                setPhoneNumber(numericValue);
+                                            }}
+                                            maxlength="10"
                                             placeholder="Số điện thoại"
                                             required
                                         />

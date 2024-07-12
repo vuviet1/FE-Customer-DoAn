@@ -22,39 +22,30 @@ function number_format(number, decimals, dec_point, thousands_sep) {
   return s.join(dec);
 }
 
-// Hàm load biểu đồ dạng line
-function loadLineChart(profitData) {
-  var ctx = document.getElementById("myLineChart");
+function loadBarChart(profitData) {
+  var ctx = document.getElementById("myBarChart");
 
-  // Đảm bảo ctx là một phần tử canvas hợp lệ
   if (ctx instanceof HTMLCanvasElement) {
-    // Hủy biểu đồ hiện tại nếu tồn tại
     if (ctx.chart) {
       ctx.chart.destroy();
     }
 
-    // Chuyển đổi dữ liệu thành định dạng biểu đồ
-    const labels = profitData.map(data => data.month);
-    const profits = profitData.map(data => parseFloat(data.profit));
+    const labels = Array.from({ length: 12 }, (_, i) => {
+      const month = (i + 1).toString().padStart(2, '0');
+      return `2024-${month}`;
+    });
 
-    // Khởi tạo biểu đồ mới
+    const profitsMap = new Map(profitData.map(data => [data.month, parseFloat(data.profit)]));
+    const profits = labels.map(label => profitsMap.get(label) || 0);
+
     const chart = new Chart(ctx, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: labels,
         datasets: [{
-          label: "Earnings",
-          lineTension: 0.3,
-          backgroundColor: "rgba(78, 115, 223, 0.05)",
+          label: "Doanh thu",
+          backgroundColor: "rgba(78, 115, 223, 1)",
           borderColor: "rgba(78, 115, 223, 1)",
-          pointRadius: 3,
-          pointBackgroundColor: "rgba(78, 115, 223, 1)",
-          pointBorderColor: "rgba(78, 115, 223, 1)",
-          pointHoverRadius: 3,
-          pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
-          pointHoverBorderColor: "rgba(78, 115, 223, 1)",
-          pointHitRadius: 10,
-          pointBorderWidth: 2,
           data: profits,
         }],
       },
@@ -70,16 +61,14 @@ function loadLineChart(profitData) {
         },
         scales: {
           xAxes: [{
-            time: {
-              unit: 'month'
-            },
             gridLines: {
               display: false,
               drawBorder: false
             },
             ticks: {
               maxTicksLimit: 12
-            }
+            },
+            maxBarThickness: 25,
           }],
           yAxes: [{
             ticks: {
@@ -124,9 +113,8 @@ function loadLineChart(profitData) {
       }
     });
 
-    // Lưu thể hiện biểu đồ vào phần tử canvas
     ctx.chart = chart;
   }
 }
 
-export default loadLineChart;
+export default loadBarChart;

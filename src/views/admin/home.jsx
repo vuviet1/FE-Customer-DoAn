@@ -7,7 +7,7 @@ import { useAlert } from "@utils/AlertContext";
 import Topbar from "./components/topbar";
 import Footer from "./components/footer";
 import request from "@utils/request";
-import loadLineChart from "./chart-line.js"; 
+import loadBarChart from "./chart-line.js"; 
 
 function HomeAdmin() {
     const [report, setReport] = useState({});
@@ -33,8 +33,7 @@ function HomeAdmin() {
 
     useEffect(() => {
         if (Array.isArray(profit) && profit.length > 0) {
-            console.log(profit)
-            loadLineChart(profit);
+            loadBarChart(profit);
         }
     }, [profit]);
 
@@ -172,7 +171,7 @@ function HomeAdmin() {
                                     <div className="card-body">
                                         <div className="chart-line">
                                             <canvas
-                                                id="myLineChart"
+                                                id="myBarChart"
                                                 width="500"
                                                 height="500"
                                             />

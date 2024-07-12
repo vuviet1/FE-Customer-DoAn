@@ -10,7 +10,7 @@ import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Slider from "./components/slider";
-import Banner from "./components/banner";
+// import Banner from "./components/banner";
 import Footer from "./components/footer";
 import ProductModal from "./components/modal";
 import request from "@utils/request";
@@ -55,7 +55,7 @@ function Home() {
             <Sidebar />
             <Cart />
             <Slider />
-            <Banner />
+            {/* <Banner /> */}
             {/* Content */}
             <section className="bg0 p-t-23 p-b-130">
                 <div className="container">

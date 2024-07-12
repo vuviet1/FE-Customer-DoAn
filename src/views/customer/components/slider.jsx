@@ -24,7 +24,7 @@ function Slider() {
                                         data-delay={0}
                                     >
                                         <span className="ltext-202 txt-center cl0 respon2">
-                                            Women Collection 2018
+                                            Women Collection
                                         </span>
                                     </div>
                                     <div
@@ -110,7 +110,7 @@ function Slider() {
                                         data-delay={0}
                                     >
                                         <span className="ltext-202 txt-center cl0 respon2">
-                                            Men Collection 2018
+                                            Men Collection
                                         </span>
                                     </div>
                                     <div

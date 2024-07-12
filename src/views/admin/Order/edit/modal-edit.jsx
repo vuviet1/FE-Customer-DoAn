@@ -51,7 +51,7 @@ function StatusOrderModal({
         e.preventDefault();
         const orderData = { 
             status: Number(order.status),
-            payment_status: 1
+            payment_status: Number(order.paymentStatus)
         };
         request.defaults.headers.common[
             "Authorization"
@@ -81,12 +81,12 @@ function StatusOrderModal({
             { value: 4, label: "Hoàn thành" },
         ];
 
-        if (order.paymentMethod === "COD") {
-            statusOptions = [
-                { value: 1, label: "Chờ duyệt" },
-                { value: 4, label: "Đã thanh toán" },
-            ];
-        }
+        // if (order.paymentMethod === "COD") {
+        //     statusOptions = [
+        //         { value: 1, label: "Chờ duyệt" },
+        //         { value: 4, label: "Đã thanh toán" },
+        //     ];
+        // }
 
         return statusOptions
             .filter(option => option.value >= status)

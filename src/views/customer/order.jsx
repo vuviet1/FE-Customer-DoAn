@@ -32,7 +32,6 @@ function Orders() {
 
     const fetchOrders = async () => {
         const access_token = localStorage.getItem("access_token");
-        if (!access_token) return;
         request.defaults.headers.common["Token"] = `${access_token}`;
 
         try {
@@ -40,7 +39,14 @@ function Orders() {
             setOrders(response.data.data);
             setFilteredOrders(response.data.data);
         } catch (error) {
-            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+            if (!access_token) {
+                showErrorAlert(
+                    "Chưa đăng nhập!",
+                    "Hãy đăng nhập để sử dụng chức năng."
+                );
+            } else {
+                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+            }
         }
     };
 
@@ -145,6 +151,17 @@ function Orders() {
         offset + itemsPerPage
     );
 
+    const getStatusCounts = (orders) => {
+        const statusCounts = orders.reduce((acc, order) => {
+            acc[order.status] = (acc[order.status] || 0) + 1;
+            return acc;
+        }, {});
+
+        return statusCounts;
+    };
+
+    const statusCounts = getStatusCounts(orders);
+
     return (
         <Fragment>
             <Header />
@@ -205,19 +222,24 @@ function Orders() {
                                                     Tất cả trạng thái
                                                 </option>
                                                 <option value="1">
-                                                    Chờ duyệt
+                                                    Chờ duyệt(
+                                                    {statusCounts[1] || 0})
                                                 </option>
                                                 <option value="2">
-                                                    Chờ lấy hàng
+                                                    Chờ lấy hàng(
+                                                    {statusCounts[2] || 0})
                                                 </option>
                                                 <option value="3">
-                                                    Đang giao hàng
+                                                    Đang giao hàng(
+                                                    {statusCounts[3] || 0})
                                                 </option>
                                                 <option value="4">
-                                                    Hoàn thành
+                                                    Hoàn thành(
+                                                    {statusCounts[4] || 0})
                                                 </option>
                                                 <option value="0">
-                                                    Đã hủy
+                                                    Đã hủy(
+                                                    {statusCounts[0] || 0})
                                                 </option>
                                             </Form.Control>
                                         </Form.Group>

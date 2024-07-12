@@ -3,7 +3,7 @@
 import React, { useEffect, useState, Fragment } from "react";
 import { Table, Button, Form, Pagination } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useAlert } from '@utils/AlertContext';
+import { useAlert } from "@utils/AlertContext";
 
 import Topbar from "../components/topbar";
 import Footer from "../components/footer";
@@ -39,7 +39,7 @@ function OrderAdmin() {
             setOrders(response.data.data);
             setFilteredOrders(response.data.data);
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại");
         }
     };
 
@@ -129,10 +129,10 @@ function OrderAdmin() {
                 await request.post(`order/${order_id}?_method=PUT`, {
                     status: 0,
                 });
-                showSuccessAlert('Thành công!', 'Hủy hóa đơn thành công!');
+                showSuccessAlert("Thành công!", "Hủy hóa đơn thành công!");
                 fetchData();
             } catch (error) {
-                showErrorAlert('Lỗi!', 'Hủy hóa đơn thất bại');
+                showErrorAlert("Lỗi!", "Hủy hóa đơn thất bại");
             }
         }
     };
@@ -260,16 +260,15 @@ function OrderAdmin() {
                             >
                                 <i className="far fa-eye" />
                             </Button>
-                            {order.status === 1 ? (
-                                    <Button
-                                        variant="danger"
-                                        onClick={() =>
-                                            deleteOrder(order.order_id)
-                                        }
-                                    >
-                                        <i className="fas fa-trash" />
-                                    </Button>
-                            ): null}
+                            {order.status === 1 &&
+                            order.payment_status === 0 ? (
+                                <Button
+                                    variant="danger"
+                                    onClick={() => deleteOrder(order.order_id)}
+                                >
+                                    <i className="fas fa-trash" />
+                                </Button>
+                            ) : null}
                         </td>
                     </tr>
                 ))}
@@ -335,20 +334,35 @@ function OrderAdmin() {
                                                                 Tất cả trạng
                                                                 thái
                                                             </option>
-                                                            <option value="0">
-                                                                Đã hủy ({statusCounts[0] || 0})
-                                                            </option>
                                                             <option value="1">
-                                                                Chờ duyệt ({statusCounts[1] || 0})
+                                                                Chờ duyệt (
+                                                                {statusCounts[1] ||
+                                                                    0}
+                                                                )
                                                             </option>
                                                             <option value="2">
-                                                                Chờ lấy hàng ({statusCounts[2] || 0})
+                                                                Chờ lấy hàng (
+                                                                {statusCounts[2] ||
+                                                                    0}
+                                                                )
                                                             </option>
                                                             <option value="3">
-                                                                Đang giao hàng ({statusCounts[3] || 0})
+                                                                Đang giao hàng (
+                                                                {statusCounts[3] ||
+                                                                    0}
+                                                                )
                                                             </option>
                                                             <option value="4">
-                                                                Hoàn thành ({statusCounts[4] || 0})
+                                                                Hoàn thành (
+                                                                {statusCounts[4] ||
+                                                                    0}
+                                                                )
+                                                            </option>
+                                                            <option value="0">
+                                                                Đã hủy (
+                                                                {statusCounts[0] ||
+                                                                    0}
+                                                                )
                                                             </option>
                                                         </Form.Control>
                                                     </div>
@@ -409,7 +423,8 @@ function OrderAdmin() {
                                                                     "left",
                                                             }}
                                                         >
-                                                            Trạng thái thanh toán
+                                                            Trạng thái thanh
+                                                            toán
                                                         </th>
                                                         <th
                                                             style={{
