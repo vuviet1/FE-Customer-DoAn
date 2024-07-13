@@ -37,6 +37,22 @@ function ShoppingCart() {
 
     const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
 
+    const token_type = localStorage.getItem("token_type");
+    const access_token = localStorage.getItem("access_token");
+    const user_data = JSON.parse(localStorage.getItem("user_data")) || {};
+
+    useEffect(() => {
+        if (!name) {
+            setName(user_data.name || "");
+        }
+        if (!phoneNumber) {
+            setPhoneNumber(user_data.phone || "");
+        }
+        if (!address) {
+            setAddress(user_data.address || "");
+        }
+    }, [name, phoneNumber, address, user_data]);
+
     const handleProductClick = (productId) => {
         sessionStorage.setItem("productId", productId);
         window.location.href = `/product-detail`;
@@ -44,8 +60,6 @@ function ShoppingCart() {
 
     useEffect(() => {
         const fetchAllData = async () => {
-            const token_type = localStorage.getItem("token_type");
-            const access_token = localStorage.getItem("access_token");
             try {
                 request.defaults.headers.common[
                     "Authorization"
@@ -55,14 +69,11 @@ function ShoppingCart() {
                         request.get("payment"),
                         request.get("shipping"),
                         request.get("voucher"),
-                        // request.get("cart"),
                     ]);
 
                 setPaymentMethods(paymentResponse.data.data);
                 setShippingMethods(shippingResponse.data.data);
                 setVouchers(voucherResponse.data.data);
-                // setCartItems(cartResponse.data.data);
-                // setFilteredItems(cartResponse.data.data);
             } catch (error) {
                 if (!access_token) {
                     showErrorAlert(
@@ -76,13 +87,10 @@ function ShoppingCart() {
         };
 
         fetchAllData();
-
         fetchCartItems();
     }, []);
 
     const fetchCartItems = async () => {
-        const token_type = localStorage.getItem("token_type");
-        const access_token = localStorage.getItem("access_token");
         request.defaults.headers.common[
             "Authorization"
         ] = `${token_type} ${access_token}`;
@@ -589,7 +597,7 @@ function ShoppingCart() {
                         </div>
                     </div>
                 </div>
-                {/*  */}
+                {/* Tổng quan hóa đơn */}
                 <div
                     className="col-12 m-lr-auto m-b-50"
                     style={{ marginTop: "-100px" }}
@@ -798,8 +806,6 @@ function ShoppingCart() {
                         </Form>
                     </div>
                 </div>
-
-                {/*  */}
             </>
             <Footer />
 

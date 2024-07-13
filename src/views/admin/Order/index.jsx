@@ -197,7 +197,7 @@ function OrderAdmin() {
                                         handleStatusButtonClick(order.order_id)
                                     }
                                 >
-                                    Chờ lấy hàng
+                                    Đã duyệt
                                 </Button>
                             ) : order.status === 3 ? (
                                 <Button
@@ -341,7 +341,7 @@ function OrderAdmin() {
                                                                 )
                                                             </option>
                                                             <option value="2">
-                                                                Chờ lấy hàng (
+                                                                Đã duyệt (
                                                                 {statusCounts[2] ||
                                                                     0}
                                                                 )

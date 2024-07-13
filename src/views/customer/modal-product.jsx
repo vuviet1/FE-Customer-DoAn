@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import { Modal, Button, Table, FormControl, InputGroup } from "react-bootstrap";
 import ReactPaginate from "react-paginate";
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
-import { useAlert } from '@utils/AlertContext';
-
+import { useAlert } from "@utils/AlertContext";
 import request from "@utils/request";
+import { Link } from "react-router-dom";
 
 function ProductModal({ show, handleClose, selectedOrderId }) {
     const [productItems, setProductItems] = useState([]);
@@ -13,10 +13,16 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
     const [currentPage, setCurrentPage] = useState(0);
     const [itemsPerPage] = useState(5);
     const [searchQuery, setSearchQuery] = useState("");
+    // const [orderData, setOrderData] = useState(null);
     const { showErrorAlert } = useAlert();
 
     const token_type = localStorage.getItem("token_type");
     const access_token = localStorage.getItem("access_token");
+
+    const handleProductClick = (productId) => {
+        sessionStorage.setItem("productId", productId);
+        window.location.href = `/product-detail`;
+    };
 
     useEffect(() => {
         if (show) {
@@ -31,15 +37,17 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
             ] = `${token_type} ${access_token}`;
             const response = await request.get(`order/${selectedOrderId}`);
             const productData = response.data.data.order_details.map(
-                (detail) => detail.product_detail
+                (detail) => detail
             );
             setProductItems(productData);
             setFilteredItems(productData);
+            // setOrderData(response.data.data);
         } catch (error) {
             console.error("Error fetching data:", error);
             setProductItems([]);
             setFilteredItems([]);
-            showErrorAlert('Lỗi!', 'Hiển thị sản phẩm thất bại');
+            // setOrderData(null);
+            showErrorAlert("Lỗi!", "Hiển thị sản phẩm thất bại");
         }
     };
 
@@ -51,24 +59,52 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
         const query = event.target.value.toLowerCase();
         setSearchQuery(query);
         const filtered = productItems.filter((item) =>
-            item.product.product_name.toLowerCase().includes(query)
+            item.product_detail.product.product_name.toLowerCase().includes(query)
         );
         setFilteredItems(filtered);
         setCurrentPage(0);
     };
 
     const offset = currentPage * itemsPerPage;
-    const currentPageItems = filteredItems.slice(
-        offset,
-        offset + itemsPerPage
-    );
+    const currentPageItems = filteredItems.slice(offset, offset + itemsPerPage);
 
     return (
-        <Modal show={show} onHide={handleClose} size="xl" centered>
+        <Modal show={show} onHide={handleClose} size="lg" centered>
             <Modal.Header closeButton>
                 <Modal.Title>Danh sách sản phẩm</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+            {/* {orderData && (
+                    <Table striped bordered hover className="mb-3">
+                        <thead>
+                            <tr>
+                                <th colSpan="2">Thông tin đơn hàng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Mã đơn hàng</strong></td>
+                                <td>{orderData.order_id}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Khách hàng</strong></td>
+                                <td>{orderData.name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Địa chỉ</strong></td>
+                                <td>{orderData.address}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Số điện thoại</strong></td>
+                                <td>{orderData.phone_number}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tổng tiền</strong></td>
+                                <td>{orderData.total}</td>
+                            </tr>
+                        </tbody>
+                    </Table>
+                )} */}
                 <div className="d-flex justify-content-between mb-3">
                     <InputGroup className="mb-3" style={{ width: "300px" }}>
                         <FormControl
@@ -95,11 +131,23 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
                             {currentPageItems.map((item, index) => (
                                 <tr key={item.product_detail_id}>
                                     <td>{offset + index + 1}</td>
-                                    <td>{item.product.product_name}</td>
+                                    <td>
+                                        <div>
+                                            <Link
+                                                onClick={() =>
+                                                    handleProductClick(
+                                                        item.product_detail.product.product_id
+                                                    )
+                                                }
+                                            >
+                                                {item.product_detail.product.product_name}
+                                            </Link>
+                                        </div>
+                                    </td>
                                     <td>
                                         <img
-                                            src={`http://127.0.0.1:8000/uploads/product/${item.product.image}`}
-                                            alt={item.product.product_name}
+                                            src={`http://127.0.0.1:8000/uploads/product/${item.product_detail.product.image}`}
+                                            alt={item.product_detail.product.product_name}
                                             style={{
                                                 width: "100px",
                                                 height: "100px",
@@ -107,8 +155,8 @@ function ProductModal({ show, handleClose, selectedOrderId }) {
                                         />
                                     </td>
                                     <td>{item.quantity}</td>
-                                    <td>{item.color.color}</td>
-                                    <td>{item.size.size}</td>
+                                    <td>{item.product_detail.color.color}</td>
+                                    <td>{item.product_detail.size.size}</td>
                                 </tr>
                             ))}
                         </tbody>

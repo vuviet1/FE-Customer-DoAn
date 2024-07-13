@@ -58,12 +58,12 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                         });
                         setProductItems(
                             orderData.order_details.map(
-                                (detail) => detail.product_detail
+                                (detail) => detail
                             )
                         );
                         setFilteredItems(
                             orderData.order_details.map(
-                                (detail) => detail.product_detail
+                                (detail) => detail
                             )
                         );
                     }
@@ -86,7 +86,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
         const query = event.target.value.toLowerCase();
         setSearchQuery(query);
         const filtered = productItems.filter((item) =>
-            item.product.product_name.toLowerCase().includes(query)
+            item.product_detail.product.product_name.toLowerCase().includes(query)
         );
         setFilteredItems(filtered);
         setCurrentPage(0);
@@ -99,7 +99,7 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
             case 1:
                 return "Chờ duyệt";
             case 2:
-                return "Chờ lấy hàng";
+                return "Đã duyệt";
             case 3:
                 return "Đang giao hàng";
             case 4:
@@ -277,13 +277,13 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                             </thead>
                             <tbody>
                                 {currentPageItems.map((item, index) => (
-                                    <tr key={item.product_detail_id}>
+                                    <tr key={item.product_detail.product_detail_id}>
                                         <td>{offset + index + 1}</td>
-                                        <td>{item.product.product_name}</td>
+                                        <td>{item.product_detail.product.product_name}</td>
                                         <td>
                                             <img
-                                                src={`http://127.0.0.1:8000/uploads/product/${item.product.image}`}
-                                                alt={item.product.product_name}
+                                                src={`http://127.0.0.1:8000/uploads/product/${item.product_detail.product.image}`}
+                                                alt={item.product_detail.product.product_name}
                                                 style={{
                                                     width: "100px",
                                                     height: "100px",
@@ -291,8 +291,8 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                                             />
                                         </td>
                                         <td>{item.quantity}</td>
-                                        <td>{item.color.color}</td>
-                                        <td>{item.size.size}</td>
+                                        <td>{item.product_detail.color.color}</td>
+                                        <td>{item.product_detail.size.size}</td>
                                     </tr>
                                 ))}
                             </tbody>

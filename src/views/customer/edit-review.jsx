@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import ReactQuill from "react-quill";
+import sanitizeHtml from "sanitize-html";
 import { useAlert } from '@utils/AlertContext';
 import request from "@utils/request";
 
@@ -66,9 +67,14 @@ const EditReviewModal = ({ show, handleClose, review, productId }) => {
         ] = `Bearer ${access_token}`;
 
         try {
+            const sanitizedEvaluation = sanitizeHtml(editedReview.evaluation, {
+                allowedTags: [],
+                allowedAttributes: {},
+            });
+
             await request.put(`review/${review}`, {
                 review: editedReview.review,
-                evaluation: editedReview.evaluation.replace(/<p>|<\/p>/g, ""),
+                evaluation: sanitizedEvaluation,
                 product_id: Number(productId),
             });
 

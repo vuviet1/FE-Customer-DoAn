@@ -226,7 +226,7 @@ function Orders() {
                                                     {statusCounts[1] || 0})
                                                 </option>
                                                 <option value="2">
-                                                    Chờ lấy hàng(
+                                                    Đã duyệt(
                                                     {statusCounts[2] || 0})
                                                 </option>
                                                 <option value="3">

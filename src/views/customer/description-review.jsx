@@ -21,6 +21,10 @@ const ProductDescriptionReviews = ({ productId, product }) => {
     const [showEditModal, setShowEditModal] = useState(false);
     const { showSuccessAlert, showErrorAlert } = useAlert();
 
+    const sanitizeInput = (input) => {
+        return input.replace(/<[^>]*>?/gm, '');
+    };
+
     // Fetch reviews
     const fetchReview = async () => {
         const access_token = localStorage.getItem("access_token");
@@ -31,7 +35,8 @@ const ProductDescriptionReviews = ({ productId, product }) => {
         try {
             const response = await request.get("review");
             const data = response.data.data;
-            setReviews(data);
+            const filteredReviews = data.filter(review => review.product_id === Number(productId));
+            setReviews(filteredReviews);
         } catch (error) {
             showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại.');
         }
@@ -77,7 +82,8 @@ const ProductDescriptionReviews = ({ productId, product }) => {
         try {
             const response = await request.post("review", {
                 review: review,
-                evaluation: evaluation.replace(/<p>|<\/p>/g, ""),
+                // evaluation: evaluation.replace(/<p>|<\/p>/g, ""),
+                evaluation: sanitizeInput(evaluation),
                 product_id: Number(productId),
             });
 
@@ -150,6 +156,7 @@ const ProductDescriptionReviews = ({ productId, product }) => {
 
     const handleEvaluationChange = (value) => {
         setEvaluation(value);
+        // setEvaluation(sanitizeInput(value));
     };
 
     const handleRatingChange = (rating) => {

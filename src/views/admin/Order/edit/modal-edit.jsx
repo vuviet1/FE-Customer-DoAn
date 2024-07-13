@@ -50,7 +50,8 @@ function StatusOrderModal({
     const handleSubmit = async (e) => {
         e.preventDefault();
         const orderData = { 
-            status: Number(order.status),
+            // status: Number(order.status),
+            status: Number(order.status) + 1,
             payment_status: Number(order.paymentStatus)
         };
         request.defaults.headers.common[
@@ -76,20 +77,28 @@ function StatusOrderModal({
         const status = Number(originalStatus);
         let statusOptions = [
             { value: 1, label: "Chờ duyệt" },
-            { value: 2, label: "Chờ lấy hàng" },
+            { value: 2, label: "Đã duyệt" },
             { value: 3, label: "Đang giao hàng" },
             { value: 4, label: "Hoàn thành" },
         ];
 
-        // if (order.paymentMethod === "COD") {
+        // if (order.paymentMethod === "OFF") {
         //     statusOptions = [
         //         { value: 1, label: "Chờ duyệt" },
         //         { value: 4, label: "Đã thanh toán" },
         //     ];
         // }
 
+        // return statusOptions
+        //     .filter(option => option.value >= status)
+        //     .map(option => (
+        //         <option key={option.value} value={option.value}>
+        //             {option.label}
+        //         </option>
+        //     ));
+
         return statusOptions
-            .filter(option => option.value >= status)
+            .filter(option => option.value === status + 1)
             .map(option => (
                 <option key={option.value} value={option.value}>
                     {option.label}
