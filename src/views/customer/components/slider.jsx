@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 /* eslint-disable no-script-url */
 import React, { Fragment } from "react";
+import { Link } from "react-router-dom";
 
 function Slider() {
     return (
@@ -14,7 +15,7 @@ function Slider() {
                                 backgroundImage: "url(assets/customer/images/slide-05.jpg)",
                             }}
                             data-thumb="assets/customer/images/thumb-01.jpg"
-                            data-caption="Women’s Wear"
+                            data-caption=""
                         >
                             <div className="container h-full">
                                 <div className="flex-col-c-m h-full p-t-100 p-b-60 respon5">
@@ -23,9 +24,9 @@ function Slider() {
                                         data-appear="fadeInDown"
                                         data-delay={0}
                                     >
-                                        <span className="ltext-202 txt-center cl0 respon2">
+                                        {/* <span className="ltext-202 txt-center cl0 respon2">
                                             Women Collection
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <div
                                         className="layer-slick1 animated visible-false"
@@ -33,7 +34,7 @@ function Slider() {
                                         data-delay={800}
                                     >
                                         <h2 className="ltext-104 txt-center cl0 p-t-22 p-b-40 respon1">
-                                            New arrivals
+                                            Sản phẩm mới
                                         </h2>
                                     </div>
                                     <div
@@ -41,12 +42,12 @@ function Slider() {
                                         data-appear="zoomIn"
                                         data-delay={1600}
                                     >
-                                        <a
-                                            href="product.html"
+                                        <Link
+                                            to={"/product"}
                                             className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn2 p-lr-15 trans-04"
                                         >
                                             Mua sắm ngay
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -57,7 +58,7 @@ function Slider() {
                                 backgroundImage: "url(assets/customer/images/slide-06.jpg)",
                             }}
                             data-thumb="assets/customer/images/thumb-02.jpg"
-                            data-caption="Men’s Wear"
+                            data-caption=""
                         >
                             <div className="container h-full">
                                 <div className="flex-col-c-m h-full p-t-100 p-b-60 respon5">
@@ -66,9 +67,9 @@ function Slider() {
                                         data-appear="rollIn"
                                         data-delay={0}
                                     >
-                                        <span className="ltext-202 txt-center cl0 respon2">
+                                        {/* <span className="ltext-202 txt-center cl0 respon2">
                                             Men New-Season
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <div
                                         className="layer-slick1 animated visible-false"
@@ -76,7 +77,7 @@ function Slider() {
                                         data-delay={800}
                                     >
                                         <h2 className="ltext-104 txt-center cl0 p-t-22 p-b-40 respon1">
-                                            Jackets &amp; Coats
+                                            Sản phảm mới
                                         </h2>
                                     </div>
                                     <div
@@ -84,12 +85,12 @@ function Slider() {
                                         data-appear="slideInUp"
                                         data-delay={1600}
                                     >
-                                        <a
-                                            href="product.html"
+                                        <Link
+                                            to={"/product"}
                                             className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn2 p-lr-15 trans-04"
                                         >
                                             Mua sắm ngay
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
@@ -100,7 +101,7 @@ function Slider() {
                                 backgroundImage: "url(assets/customer/images/slide-07.jpg)",
                             }}
                             data-thumb="assets/customer/images/thumb-03.jpg"
-                            data-caption="Men’s Wear"
+                            data-caption=""
                         >
                             <div className="container h-full">
                                 <div className="flex-col-c-m h-full p-t-100 p-b-60 respon5">
@@ -109,9 +110,9 @@ function Slider() {
                                         data-appear="rotateInDownLeft"
                                         data-delay={0}
                                     >
-                                        <span className="ltext-202 txt-center cl0 respon2">
+                                        {/* <span className="ltext-202 txt-center cl0 respon2">
                                             Men Collection
-                                        </span>
+                                        </span> */}
                                     </div>
                                     <div
                                         className="layer-slick1 animated visible-false"
@@ -119,7 +120,7 @@ function Slider() {
                                         data-delay={800}
                                     >
                                         <h2 className="ltext-104 txt-center cl0 p-t-22 p-b-40 respon1">
-                                            NEW SEASON
+                                            Sản phẩm mới
                                         </h2>
                                     </div>
                                     <div
@@ -127,12 +128,12 @@ function Slider() {
                                         data-appear="rotateIn"
                                         data-delay={1600}
                                     >
-                                        <a
-                                            href="product.html"
+                                        <Link
+                                            to={"/product"}
                                             className="flex-c-m stext-101 cl0 size-101 bg1 bor1 hov-btn2 p-lr-15 trans-04"
                                         >
                                             Mua sắm ngay
-                                        </a>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>

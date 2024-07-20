@@ -306,8 +306,7 @@ function Orders() {
                                                                 ) : order.status ===
                                                                   2 ? (
                                                                     <span className="badge badge-primary">
-                                                                        Chờ lấy
-                                                                        hàng
+                                                                        Đã duyệt
                                                                     </span>
                                                                 ) : order.status ===
                                                                   3 ? (
