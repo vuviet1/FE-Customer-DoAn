@@ -28,7 +28,7 @@ const ProductDescriptionReviews = ({ productId, product }) => {
     // Fetch reviews
     const fetchReview = async () => {
         const access_token = localStorage.getItem("access_token");
-        if (!access_token) return;
+        // if (!access_token) return;
         request.defaults.headers.common[
             "Authorization"
         ] = `Bearer ${access_token}`;
@@ -256,7 +256,7 @@ const ProductDescriptionReviews = ({ productId, product }) => {
                                             {product.category.category_name}
                                         </span>
                                     </li>
-                                    <li className="flex-w flex-t p-b-7">
+                                    {/* <li className="flex-w flex-t p-b-7">
                                         <span className="stext-102 cl3 size-205">
                                             Màu sắc
                                         </span>
@@ -268,8 +268,8 @@ const ProductDescriptionReviews = ({ productId, product }) => {
                                                 )
                                                 .join(", ")}
                                         </span>
-                                    </li>
-                                    <li className="flex-w flex-t p-b-7">
+                                    </li> */}
+                                    {/* <li className="flex-w flex-t p-b-7">
                                         <span className="stext-102 cl3 size-205">
                                             Kích cỡ
                                         </span>
@@ -280,7 +280,7 @@ const ProductDescriptionReviews = ({ productId, product }) => {
                                                 )
                                                 .join(", ")}
                                         </span>
-                                    </li>
+                                    </li> */}
                                 </ul>
                             </div>
                         </div>
