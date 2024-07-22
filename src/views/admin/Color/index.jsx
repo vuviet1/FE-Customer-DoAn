@@ -56,6 +56,7 @@ function ColorAdmin() {
 
     const handleUpdateColor = () => {
         setShowEditModal(false);
+        setSelectedColorId(null);
         fetchData();
     };
 
@@ -340,9 +341,10 @@ function ColorAdmin() {
                             {selectedColorId && (
                                 <EditColorModal
                                     show={showEditModal}
-                                    handleClose={() =>
+                                    handleClose={() =>{
                                         setShowEditModal(false)
-                                    }
+                                        setSelectedColorId(null);
+                                    }}
                                     selectedColorId={selectedColorId}
                                     onUpdateColor={handleUpdateColor}
                                 />

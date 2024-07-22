@@ -56,6 +56,7 @@ function CategoryAdmin() {
 
     const handleUpdateCategory = () => {
         setShowEditModal(false);
+        setSelectedCategoryId(null);
         fetchData();
     };
 
@@ -330,7 +331,10 @@ function CategoryAdmin() {
             {selectedCategoryId && (
                 <EditCategoryModal
                     show={showEditModal}
-                    handleClose={() => setShowEditModal(false)}
+                    handleClose={() => {
+                        setShowEditModal(false);
+                        setSelectedCategoryId(null);
+                    }}
                     selectedCategoryId={selectedCategoryId}
                     onUpdateCategory={handleUpdateCategory}
                 />

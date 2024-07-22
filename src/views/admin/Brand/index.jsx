@@ -271,7 +271,10 @@ function BrandAdmin() {
                             {selectedBrandId && (
                                 <EditBrandModal
                                     show={showEditModal}
-                                    handleClose={() => setShowEditModal(false)}
+                                    handleClose={() => {
+                                        setShowEditModal(false)
+                                        setSelectedBrandId(null);
+                                    }}
                                     selectedBrandId={selectedBrandId}
                                     onUpdateBrand={handleUpdateBrand}
                                 />

@@ -259,7 +259,14 @@ function ShippingAdmin() {
 
                             <AddShippingModal show={showAddModal} handleClose={() => setShowAddModal(false)} onAddShipping={handleAddShipping} />
                             {selectedShippingId && (
-                                <EditShippingModal show={showEditModal} handleClose={() => setShowEditModal(false)} selectedShippingId={selectedShippingId} onUpdateShipping={handleUpdateShipping} />
+                                <EditShippingModal 
+                                show={showEditModal} 
+                                handleClose={() => {
+                                    setShowEditModal(false) 
+                                    setSelectedShippingId(null)
+                                }} 
+                                selectedShippingId={selectedShippingId} 
+                                onUpdateShipping={handleUpdateShipping} />
                             )}
                         </div>
                         <Footer />

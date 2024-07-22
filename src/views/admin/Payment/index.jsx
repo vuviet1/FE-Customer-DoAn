@@ -351,7 +351,10 @@ function PaymentAdmin() {
                             {selectedPaymentId && (
                                 <EditPaymentModal
                                     show={showEditModal}
-                                    handleClose={() => setShowEditModal(false)}
+                                    handleClose={() => {
+                                        setShowEditModal(false)
+                                        setSelectedPaymentId(null);
+                                    }}
                                     selectedPaymentId={selectedPaymentId}
                                     onUpdatePayment={handleUpdatePayment}
                                 />

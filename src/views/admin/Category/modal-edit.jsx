@@ -16,11 +16,7 @@ function EditCategoryModal({ show, handleClose, selectedCategoryId, onUpdateCate
         const fetchCategory = async () => {
             try {
                 const response = await request.get(`category/${selectedCategoryId}`);
-                if (response.data.data) {
                     setCategory(response.data.data);
-                } else {
-                    console.error("No data returned from the API");
-                }
             } catch (error) {
                 showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
             }
