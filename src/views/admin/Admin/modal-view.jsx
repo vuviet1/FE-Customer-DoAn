@@ -11,7 +11,7 @@ function ViewAdminModal({ show, handleClose, selectedAdminId }) {
         email: "",
         password: "",
         role: 1,
-        google_id: "",
+        // google_id: "",
         avatar: "",
         phone: "",
         address: "",
@@ -117,7 +117,7 @@ function ViewAdminModal({ show, handleClose, selectedAdminId }) {
                                     readOnly
                                 />
                             </Form.Group>
-                            <Form.Group controlId="adminGoogleId">
+                            {/* <Form.Group controlId="adminGoogleId">
                                 <Form.Label>Google ID</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -125,7 +125,7 @@ function ViewAdminModal({ show, handleClose, selectedAdminId }) {
                                     value={admin.google_id}
                                     readOnly
                                 />
-                            </Form.Group>
+                            </Form.Group> */}
                             <Form.Group controlId="adminStatus">
                                 <Form.Label>Trạng thái</Form.Label>
                                 <Form.Control

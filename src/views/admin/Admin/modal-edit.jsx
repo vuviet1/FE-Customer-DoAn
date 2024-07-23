@@ -16,7 +16,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
         phone: "",
         address: "",
         status: 1,
-        google_id: "",
+        // google_id: "",
     });
     const { showSuccessAlert, showErrorAlert } = useAlert();
 
@@ -51,7 +51,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                 phone: admin.phone,
                 address: admin.address,
                 status: admin.status,
-                google_id: admin.google_id,
+                // google_id: admin.google_id,
             };
 
             console.log(formData);
@@ -225,7 +225,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                         required
                                     />
                                 </Form.Group>
-                                <Form.Group controlId="inputGoogleId">
+                                {/* <Form.Group controlId="inputGoogleId">
                                     <Form.Label>Google ID</Form.Label>
                                     <Form.Control
                                         type="text"
@@ -238,7 +238,7 @@ function EditAdminModal({ show, handleClose, selectedAdminId, onUpdateAdmin }) {
                                             })
                                         }
                                     />
-                                </Form.Group>
+                                </Form.Group> */}
                             </div>
                         </div>
                     </Modal.Body>

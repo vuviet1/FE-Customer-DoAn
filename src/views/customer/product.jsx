@@ -57,15 +57,32 @@ function Product() {
     useEffect(() => {
         const fetchAllData = async () => {
             try {
-                const [productResponse, brandResponse, categoryResponse] =
+                const [productResponse, brandResponse, categoryResponse, favoriteResponse] =
                     await Promise.all([
                         request.get("product"),
                         request.get("brand"),
                         request.get("category"),
+                        request.get("favourite", {
+                            headers: {
+                                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                            },
+                        })
                     ]);
 
-                setProducts(productResponse.data.data);
-                setFilteredProducts(productResponse.data.data);
+                    const allProducts = productResponse.data.data;
+                    const favoriteProductIds = favoriteResponse.data.data.map(favorite => favorite.product_id);
+            
+                    // Gắn cờ yêu thích và bán chạy vào sản phẩm
+                    const linkedProducts = allProducts.map(product => ({
+                        ...product,
+                        isFavorite: favoriteProductIds.includes(product.product_id),
+                        isBestSelling: product.isBestSelling || false // Assuming you have this property in your product response
+                    }));
+            
+                    const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
+
+                setProducts(linkedProducts);
+                setFilteredProducts(filteredBestSellingProducts);
                 setBrands(brandResponse.data.data);
                 setCategory(categoryResponse.data.data);
                 setLoading(false);
@@ -479,6 +496,7 @@ function Product() {
                                                     productId={
                                                         product.product_id
                                                     }
+                                                    isFavorite={product.isFavorite}
                                                 />
                                             </div>
                                         </div>

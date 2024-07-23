@@ -10,7 +10,6 @@ import Header from "./components/header";
 import Sidebar from "./components/sidebar";
 import Cart from "./components/cart";
 import Slider from "./components/slider";
-// import Banner from "./components/banner";
 import Footer from "./components/footer";
 import ProductModal from "./components/modal";
 import request from "@utils/request";
@@ -18,6 +17,7 @@ import FavoriteButton from "./components/FavoriteButton";
 
 function Home() {
     const [products, setProducts] = useState([]);
+    const [productSell, setProductSell] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showModal, setShowModal] = useState(false);
 
@@ -25,15 +25,41 @@ function Home() {
 
     const fetchData = async () => {
         try {
-            // Sản phẩm mới nhất
-            const response = await request.get("product");
-            const latestProducts = response.data.data.slice(0, 4);
+            const [productResponse, bestSellingResponse, favoriteResponse] = await Promise.all([
+                request.get("product"),
+                request.get("best-selling"),
+                request.get("favourite", {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+                    },
+                })
+            ]);
+    
+            const allProducts = productResponse.data.data;
+            const bestSellingProducts = bestSellingResponse.data.data;
+            const favoriteProductIds = favoriteResponse.data.data.map(favorite => favorite.product_id);
+
+            // Liên kết thông qua product_id
+            const linkedProducts = allProducts.map(product => {
+                const bestSellingProduct = bestSellingProducts.find(bp => bp.product_id === product.product_id);
+                return {
+                    ...product,
+                    isBestSelling: !!bestSellingProduct,
+                    ...bestSellingProduct,
+                    isFavorite: favoriteProductIds.includes(product.product_id)
+                };
+            });
+    
+            const latestProducts = linkedProducts.slice(0, 4);
+            const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
+            
             setProducts(latestProducts);
+            setProductSell(filteredBestSellingProducts);
         } catch (error) {
             showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
     };
-
+    
     useEffect(() => {
         fetchData();
     }, []);
@@ -55,7 +81,6 @@ function Home() {
             <Sidebar />
             <Cart />
             <Slider />
-            {/* <Banner /> */}
             {/* Content */}
             <section className="bg0 p-t-23 p-b-130">
                 <div className="container">
@@ -171,6 +196,7 @@ function Home() {
                                         <div className="block2-txt-child2 flex-r p-t-3">
                                             <FavoriteButton
                                                 productId={product.product_id}
+                                                isFavorite={product.isFavorite}
                                             />
                                         </div>
                                     </div>
@@ -186,7 +212,7 @@ function Home() {
                                 justifyContent: "center",
                             }}
                         >
-                            Sản phẩm mới nhất
+                            Sản phẩm bán chạy
                         </h3>
                     </div>
                     <div
@@ -199,7 +225,7 @@ function Home() {
                         display="flex"
                         flexwrap="wrap"
                     >
-                        {products.map((product) => (
+                        {productSell.map((product) => (
                             <div
                                 key={product.product_id}
                                 className="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item"
@@ -290,6 +316,7 @@ function Home() {
                                         <div className="block2-txt-child2 flex-r p-t-3">
                                             <FavoriteButton
                                                 productId={product.product_id}
+                                                isFavorite={product.isFavorite}
                                             />
                                         </div>
                                     </div>

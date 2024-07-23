@@ -4,9 +4,11 @@ import React, { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Image } from "react-bootstrap";
 import request from "@utils/request";
+import { useAlert } from '@utils/AlertContext';
 
 function Cart(props) {
     const [cartItems, setCartItems] = useState([]);
+    const { showErrorAlert } = useAlert();
 
     useEffect(() => {
         fetchCartItems();
@@ -42,6 +44,7 @@ function Cart(props) {
             setCartItems(updatedCartItems);
         } catch (error) {
             console.error("Error removing item from cart:", error);
+            showErrorAlert('Lỗi!', 'Xóa giỏ hàng thất bại');
         }
     };
 

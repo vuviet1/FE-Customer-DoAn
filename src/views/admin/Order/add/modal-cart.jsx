@@ -32,10 +32,14 @@ function CartModal({ show, handleClose }) {
         try {
             const response = await request.get("cart");
             const cartData = response.data.data;
+            if (!cartData || !cartData.cart_id) {
+                return
+            }
             setCartItems(cartData);
             setFilteredItems(cartData);
         } catch (error) {
-            showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
+            // showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
+            console.error("Error fetching cart items:", error);
         }
     };
 

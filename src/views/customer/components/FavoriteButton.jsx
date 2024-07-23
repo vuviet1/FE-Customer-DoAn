@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button, Image } from "react-bootstrap";
 import { useAlert } from '@utils/AlertContext';
 import request from "@utils/request";
 
-const FavoriteButton = ({ productId }) => {
-    const [isFavorite, setIsFavorite] = useState(false);
+const FavoriteButton = ({ productId, isFavorite: initialIsFavorite }) => {
+    const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
     const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
 
-    useEffect(() => {
-        const checkIfFavorite = async () => {
-            const access_token = localStorage.getItem("access_token");
-            if (!access_token) return;
+    // useEffect(() => {
+    //     const checkIfFavorite = async () => {
+    //         const access_token = localStorage.getItem("access_token");
+    //         if (!access_token) return;
 
-            try {
-                const response = await request.get("favourite", {
-                    headers: {
-                        Authorization: `Bearer ${access_token}`,
-                    },
-                });
-                const favoriteProductIds = response.data.data.map(
-                    (favorite) => favorite.product_id
-                );
-                setIsFavorite(favoriteProductIds.includes(productId));
-            } catch (error) {
-                console.error("Error fetching favorite products:", error);
-            }
-        };
+    //         try {
+    //             const response = await request.get("favourite", {
+    //                 headers: {
+    //                     Authorization: `Bearer ${access_token}`,
+    //                 },
+    //             });
+    //             const favoriteProductIds = response.data.data.map(
+    //                 (favorite) => favorite.product_id
+    //             );
+    //             setIsFavorite(favoriteProductIds.includes(productId));
+    //         } catch (error) {
+    //             console.error("Error fetching favorite products:", error);
+    //         }
+    //     };
 
-        checkIfFavorite();
-    }, [productId]);
+    //     checkIfFavorite();
+    // }, [productId]);
 
     const handleAddToFavorites = async () => {
         const access_token = localStorage.getItem("access_token");

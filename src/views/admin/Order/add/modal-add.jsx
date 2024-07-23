@@ -8,7 +8,6 @@ import CartModal from "./modal-cart";
 
 function AddOrderModal({ show, handleClose, onAddOrder }) {
     const [cartItems, setCartItems] = useState([]);
-    // const [paymentMethods, setPaymentMethods] = useState([]);
     const [shippingMethods, setShippingMethods] = useState([]);
     const [address, setAddress] = useState("");
     const [vouchers, setVouchers] = useState("");
@@ -31,34 +30,26 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
             try {
                 const [shippingResponse, voucherResponse] =
                     await Promise.all([
-                        // request.get("payment"),
                         request.get("shipping"),
                         request.get("voucher"),
                     ]);
-                // const activePayments = paymentResponse.data.data.filter(
-                //     (payment) => payment.status === 1
-                // );
                 const activeShippings = shippingResponse.data.data.filter(
                     (shipping) => shipping.status === 1
                 );
                 const activeVouchers = voucherResponse.data.data.filter(
                     (voucher) => voucher.status === 1
                 );
-                // setPaymentMethods(activePayments);
                 setShippingMethods(activeShippings);
                 setVouchers(activeVouchers);
             } catch (error) {
                 showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
             }
-        };
-
+        }
         fetchAllData();
         fetchCartItems()
     }, []);
 
     const fetchCartItems = async () => {
-        const token_type = localStorage.getItem("token_type");
-        const access_token = localStorage.getItem("access_token");
         request.defaults.headers.common[
             "Authorization"
         ] = `${token_type} ${access_token}`;
@@ -66,9 +57,13 @@ function AddOrderModal({ show, handleClose, onAddOrder }) {
             if (!access_token) return;
             const response = await request.get("cart");
             const cartData = response.data.data;
+            if (!cartData || !cartData.cart_id) {
+                return
+            }
             setCartItems(cartData);
         } catch (error) {
-            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+            // showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+            console.error("Error fetching cart items:", error);
         }
     };
 

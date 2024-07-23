@@ -31,34 +31,51 @@ function ProductDetail() {
 
     const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
 
+    const fetchProduct = async () => {
+        try {
+            // Lấy token từ localStorage
+            const access_token = localStorage.getItem("access_token");
+    
+            // Gọi API để lấy thông tin sản phẩm và thông tin yêu thích
+            const [productResponse, favoriteResponse] = await Promise.all([
+                request.get(`/product/${productId}`),
+                access_token
+                    ? request.get("favourite", {
+                          headers: {
+                              Authorization: `Bearer ${access_token}`,
+                          },
+                      })
+                    : Promise.resolve({ data: { data: [] } }), // Nếu không có token, trả về một mảng rỗng
+            ]);
+    
+            const fetchedProduct = productResponse.data.data;
+            const favoriteProductIds = favoriteResponse.data.data.map(
+                (favorite) => favorite.product_id
+            );
+    
+            // Gắn cờ yêu thích vào sản phẩm
+            const isFavorite = favoriteProductIds.includes(fetchedProduct.product_id);
+    
+            // Cập nhật trạng thái của component
+            setProduct({ ...fetchedProduct, isFavorite });
+            setAvailableColors(
+                fetchedProduct.product_details.map((detail) => detail.color.color)
+            );
+            setAvailableSizes(
+                fetchedProduct.product_details.map((detail) => detail.size.size)
+            );
+            setDefaultImage(fetchedProduct.image);
+        } catch (error) {
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+        }
+    };
+    
     useEffect(() => {
         if (!productId) {
             console.error("Product id is undefined");
             navigate("/product");
             return;
         }
-
-        const fetchProduct = async () => {
-            try {
-                const response = await request.get(`/product/${productId}`);
-                const fetchedProduct = response.data.data;
-                setProduct(fetchedProduct);
-                setAvailableColors(
-                    fetchedProduct.product_details.map(
-                        (detail) => detail.color.color
-                    )
-                );
-                setAvailableSizes(
-                    fetchedProduct.product_details.map(
-                        (detail) => detail.size.size
-                    )
-                );
-                setDefaultImage(fetchedProduct.image);
-            } catch (error) {
-                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
-            }
-        };
-
         fetchProduct();
     }, []);
 
@@ -625,6 +642,7 @@ function ProductDetail() {
                                     <div className="flex-w flex-m p-l-100 p-t-40 respon7">
                                         <FavoriteButton
                                             productId={product.product_id}
+                                            isFavorite={product.isFavorite}
                                         />
                                         {/* Social media icons */}
                                         <a

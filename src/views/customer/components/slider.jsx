@@ -77,7 +77,7 @@ function Slider() {
                                         data-delay={800}
                                     >
                                         <h2 className="ltext-104 txt-center cl0 p-t-22 p-b-40 respon1">
-                                            Sản phảm mới
+                                            Sản phẩm mới
                                         </h2>
                                     </div>
                                     <div
