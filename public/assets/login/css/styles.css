@@ -63,6 +63,11 @@ img {
   object-fit: cover;
   object-position: center;
 }
+.google__img {
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
+}
 .login__form {
   position: relative;
   background-color: hsla(0, 0%, 10%, 0.1);

@@ -6,6 +6,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from "./views/login/login";
 import Register from "./views/login/register";
 import Forgot from "./views/login/forgot";
+// import GoogleCallback from "./views/login/GoogleCallback";
 
 // Customer
 import Home from "./views/customer/home";
@@ -48,6 +49,7 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot" element={<Forgot />} />
+        {/* <Route path="/auth/google/callback" element={<GoogleCallback />} /> */}
 
         {/* Customer Route */}
         {customerRoutes.map(({ path, element }) => (

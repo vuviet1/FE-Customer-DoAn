@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Image, Form } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { useAlert } from '@utils/AlertContext';
-
 import request from "../../utils/request";
 
 function Login() {
@@ -13,10 +12,7 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const dataLogin = {
-            email,
-            password,
-        };
+        const dataLogin = { email, password };
         try {
             const response = await request.post("auth/login", dataLogin);
             const { access_token, token_type } = response.data;
@@ -28,7 +24,6 @@ function Login() {
                 "Authorization"
             ] = `${token_type} ${access_token}`;
 
-            // Kiểm tra role người dùng
             const userResponse = await request.post("auth/me");
             const userData = userResponse.data;
 
@@ -46,6 +41,11 @@ function Login() {
         }
     };
 
+    // const handleGoogleLogin = () => {
+    //     const redirectUri = encodeURIComponent("http://localhost:3000/google-callback"); // URL callback của bạn
+    //     window.location.href = `http://127.0.0.1:8000/auth/google?redirect_uri=${redirectUri}`;
+    // };
+
     const togglePasswordVisibility = () => {
         setPasswordVisible(!passwordVisible);
     };
@@ -57,6 +57,7 @@ function Login() {
                 rel="stylesheet"
             ></link>
             <link rel="stylesheet" href="assets/login/css/styles.css"></link>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
             <Image
                 src="assets/login/img/login-bg.png"
                 alt="login image"
@@ -116,15 +117,6 @@ function Login() {
                         </div>
                     </div>
                 </div>
-                {/* <div className="login__check">
-                    <div className="login__check-group">
-                    </div>
-
-                    <div className="login__check-group"></div>
-                    <Link to={"/forgot"} className="login__forgot">
-                        Quên mật khẩu?
-                    </Link>
-                </div> */}
                 <button type="submit" className="login__button">
                     Đăng nhập
                 </button>
@@ -132,6 +124,12 @@ function Login() {
                     Bạn không có tài khoản?{" "}
                     <Link to={"/register"}>Đăng ký</Link>
                 </p>
+                {/* <p className="login__register">
+                    Đăng nhập với{" "}{" "}
+                    <a href="#!" onClick={handleGoogleLogin}>
+                        <i className="fab fa-google"></i>
+                    </a>
+                </p> */}
                 <p className="login__register">
                     <Link to={"/"}>Trở lại trang chủ</Link>
                 </p>
