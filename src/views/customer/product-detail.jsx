@@ -33,7 +33,6 @@ function ProductDetail() {
 
     const fetchProduct = async () => {
         try {
-            // Lấy token từ localStorage
             const access_token = localStorage.getItem("access_token");
     
             // Gọi API để lấy thông tin sản phẩm và thông tin yêu thích
@@ -45,7 +44,7 @@ function ProductDetail() {
                               Authorization: `Bearer ${access_token}`,
                           },
                       })
-                    : Promise.resolve({ data: { data: [] } }), // Nếu không có token, trả về một mảng rỗng
+                    : Promise.resolve({ data: { data: [] } }),
             ]);
     
             const fetchedProduct = productResponse.data.data;

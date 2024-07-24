@@ -54,44 +54,60 @@ function Product() {
         sessionStorage.setItem("productId", product.product_id);
     };
 
-    useEffect(() => {
-        const fetchAllData = async () => {
-            try {
-                const [productResponse, brandResponse, categoryResponse, favoriteResponse] =
-                    await Promise.all([
-                        request.get("product"),
-                        request.get("brand"),
-                        request.get("category"),
-                        request.get("favourite", {
-                            headers: {
-                                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                            },
-                        })
-                    ]);
+    const fetchAllData = async () => {
+        try {
+            const [productResponse, brandResponse, categoryResponse] = await Promise.all([
+                request.get("product"),
+                request.get("brand"),
+                request.get("category")
+            ]);
 
-                    const allProducts = productResponse.data.data;
-                    const favoriteProductIds = favoriteResponse.data.data.map(favorite => favorite.product_id);
-            
-                    // Gắn cờ yêu thích và bán chạy vào sản phẩm
-                    const linkedProducts = allProducts.map(product => ({
-                        ...product,
-                        isFavorite: favoriteProductIds.includes(product.product_id),
-                        isBestSelling: product.isBestSelling || false // Assuming you have this property in your product response
-                    }));
-            
-                    const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
+            const allProducts = productResponse.data.data;
+
+            // Lấy dữ liệu yêu thích nếu đã đăng nhập
+            const access_token = localStorage.getItem("access_token");
+            if (access_token) {
+                const favoriteResponse = await request.get("favourite", {
+                    headers: {
+                        Authorization: `Bearer ${access_token}`,
+                    },
+                });
+                const favoriteProductIds = favoriteResponse.data.data.map(favorite => favorite.product_id);
+                
+                // Gắn cờ yêu thích vào sản phẩm
+                const linkedProducts = allProducts.map(product => ({
+                    ...product,
+                    isFavorite: favoriteProductIds.includes(product.product_id),
+                    isBestSelling: product.isBestSelling || false // Assuming you have this property in your product response
+                }));
+
+                const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
 
                 setProducts(linkedProducts);
                 setFilteredProducts(filteredBestSellingProducts);
-                setBrands(brandResponse.data.data);
-                setCategory(categoryResponse.data.data);
-                setLoading(false);
-            } catch (error) {
-                showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
-                setLoading(false);
-            }
-        };
+            } else {
+                const linkedProducts = allProducts.map(product => ({
+                    ...product,
+                    isFavorite: false,
+                    isBestSelling: product.isBestSelling || false // Assuming you have this property in your product response
+                }));
 
+                const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
+
+                setProducts(linkedProducts);
+                setFilteredProducts(filteredBestSellingProducts);
+            }
+
+            setBrands(brandResponse.data.data);
+            setCategory(categoryResponse.data.data);
+            setLoading(false);
+        } catch (error) {
+            showErrorAlert("Lỗi!", "Lấy dữ liệu thất bại.");
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchAllData();
     }, []);
 

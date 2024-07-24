@@ -25,36 +25,50 @@ function Home() {
 
     const fetchData = async () => {
         try {
-            const [productResponse, bestSellingResponse, favoriteResponse] = await Promise.all([
+            const [productResponse, bestSellingResponse] = await Promise.all([
                 request.get("product"),
-                request.get("best-selling"),
-                request.get("favourite", {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-                    },
-                })
+                request.get("best-selling")
             ]);
-    
+
             const allProducts = productResponse.data.data;
             const bestSellingProducts = bestSellingResponse.data.data;
-            const favoriteProductIds = favoriteResponse.data.data.map(favorite => favorite.product_id);
 
-            // Liên kết thông qua product_id
+            // Gắn cờ bán chạy vào sản phẩm
             const linkedProducts = allProducts.map(product => {
                 const bestSellingProduct = bestSellingProducts.find(bp => bp.product_id === product.product_id);
                 return {
                     ...product,
                     isBestSelling: !!bestSellingProduct,
                     ...bestSellingProduct,
-                    isFavorite: favoriteProductIds.includes(product.product_id)
                 };
             });
-    
+
             const latestProducts = linkedProducts.slice(0, 4);
             const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
-            
+
             setProducts(latestProducts);
             setProductSell(filteredBestSellingProducts);
+
+            // Kiểm tra nếu người dùng đã đăng nhập trước khi thực hiện yêu cầu API cho dữ liệu yêu thích
+            const access_token = localStorage.getItem("access_token");
+            if (access_token) {
+                const favoriteResponse = await request.get("favourite", {
+                    headers: {
+                        Authorization: `Bearer ${access_token}`,
+                    },
+                });
+                const favoriteProductIds = favoriteResponse.data.data.map(favorite => favorite.product_id);
+
+                // Gắn cờ yêu thích vào sản phẩm
+                const updatedLinkedProducts = linkedProducts.map(product => ({
+                    ...product,
+                    isFavorite: favoriteProductIds.includes(product.product_id)
+                }));
+
+                setProducts(updatedLinkedProducts.slice(0, 4));
+                setProductSell(updatedLinkedProducts.filter(product => product.isBestSelling));
+            }
+
         } catch (error) {
             showErrorAlert('Lỗi!', 'Lấy dữ liệu thất bại');
         }
