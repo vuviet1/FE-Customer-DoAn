@@ -33,7 +33,7 @@ function Home() {
             const allProducts = productResponse.data.data;
             const bestSellingProducts = bestSellingResponse.data.data;
 
-            // Gắn cờ bán chạy vào sản phẩm
+            // // Gắn cờ bán chạy vào sản phẩm
             const linkedProducts = allProducts.map(product => {
                 const bestSellingProduct = bestSellingProducts.find(bp => bp.product_id === product.product_id);
                 return {
@@ -43,11 +43,11 @@ function Home() {
                 };
             });
 
-            const latestProducts = linkedProducts.slice(0, 4);
-            const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
+            // const latestProducts = linkedProducts.slice(0, 4);
+            // const filteredBestSellingProducts = linkedProducts.filter(product => product.isBestSelling);
 
-            setProducts(latestProducts);
-            setProductSell(filteredBestSellingProducts);
+            // setProducts(latestProducts);
+            // setProductSell(filteredBestSellingProducts);
 
             // Kiểm tra nếu người dùng đã đăng nhập trước khi thực hiện yêu cầu API cho dữ liệu yêu thích
             const access_token = localStorage.getItem("access_token");

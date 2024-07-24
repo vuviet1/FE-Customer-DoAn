@@ -36,8 +36,17 @@ function Favorite() {
         try {
             const response = await request.get("favourite");
             const productsData = response.data.data.map((item) => item.product);
-            setProducts(productsData);
-            setFilteredProducts(productsData);
+            const favoriteProductIds = response.data.data.map(favorite => favorite.product_id);
+            // Gắn cờ yêu thích vào sản phẩm
+            const updatedLinkedProducts = productsData.map(product => ({
+                ...product,
+                isFavorite: favoriteProductIds.includes(product.product_id)
+            }));
+            setProducts(updatedLinkedProducts);
+            setFilteredProducts(updatedLinkedProducts);
+
+            // setProducts(productsData.data.data);
+            // setFilteredProducts(productsData.data.data);
         } catch (error) {
             if (!access_token) {
                 showErrorAlert("Chưa đăng nhập!", "Hãy đăng nhập để sử dụng chức năng.");
@@ -259,6 +268,7 @@ function Favorite() {
                                                     productId={
                                                         product.product_id
                                                     }
+                                                    isFavorite={product.isFavorite}
                                                 />
                                             </div>
                                         </div>
