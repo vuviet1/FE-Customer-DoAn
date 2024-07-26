@@ -8,13 +8,11 @@ import Topbar from "../components/topbar";
 import Footer from "../components/footer";
 import request from "@utils/request";
 
-import EditCustomerModal from "./modal-edit";
 import ViewCustomerModal from "./modal-view";
 
 function CustomerAdmin() {
     const [customers, setCustomers] = useState([]);
     const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-    const [showEditModal, setShowEditModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -23,7 +21,7 @@ function CustomerAdmin() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const itemsPerPage = 5;
-    const { showSuccessAlert, showErrorAlert } = useAlert();
+    const { showErrorAlert } = useAlert();
 
     const fetchData = async () => {
         try {
@@ -47,32 +45,9 @@ function CustomerAdmin() {
         setCurrentPage(1);
     }, [searchTerm, statusFilter]);
 
-    const handleEditButtonClick = (user_id) => {
-        setSelectedCustomerId(user_id);
-        setShowEditModal(true);
-    };
-
-    const handleUpdateCustomer = () => {
-        setSelectedCustomerId(null);
-        setShowEditModal(false);
-        fetchData();
-    };
-
     const handleView = (user_id) => {
         setSelectedCustomerId(user_id);
         setShowViewModal(true);
-    };
-
-    const handleDeleteCustomer = async (user_id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa khách hàng này?")) {
-            try {
-                await request.delete(`user/${user_id}`);
-                showSuccessAlert('Thành công!', 'Xóa khách hàng thành công!');
-                fetchData();
-            } catch (error) {
-                showErrorAlert('Lỗi!', 'Xóa khách hàng thất bại');
-            }
-        }
     };
 
     // Lọc và tìm kiếm
@@ -174,23 +149,6 @@ function CustomerAdmin() {
                                 style={{ marginRight: "5px" }}
                             >
                                 <i className="far fa-eye" />
-                            </Button>
-                            <Button
-                                variant="success"
-                                onClick={() =>
-                                    handleEditButtonClick(customer.user_id)
-                                }
-                                style={{ marginRight: "5px" }}
-                            >
-                                <i className="far fa-edit" />
-                            </Button>
-                            <Button
-                                variant="danger"
-                                onClick={() =>
-                                    handleDeleteCustomer(customer.user_id)
-                                }
-                            >
-                                <i className="far fa-trash-alt" />
                             </Button>
                         </td>
                     </tr>
@@ -312,12 +270,6 @@ function CustomerAdmin() {
                                                     customers={
                                                         paginatedCustomers
                                                     }
-                                                    handleEditButtonClick={
-                                                        handleEditButtonClick
-                                                    }
-                                                    handleDeleteCustomer={
-                                                        handleDeleteCustomer
-                                                    }
                                                 />
                                             </Table>
                                             <div
@@ -383,15 +335,6 @@ function CustomerAdmin() {
                                     </div>
                                 </div>
                             </div>
-
-                            {selectedCustomerId && (
-                                <EditCustomerModal
-                                    show={showEditModal}
-                                    handleClose={() => setShowEditModal(false)}
-                                    selectedCustomerId={selectedCustomerId}
-                                    onUpdateCustomer={handleUpdateCustomer}
-                                />
-                            )}
                             {selectedCustomerId && (
                                 <ViewCustomerModal
                                     show={showViewModal}

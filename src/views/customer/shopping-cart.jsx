@@ -51,7 +51,7 @@ function ShoppingCart() {
         if (!address) {
             setAddress(user_data.address || "");
         }
-    }, [name, phoneNumber, address, user_data]);
+    }, []);
 
     const handleProductClick = (productId) => {
         sessionStorage.setItem("productId", productId);

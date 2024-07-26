@@ -11,7 +11,6 @@ function ViewCustomerModal({ show, handleClose, selectedCustomerId }) {
         email: "",
         password: "",
         role: 0,
-        google_id: "",
         avatar: "",
         phone: "",
         address: "",
@@ -108,24 +107,6 @@ function ViewCustomerModal({ show, handleClose, selectedCustomerId }) {
                         </div>
 
                         <div className="col-12">
-                            <Form.Group controlId="customerRole">
-                                <Form.Label>Vai trò</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Vai trò"
-                                    value={customer.role === 1 ? "Quản trị viên" : "Khách hàng"}
-                                    readOnly
-                                />
-                            </Form.Group>
-                            <Form.Group controlId="customerGoogleId">
-                                <Form.Label>Google ID</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    placeholder="Google ID"
-                                    value={customer.google_id}
-                                    readOnly
-                                />
-                            </Form.Group>
                             <Form.Group controlId="customerStatus">
                                 <Form.Label>Trạng thái</Form.Label>
                                 <Form.Control
