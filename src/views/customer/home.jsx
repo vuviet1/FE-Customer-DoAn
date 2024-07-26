@@ -33,7 +33,7 @@ function Home() {
             const allProducts = productResponse.data.data;
             const bestSellingProducts = bestSellingResponse.data.data;
 
-            // // Sản phẩm bán chạy 
+            // Sản phẩm bán chạy 
             const linkedProducts = allProducts.map(product => {
                 const bestSellingProduct = bestSellingProducts.find(bp => bp.product_id === product.product_id);
                 return {
@@ -61,6 +61,9 @@ function Home() {
 
                 setProducts(updatedLinkedProducts.slice(0, 4));
                 setProductSell(updatedLinkedProducts.filter(product => product.isBestSelling));
+            } else {
+                setProducts(allProducts.slice(0, 4));
+                setProductSell(linkedProducts.filter(product => product.isBestSelling));
             }
 
         } catch (error) {
