@@ -7,29 +7,6 @@ const FavoriteButton = ({ productId, isFavorite: initialIsFavorite }) => {
     const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
     const { showSuccessAlert, showErrorAlert, showWarningAlert } = useAlert();
 
-    // useEffect(() => {
-    //     const checkIfFavorite = async () => {
-    //         const access_token = localStorage.getItem("access_token");
-    //         if (!access_token) return;
-
-    //         try {
-    //             const response = await request.get("favourite", {
-    //                 headers: {
-    //                     Authorization: `Bearer ${access_token}`,
-    //                 },
-    //             });
-    //             const favoriteProductIds = response.data.data.map(
-    //                 (favorite) => favorite.product_id
-    //             );
-    //             setIsFavorite(favoriteProductIds.includes(productId));
-    //         } catch (error) {
-    //             console.error("Error fetching favorite products:", error);
-    //         }
-    //     };
-
-    //     checkIfFavorite();
-    // }, [productId]);
-
     const handleAddToFavorites = async () => {
         const access_token = localStorage.getItem("access_token");
         if (!access_token) {
@@ -37,8 +14,8 @@ const FavoriteButton = ({ productId, isFavorite: initialIsFavorite }) => {
             return;
         }
 
-        if (isFavorite) {
-            try {
+        try {
+            if (isFavorite) {
                 await request.delete(`favourite/${productId}`, {
                     headers: {
                         Authorization: `Bearer ${access_token}`,
@@ -46,20 +23,22 @@ const FavoriteButton = ({ productId, isFavorite: initialIsFavorite }) => {
                 });
                 setIsFavorite(false);
                 showSuccessAlert('Thành công!', 'Xóa sản phẩm yêu thích thành công!');
-            } catch (error) {
-                showErrorAlert('Lỗi!', 'Xóa sản phẩm yêu thích thất bại');
-            }
-        } else {
-            try {
+            } else {
                 await request.post("favourite", {
                     product_id: productId,
                     token: access_token,
-                });
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${access_token}`,
+                    },
+                }
+            )
                 setIsFavorite(true);
                 showSuccessAlert('Thành công!', 'Thêm sản phẩm yêu thích thành công!');
-            } catch (error) {
-                showErrorAlert('Lỗi!', 'Thêm sản phẩm yêu thích thất bại');
             }
+        } catch (error) {
+            showErrorAlert('Lỗi!', `Không thể ${isFavorite ? 'xóa' : 'thêm'} sản phẩm yêu thích`);
         }
     };
 
