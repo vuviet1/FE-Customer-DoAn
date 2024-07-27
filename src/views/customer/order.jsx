@@ -249,6 +249,7 @@ function Orders() {
                                     <Table responsive="sm">
                                         <thead>
                                             <tr>
+                                                <th>Mã vận đơn</th>
                                                 <th>Tên người nhận</th>
                                                 <th>Số điện thoại</th>
                                                 <th>Địa chỉ</th>
@@ -264,6 +265,9 @@ function Orders() {
                                                 currentPageItems.map(
                                                     (order) => (
                                                         <tr key={order.id}>
+                                                            <td>
+                                                                {}
+                                                            </td>
                                                             <td>
                                                                 {order.name}
                                                             </td>

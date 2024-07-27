@@ -245,6 +245,16 @@ function ViewOrderModal({ show, handleClose, selectedOrderId }) {
                                         readOnly
                                     />
                                 </Form.Group>
+                                <Form.Group controlId="inputShippingCode">
+                                    <Form.Label>
+                                        Mã vận đơn
+                                    </Form.Label>
+                                    <Form.Control
+                                        type="text"
+                                        placeholder="Mã vận đơn ..."
+                                        readOnly
+                                    />
+                                </Form.Group>
                             </div>
                         </div>
                         <hr />
